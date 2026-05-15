@@ -1,0 +1,51 @@
+{
+  "name": "orbital-osiris",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "cross-env CLOUDFLARE_ENV=development astro dev",
+    "build": "astro check && astro build",
+    "build-development": "cross-env CLOUDFLARE_ENV=development astro check && cross-env CLOUDFLARE_ENV=development astro build",
+    "build-production": "cross-env CLOUDFLARE_ENV=production astro check && cross-env CLOUDFLARE_ENV=production astro build",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate-development": "wrangler d1 migrations apply DB --remote --env development",
+    "db:migrate-production": "wrangler d1 migrations apply DB --remote --env production",
+    "wrangler-types": "wrangler types --env development",
+    "deploy-development": "npx wrangler@latest deploy --env=\"development\"",
+    "deploy-production": "npx wrangler@latest deploy --env=\"production\"",
+    "check": "astro check",
+    "test": "vitest",
+    "preview": "astro preview",
+    "astro": "astro",
+    "prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.5.1",
+    "@astrojs/react": "^5.0.5",
+    "@tailwindcss/vite": "^4.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "astro": "^6.3.3",
+    "cross-env": "^10.1.0",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
+    "jose": "^6.2.3",
+    "lodash": "^4.18.1",
+    "postgres": "^3.4.9",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "tailwindcss": "^4.3.0",
+    "vitest": "^4.1.6",
+    "wrangler": "^4.91.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.24",
+    "drizzle-kit": "^0.31.10",
+    "prettier": "3.8.3",
+    "tsx": "^4.22.0"
+  }
+}

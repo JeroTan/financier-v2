@@ -1,0 +1,52 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": "src/cloudflare/worker.ts",
+  "name": "financier-v2",
+  "account_id": "8e6c0cd85435131ccf9936cc03cb62e5",
+  "compatibility_date": "2026-04-28",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+  },
+  "preview_urls": true,
+  "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "env": {
+    "development": {
+      "name": "financier-v2-development",
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "financier-v2-development",
+          "database_id": "beabfd98-8611-4d58-8f1b-7a972b8af1ed",
+          "remote": true,
+        },
+      ],
+      "ai": {
+        "binding": "AI"
+      }
+    },
+    "production": {
+      "name": "jrw-simple-ecommerce-site",
+      "r2_buckets": [
+        {
+          "binding": "STORAGE",
+          "bucket_name": "financier-v2-storage-production",
+          "remote": true,
+        },
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "financier-v2-production",
+          "database_id": "fd08e264-2046-4648-9164-84f66948533e",
+          "remote": true,
+        },
+      ],
+    },
+  },
+}
