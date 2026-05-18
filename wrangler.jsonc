@@ -27,8 +27,8 @@
         },
       ],
       "ai": {
-        "binding": "AI"
-      }
+        "binding": "AI",
+      },
     },
     "production": {
       "name": "jrw-simple-ecommerce-site",
@@ -47,6 +47,9 @@
           "remote": true,
         },
       ],
+      "ai": {
+        "binding": "AI",
+      },
     },
   },
 }
