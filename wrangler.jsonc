@@ -36,6 +36,16 @@
           "remote": true,
         },
       ],
+      "kv_namespaces": [
+        {
+          "binding": "TOKEN_REVOCATION",
+          "id": "replace-with-dev-kv-id",
+        },
+        {
+          "binding": "RATE_LIMITER",
+          "id": "replace-with-dev-kv-id",
+        },
+      ],
     },
     "production": {
       "name": "jrw-simple-ecommerce-site",
@@ -55,6 +65,16 @@
           "binding": "STORAGE",
           "bucket_name": "financier-v2-production",
           "remote": true,
+        },
+      ],
+      "kv_namespaces": [
+        {
+          "binding": "TOKEN_REVOCATION",
+          "id": "replace-with-prod-kv-id",
+        },
+        {
+          "binding": "RATE_LIMITER",
+          "id": "replace-with-prod-kv-id",
         },
       ],
     },

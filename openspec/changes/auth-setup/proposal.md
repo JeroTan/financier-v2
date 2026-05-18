@@ -30,6 +30,7 @@ Financier requires secure user authentication to isolate each user's financial d
 - New files in `src/server/auth/`, `src/server/middleware/`, `src/server/controller/`
 - New API routes: `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`, `/api/auth/google`, `/api/settings`
 - Depends on `database-schema` for user repository
-- Requires Workers KV namespace for token revocation list (add to wrangler.jsonc)
+- Requires Workers KV namespace for token revocation list (`TOKEN_REVOCATION` in `wrangler.jsonc`)
 - Requires Google OAuth credentials (Google Cloud Console project)
+- Uses `cross-env` / `CLOUDFLARE_ENV` pattern from `package.json` for environment-aware behavior
 - All API routes except landing page and auth endpoints require valid JWT
