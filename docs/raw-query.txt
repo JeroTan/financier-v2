@@ -1,0 +1,18 @@
+Hello! I want to create a finance app wherein I can record my expenses and income using chat or manual input. for MVP, I want a registration, can be registered with google or manual email or password. The landing page is just simple page what showcase what we can do in this app in SEO way. Also once logged in, we will see a dashboard where the first thing we see is chat. The chat also serve as 40% at the top the stats of our finance and 60% below is chat. BUT the 40% will dissappear if the chat is started. Btw we won't store chats in database. So with that, we have the sidebar also that can be toggle on and off meaning to show or not show. The sidebar contains home in which the dashboard I explained earlier. Now going back to dashboard I wanted to see the finance stats, for this month like how expenses and how much income then the third is my revenue or something could positive or green color or negative or red color.
+
+Now on the sidebar, we have another tab called "Stats" this is the over all stats we can have. Please show it in either monthly, yearly, or daily with you know the game harvest moon on how they show income and expense. It is very easy to understand, also have a stats that shows your maybe year goal, monthly goal and daily goal in which they can set themselves or just leave it not set at all. Also it has a meta for every entity as , name, description(optional), value, position or negative, image(optional), category (optional, array) so that we know how many they sell. Now another sidbar item is the "Entity" basically a card like list instead of "stats" where it is chart base. This one just show your item in card order with pagination. User can filter all, expense only, income only or can be search. or range like what month is covered
+
+Be sure it is responsive for both mobile and desktop
+
+Now on settings, they can set their password, link at account (like google), change appearance like dark mode or light mode
+
+
+
+This is usually for my personal stuff but anyone can try it on the if they want to.
+
+
+
+
+
+This is built using react js on astro, with shadcn as components
+the database is still in d1
