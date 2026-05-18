@@ -29,16 +29,16 @@
       "ai": {
         "binding": "AI",
       },
-    },
-    "production": {
-      "name": "jrw-simple-ecommerce-site",
       "r2_buckets": [
         {
           "binding": "STORAGE",
-          "bucket_name": "financier-v2-storage-production",
+          "bucket_name": "financier-v2-development",
           "remote": true,
         },
       ],
+    },
+    "production": {
+      "name": "jrw-simple-ecommerce-site",
       "d1_databases": [
         {
           "binding": "DB",
@@ -50,6 +50,13 @@
       "ai": {
         "binding": "AI",
       },
+      "r2_buckets": [
+        {
+          "binding": "STORAGE",
+          "bucket_name": "financier-v2-production",
+          "remote": true,
+        },
+      ],
     },
   },
 }
