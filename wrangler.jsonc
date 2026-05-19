@@ -23,6 +23,7 @@
           "binding": "DB",
           "database_name": "financier-v2-development",
           "database_id": "beabfd98-8611-4d58-8f1b-7a972b8af1ed",
+          "migrations_dir": "./drizzle/migrations",
           "remote": true,
         },
       ],

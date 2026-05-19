@@ -28,6 +28,7 @@
 - [ ] 4.2 Implement file type and size validation
 - [ ] 4.3 Create `POST /api/receipts` endpoint for R2 upload
 - [ ] 4.4 Wire image upload to form submission flow
+- [ ] 4.5 Add `routeDetail()` — summary, tags, multipart body schema, response with URL
 
 ## 5. Category Creation
 
@@ -41,6 +42,7 @@
 - [ ] 6.2 Implement Zod validation for request body
 - [ ] 6.3 Wire endpoint to transaction repository createTransaction
 - [ ] 6.4 Add auth middleware to endpoint
+- [ ] 6.5 Add `routeDetail()` — summary, tags, body schema, response schema, error codes
 
 ## 7. Unsaved Changes Guard
 

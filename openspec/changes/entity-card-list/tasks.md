@@ -5,6 +5,7 @@
 - [ ] 1.3 Wire endpoint to transaction repository getTransactions with filters
 - [ ] 1.4 Add auth middleware to endpoint
 - [ ] 1.5 Implement pagination response format `{ transactions, total, page, limit, totalPages }`
+- [ ] 1.6 Add `routeDetail()` — summary, tags, query params schema, paginated response schema, error codes
 
 ## 2. Card Component
 

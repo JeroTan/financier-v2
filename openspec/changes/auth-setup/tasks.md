@@ -58,3 +58,16 @@
 - [ ] 8.2 Add CORS configuration restricted to app domain
 - [ ] 8.3 Add request ID tracking to auth responses
 - [ ] 8.4 Test full auth flow: register → login → protected route → logout → refresh
+
+## 9. OpenAPI Documentation
+
+- [ ] 9.1 Add `routeDetail()` to POST `/api/auth/register` — summary, tags, body schema, response schema, error codes
+- [ ] 9.2 Add `routeDetail()` to POST `/api/auth/login` — summary, tags, body schema, response schema, error codes
+- [ ] 9.3 Add `routeDetail()` to POST `/api/auth/logout` — summary, tags, auth required, response schema
+- [ ] 9.4 Add `routeDetail()` to POST `/api/auth/refresh` — summary, tags, response schema, error codes
+- [ ] 9.5 Add `routeDetail()` to GET `/api/auth/google` — summary, tags, public, redirect response
+- [ ] 9.6 Add `routeDetail()` to GET `/api/auth/google/callback` — summary, tags, public, query params, response
+- [ ] 9.7 Add `routeDetail()` to GET `/api/settings` — summary, tags, auth required, response schema
+- [ ] 9.8 Add `routeDetail()` to PUT `/api/settings/password` — summary, tags, body schema, response, error codes
+- [ ] 9.9 Add `routeDetail()` to PUT `/api/settings/preferences` — summary, tags, body schema, response
+- [ ] 9.10 Add `routeDetail()` to POST `/api/settings/unlink-google` — summary, tags, auth required

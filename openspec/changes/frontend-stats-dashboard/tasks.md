@@ -27,9 +27,13 @@
 ## 5. API Integration
 
 - [ ] 5.1 Create `useStats` hook that fetches from `GET /api/stats?period=&date=`
-- [ ] 5.2 Implement loading state with skeleton/spinner
-- [ ] 5.3 Implement error state with retry option
-- [ ] 5.4 Implement real-time refresh on `transaction_saved` custom event
+- [ ] 5.2 Create `GET /api/stats` endpoint with period/date query params
+- [ ] 5.3 Wire endpoint to transaction repository aggregateTransactions
+- [ ] 5.4 Add auth middleware to endpoint
+- [ ] 5.5 Add `routeDetail()` — summary, tags, query params schema, response schema (income/expenses/net), error codes
+- [ ] 5.6 Implement loading state with skeleton/spinner
+- [ ] 5.7 Implement error state with retry option
+- [ ] 5.8 Implement real-time refresh on `transaction_saved` custom event
 
 ## 6. Empty States
 

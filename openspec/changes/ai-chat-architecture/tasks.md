@@ -36,3 +36,4 @@
 - [ ] 6.2 Wire controller → service → AI → SSE response pipeline
 - [ ] 6.3 Add Zod validation for request body
 - [ ] 6.4 Add error handling with proper HTTP status codes
+- [ ] 6.5 Add `routeDetail()` — summary, tags, body schema, SSE response description, error codes
