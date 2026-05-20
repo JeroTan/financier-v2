@@ -1,0 +1,56 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+
+    <!-- Hanken Grotesk Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap"
+    />
+
+    <!-- Global Styles -->
+    <style is:global>
+      @import "../styles/global.css";
+    </style>
+
+    <!-- Theme Initialization (prevents flash) -->
+    <script>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <slot />
+
+    <!-- Theme Toggle Script -->
+    <script>
+      function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+      }
+
+      // Expose globally for components to call
+      window.toggleTheme = toggleTheme;
+    </script>
+  </body>
+</html>
