@@ -2,6 +2,7 @@ import { UserRepository } from "@/server/repositories/userRepository";
 import { AuthService } from "@/server/auth/service";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getSettingsDetail, updatePasswordDetail, updatePreferencesDetail, unlinkGoogleDetail } from "./routes";
+import { isValidPersonality } from "@/server/ai/personalities/constants";
 
 type AppLocals = {
   db?: D1Database;
@@ -121,6 +122,10 @@ async function handleUpdatePreferences(request: Request): Promise<Response> {
     body = await request.json();
   } catch {
     return errorResponse("INVALID_INPUT", "Invalid request body", 400);
+  }
+
+  if (body.personality && !isValidPersonality(body.personality)) {
+    body.personality = "default";
   }
 
   const db = env.DB as D1Database | undefined;

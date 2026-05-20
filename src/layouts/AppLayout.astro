@@ -1,0 +1,74 @@
+---
+interface Props {
+  title: string;
+  currentPage: string;
+  userEmail?: string;
+}
+
+const { title, currentPage, userEmail } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} — Financier</title>
+
+    <!-- Hanken Grotesk Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap"
+    />
+
+    <!-- Global Styles -->
+    <style is:global>
+      @import "../styles/global.css";
+    </style>
+
+    <!-- Theme Initialization -->
+    <script>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+  </head>
+  <body class="bg-background text-foreground">
+    <div class="flex min-h-screen">
+      <!-- Sidebar -->
+      <Sidebar client:load currentPage={currentPage} userEmail={userEmail} />
+
+      <!-- Content -->
+      <main class="flex-1 lg:ml-0">
+        <div class="max-w-[1200px] mx-auto p-4 lg:p-6">
+          <slot />
+        </div>
+      </main>
+    </div>
+
+    <!-- Toaster -->
+    <Toaster client:load />
+
+    <!-- Theme Toggle Script -->
+    <script>
+      function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute("data-theme");
+        const next = current === "dark" ? "light" : "dark";
+        html.setAttribute("data-theme", next);
+        localStorage.setItem("theme", next);
+      }
+      window.toggleTheme = toggleTheme;
+    </script>
+  </body>
+</html>
+
+<script>
+  import { Sidebar } from "@/components/layout/Sidebar";
+  import { Toaster } from "@/components/ui/toaster";
+</script>

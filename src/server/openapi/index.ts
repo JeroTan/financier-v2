@@ -6,6 +6,7 @@ import "@/pages/api/receipts/routes";
 import "@/pages/api/stats/routes";
 import "@/pages/api/settings/routes";
 
-// Import actual route handlers (these also import route metadata via routes.ts)
+// Import actual route handlers
 import "@/pages/api/auth/index";
 import "@/pages/api/settings/index";
+import "@/pages/api/chat/index";

@@ -1,33 +1,24 @@
 import { defineMiddleware } from "astro:middleware";
+import { jwtDecrypt } from "@/lib/crypto/jwt";
+import { getJwtConfig } from "@/lib/crypto/jwt";
+import { rateLimiterMiddleware } from "@/server/middleware/apiRateLimiter";
 
-const ALLOWED_ORIGINS = ["http://localhost:4321", "https://financier.example.com"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/api/auth", "/api/openapi.json", "/api/docs"];
+const PUBLIC_PREFIXES = ["/api/auth/"];
 
-function isAllowedOrigin(origin: string | null): boolean {
-  if (!origin) return false;
-  return ALLOWED_ORIGINS.includes(origin);
+function isPublicRoute(pathname: string): boolean {
+  if (PUBLIC_ROUTES.includes(pathname)) return true;
+  return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+function isApiRoute(pathname: string): boolean {
+  return pathname.startsWith("/api/");
 }
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const env = (context as any).env as Record<string, unknown> | undefined;
   const request = context.request;
-  const origin = request.headers.get("Origin");
-
-  // CORS preflight
-  if (request.method === "OPTIONS") {
-    if (origin && isAllowedOrigin(origin)) {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": origin,
-          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-          "Access-Control-Allow-Credentials": "true",
-          "Access-Control-Max-Age": "86400",
-        },
-      });
-    }
-    return new Response(null, { status: 204 });
-  }
+  const pathname = new URL(request.url).pathname;
 
   // Set locals from env
   if (env) {
@@ -50,16 +41,60 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const requestId = crypto.randomUUID();
   (context.locals as unknown as Record<string, unknown>).requestId = requestId;
 
-  const response = await next();
-
-  // Add CORS headers to response
-  if (origin && isAllowedOrigin(origin)) {
-    response.headers.set("Access-Control-Allow-Origin", origin);
-    response.headers.set("Access-Control-Allow-Credentials", "true");
+  // Apply rate limiting to API routes
+  if (isApiRoute(pathname)) {
+    const rateLimitResponse = await rateLimiterMiddleware(request, env ?? {});
+    if (rateLimitResponse) {
+      rateLimitResponse.headers.set("X-Request-ID", requestId);
+      return rateLimitResponse;
+    }
   }
 
-  // Add request ID to response
-  response.headers.set("X-Request-ID", requestId);
+  // Skip auth for public routes
+  if (isPublicRoute(pathname)) {
+    const response = await next();
+    response.headers.set("X-Request-ID", requestId);
+    return response;
+  }
 
+  // Check for JWT in cookies
+  const cookie = request.headers.get("Cookie") ?? "";
+  const refreshTokenMatch = cookie.match(/refreshToken=([^;]+)/);
+
+  if (!refreshTokenMatch) {
+    // No auth token
+    if (isApiRoute(pathname)) {
+      return new Response(
+        JSON.stringify({ error: { code: "UNAUTHORIZED", message: "Authentication required" } }),
+        { status: 401, headers: { "Content-Type": "application/json", "X-Request-ID": requestId } }
+      );
+    }
+
+    // Redirect to login for page requests
+    return Response.redirect(new URL("/login", request.url), 302);
+  }
+
+  // Validate JWT
+  const jwtConfig = getJwtConfig(env ?? {});
+  const result = await jwtDecrypt({ token: refreshTokenMatch[1], config: jwtConfig });
+
+  if (result.error) {
+    if (isApiRoute(pathname)) {
+      return new Response(
+        JSON.stringify({ error: { code: "UNAUTHORIZED", message: "Invalid or expired token" } }),
+        { status: 401, headers: { "Content-Type": "application/json", "X-Request-ID": requestId } }
+      );
+    }
+
+    return Response.redirect(new URL("/login", request.url), 302);
+  }
+
+  // Attach user info to locals
+  const payload = result.data as { sub?: string; email?: string };
+  (context.locals as unknown as Record<string, unknown>).userId = payload.sub;
+  (context.locals as unknown as Record<string, unknown>).userEmail = payload.email;
+
+  const response = await next();
+  response.headers.set("X-Request-ID", requestId);
   return response;
 });

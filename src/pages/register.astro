@@ -1,0 +1,57 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import ThemeToggle from "@/components/ThemeToggle.astro";
+---
+
+<Layout title="Register">
+  <div class="flex items-center justify-center min-h-screen bg-background">
+    <div class="w-full max-w-md p-6 space-y-6">
+      <div class="text-center space-y-2">
+        <h1 class="headline-lg text-primary">Financier</h1>
+        <p class="body-lg text-muted-foreground">Create your account</p>
+      </div>
+
+      <form class="space-y-4" action="/api/auth/register" method="POST">
+        <div class="space-y-2">
+          <label class="label-md" for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            class="w-full h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
+            placeholder="you@example.com"
+          />
+        </div>
+
+        <div class="space-y-2">
+          <label class="label-md" for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            required
+            minlength="8"
+            class="w-full h-10 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm"
+            placeholder="••••••••"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full h-10 rounded-md bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+        >
+          Create Account
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-muted-foreground">
+        Already have an account? <a href="/login" class="text-primary hover:underline">Sign in</a>
+      </p>
+
+      <div class="flex justify-center">
+        <ThemeToggle />
+      </div>
+    </div>
+  </div>
+</Layout>

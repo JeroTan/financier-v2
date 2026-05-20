@@ -1,0 +1,23 @@
+---
+import AppLayout from "@/layouts/AppLayout.astro";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { EntityCardList } from "@/features/entity/EntityCardList";
+
+const token = Astro.cookies.get("refresh_token")?.value ?? "";
+---
+
+<AppLayout title="Transactions" currentPage="/entity">
+  <ErrorBoundary>
+    <div class="space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="headline-lg">Transactions</h1>
+          <p class="body-lg text-muted-foreground">
+            Browse and manage your transaction history.
+          </p>
+        </div>
+      </div>
+      <EntityCardList client:load token={token} />
+    </div>
+  </ErrorBoundary>
+</AppLayout>
