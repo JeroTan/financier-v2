@@ -31,12 +31,50 @@ type OpenAPISpec = {
   tags: { name: string; description: string }[];
 };
 
+function cleanSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  if (!schema || typeof schema !== "object") return schema;
+
+  const cleaned = { ...schema };
+
+  // Remove $schema (Swagger UI doesn't need it)
+  delete cleaned.$schema;
+
+  // If a string has both format and pattern, remove pattern
+  // Zod v4 generates very long regex patterns that break Swagger UI examples
+  if (cleaned.type === "string" && cleaned.format && cleaned.pattern) {
+    delete cleaned.pattern;
+  }
+
+  // Recursively clean nested objects
+  if (cleaned.properties && typeof cleaned.properties === "object") {
+    cleaned.properties = Object.fromEntries(
+      Object.entries(cleaned.properties).map(([k, v]) => [k, cleanSchema(v as Record<string, unknown>)])
+    );
+  }
+  if (cleaned.items) {
+    cleaned.items = cleanSchema(cleaned.items as Record<string, unknown>);
+  }
+  if (cleaned.oneOf) {
+    cleaned.oneOf = (cleaned.oneOf as Record<string, unknown>[]).map((s) => cleanSchema(s));
+  }
+  if (cleaned.anyOf) {
+    cleaned.anyOf = (cleaned.anyOf as Record<string, unknown>[]).map((s) => cleanSchema(s));
+  }
+  if (cleaned.allOf) {
+    cleaned.allOf = (cleaned.allOf as Record<string, unknown>[]).map((s) => cleanSchema(s));
+  }
+  if (cleaned.additionalProperties && typeof cleaned.additionalProperties === "object") {
+    cleaned.additionalProperties = cleanSchema(cleaned.additionalProperties as Record<string, unknown>);
+  }
+
+  return cleaned;
+}
+
 function zodToJsonSchema(schema: ZodTypeAny): Record<string, unknown> {
   try {
     const jsonSchema = z.toJSONSchema(schema);
-    return jsonSchema as Record<string, unknown>;
+    return cleanSchema(jsonSchema as Record<string, unknown>);
   } catch {
-    // Fallback for types that can't be converted (coerce, transform, etc.)
     return { type: "object", description: "Schema contains types that cannot be represented in JSON Schema" };
   }
 }
