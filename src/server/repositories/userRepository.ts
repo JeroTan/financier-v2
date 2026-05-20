@@ -12,15 +12,23 @@ export class UserRepository {
     this.db = drizzle(db, { schema: { users } });
   }
 
-  async createUser(data: NewUser): Promise<User> {
+  async create(data: NewUser): Promise<User | null> {
     const [result] = await this.db
       .insert(users)
       .values(data)
       .returning();
-    return result;
+    return result ?? null;
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
+    const [result] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.id, id));
+    return result ?? null;
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
     const [result] = await this.db
       .select()
       .from(users)
@@ -28,7 +36,7 @@ export class UserRepository {
     return result ?? null;
   }
 
-  async getUserByGoogleId(googleId: string): Promise<User | null> {
+  async findByGoogleId(googleId: string): Promise<User | null> {
     const [result] = await this.db
       .select()
       .from(users)
@@ -36,11 +44,19 @@ export class UserRepository {
     return result ?? null;
   }
 
-  async updateUserSettings(userId: string, settings: { personality?: string; theme?: string }): Promise<User | null> {
+  async findByRefreshToken(refreshToken: string): Promise<User | null> {
+    const [result] = await this.db
+      .select()
+      .from(users)
+      .where(eq(users.refreshToken, refreshToken));
+    return result ?? null;
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string): Promise<User | null> {
     const [result] = await this.db
       .update(users)
       .set({
-        ...settings,
+        refreshToken,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId))
@@ -48,11 +64,51 @@ export class UserRepository {
     return result ?? null;
   }
 
-  async updatePassword(userId: string, passwordHash: string): Promise<User | null> {
+  async updatePassword(userId: string, passwordHash: string, passwordSalt: string): Promise<User | null> {
     const [result] = await this.db
       .update(users)
       .set({
         passwordHash,
+        passwordSalt,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result ?? null;
+  }
+
+  async updatePreferences(
+    userId: string,
+    preferences: { personality?: string; theme?: string },
+  ): Promise<User | null> {
+    const [result] = await this.db
+      .update(users)
+      .set({
+        ...preferences,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result ?? null;
+  }
+
+  async unlinkGoogle(userId: string): Promise<User | null> {
+    const [result] = await this.db
+      .update(users)
+      .set({
+        googleId: null,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return result ?? null;
+  }
+
+  async linkGoogle(userId: string, googleId: string): Promise<User | null> {
+    const [result] = await this.db
+      .update(users)
+      .set({
+        googleId,
         updatedAt: new Date().toISOString(),
       })
       .where(eq(users.id, userId))

@@ -1,8 +1,7 @@
-import type { APIRoute } from "astro";
 import { generateSpec } from "@/server/openapi/spec-generator";
 import "@/server/openapi/index";
 
-export const GET: APIRoute = async () => {
+export const GET = async () => {
   const spec = generateSpec();
 
   return new Response(JSON.stringify(spec, null, 2), {
