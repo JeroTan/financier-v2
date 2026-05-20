@@ -1,0 +1,36 @@
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mAI bindings always access remote resources, and so may incur usage charges even in local dev. To suppress this warning, set `remote: true` for the binding definition in your configuration file.[0m
+
+
+[31m[1m16:18:37[22m [ERROR] [vite][39m [31mInternal server error: Cannot read properties of undefined (reading 'APP_URL')[39m
+      at null.<anonymous> (C:/dev/Web%20Application/financier/src/pages/index.astro:3:27)
+      at index (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-PANDRVTD.js?v=6ee87745:21:12)
+      at callComponentAsTemplateResultOrResponse (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:607:31)
+      at renderToAsyncIterable (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:639:32)
+      at renderPage (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-XFTMV7TW.js?v=6ee87745:584:51)
+      at PagesHandler.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1408:38)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1266:10)
+      at AstroMiddleware.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1368:18)
+      at AstroHandler.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:3262:20)
+[31m[1m16:18:40[22m [ERROR] [vite][39m [31mInternal server error: Cannot read properties of undefined (reading 'APP_URL')[39m
+      at null.<anonymous> (C:/dev/Web%20Application/financier/src/pages/index.astro:3:27)
+      at index (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-PANDRVTD.js?v=6ee87745:21:12)
+      at callComponentAsTemplateResultOrResponse (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:607:31)
+      at renderToAsyncIterable (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:639:32)
+      at renderPage (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-XFTMV7TW.js?v=6ee87745:584:51)
+      at PagesHandler.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1408:38)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1266:10)
+      at AstroMiddleware.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1368:18)
+      at AstroHandler.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:3262:20)
+[31m[1m16:19:59[22m [ERROR] [vite][39m [31mInternal server error: Cannot read properties of undefined (reading 'APP_URL')[39m
+      at null.<anonymous> (C:/dev/Web%20Application/financier/src/pages/index.astro:3:27)
+      at index (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-PANDRVTD.js?v=6ee87745:21:12)
+      at callComponentAsTemplateResultOrResponse (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:607:31)
+      at renderToAsyncIterable (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JM53MZ2Y.js?v=6ee87745:639:32)
+      at renderPage (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-XFTMV7TW.js?v=6ee87745:584:51)
+      at PagesHandler.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1408:38)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1266:10)
+      at AstroMiddleware.handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:1368:18)
+      at AstroHandler.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JQ6IDFWE.js?v=6ee87745:3262:20)
