@@ -2,12 +2,10 @@
 import AppLayout from "@/layouts/AppLayout.astro";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import SettingsPanel from "@/components/settings/SettingsPanel";
-
-const token = Astro.cookies.get("refresh_token")?.value ?? "";
 ---
 
 <AppLayout title="Settings" currentPage="/settings">
   <ErrorBoundary>
-    <SettingsPanel client:load token={token} />
+    <SettingsPanel client:load />
   </ErrorBoundary>
 </AppLayout>

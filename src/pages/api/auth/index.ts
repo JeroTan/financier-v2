@@ -1,40 +1,15 @@
 import { UserRepository } from "@/server/repositories/userRepository";
 import { AuthService } from "@/server/auth/service";
-import { registerDetail, loginDetail, logoutDetail, refreshDetail, googleAuthDetail, googleCallbackDetail } from "./routes";
+import "./routes";
 import { getGoogleAuthUrl, handleGoogleCallback } from "@/server/auth/google";
 import { authMiddleware } from "@/server/middleware/auth";
 import { checkRateLimit, getRateLimitKey } from "@/server/middleware/rateLimiter";
+import { getClearRefreshTokenCookie } from "@/server/auth/tokens";
+import { getAppUrl, getRuntimeEnv } from "@/server/context/bindings";
 
-type AppLocals = {
-  db?: D1Database;
-  tokenRevocation?: KVNamespace;
-  rateLimiter?: KVNamespace;
-  pepper?: string;
-  CLOUDFLARE_ENV?: string;
-  JWT_SECRET?: string;
-  GOOGLE_CLIENT_ID?: string;
-  GOOGLE_CLIENT_SECRET?: string;
-  APP_URL?: string;
+type AstroApiContext = {
+  request: Request;
 };
-
-function getLocals(request: Request): AppLocals {
-  return ((request as any).locals ?? {}) as AppLocals;
-}
-
-function getEnv(request: Request): Record<string, unknown> {
-  const locals = getLocals(request);
-  return {
-    CLOUDFLARE_ENV: locals.CLOUDFLARE_ENV ?? "development",
-    PASSWORD_PEPPER: locals.pepper ?? "dev-pepper",
-    JWT_SECRET: locals.JWT_SECRET ?? "dev-secret-do-not-use-in-production",
-    GOOGLE_CLIENT_ID: locals.GOOGLE_CLIENT_ID ?? "",
-    GOOGLE_CLIENT_SECRET: locals.GOOGLE_CLIENT_SECRET ?? "",
-    APP_URL: locals.APP_URL ?? "http://localhost:4321",
-    DB: locals.db,
-    TOKEN_REVOCATION: locals.tokenRevocation,
-    RATE_LIMITER: locals.rateLimiter,
-  };
-}
 
 function jsonResponse(data: unknown, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -47,14 +22,58 @@ function errorResponse(code: string, message: string, status: number, headers: R
   return jsonResponse({ error: { code, message } }, status, headers);
 }
 
+async function readCredentials(request: Request): Promise<{ email: string; password: string } | null> {
+  const contentType = request.headers.get("Content-Type") ?? "";
+
+  try {
+    if (contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data")) {
+      const form = await request.formData();
+      return {
+        email: String(form.get("email") ?? ""),
+        password: String(form.get("password") ?? ""),
+      };
+    }
+
+    return (await request.json()) as { email: string; password: string };
+  } catch {
+    return null;
+  }
+}
+
+function isFormSubmit(request: Request): boolean {
+  const contentType = request.headers.get("Content-Type") ?? "";
+  return contentType.includes("application/x-www-form-urlencoded") || contentType.includes("multipart/form-data");
+}
+
+function authSuccessResponse(
+  request: Request,
+  data: { setCookie?: string; data: unknown },
+  status: number,
+): Response {
+  const headers: Record<string, string> = {};
+  if (data.setCookie) headers["Set-Cookie"] = data.setCookie;
+
+  if (isFormSubmit(request)) {
+    return new Response(null, {
+      status: 303,
+      headers: {
+        Location: "/dashboard",
+        ...headers,
+      },
+    });
+  }
+
+  return jsonResponse(data.data, status, headers);
+}
+
 export const POST = async (context: any) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  if (path === "/api/auth/register") return handleRegister(context.request);
-  if (path === "/api/auth/login") return handleLogin(context.request);
-  if (path === "/api/auth/logout") return handleLogout(context.request);
-  if (path === "/api/auth/refresh") return handleRefresh(context.request);
+  if (path === "/api/auth/register") return handleRegister(context);
+  if (path === "/api/auth/login") return handleLogin(context);
+  if (path === "/api/auth/logout") return handleLogout(context);
+  if (path === "/api/auth/refresh") return handleRefresh(context);
 
   return errorResponse("NOT_FOUND", "Route not found", 404);
 };
@@ -63,15 +82,16 @@ export const GET = async (context: any) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  if (path === "/api/auth/google") return handleGoogleRedirect(context.request);
-  if (path === "/api/auth/google/callback") return handleGoogleCallbackRoute(context.request);
+  if (path === "/api/auth/google") return handleGoogleRedirect();
+  if (path === "/api/auth/google/callback") return handleGoogleCallbackRoute(context);
 
   return errorResponse("NOT_FOUND", "Route not found", 404);
 };
 
-async function handleRegister(request: Request): Promise<Response> {
-  const env = getEnv(request);
-  const rateLimiter = env.RATE_LIMITER as KVNamespace | undefined;
+async function handleRegister(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
+  const rateLimiter = env.RATE_LIMITER;
 
   if (rateLimiter) {
     const key = getRateLimitKey(request, "register");
@@ -82,17 +102,15 @@ async function handleRegister(request: Request): Promise<Response> {
     }
   }
 
-  let body: { email: string; password: string };
-  try {
-    body = await request.json();
-  } catch {
+  const body = await readCredentials(request);
+  if (!body) {
     return errorResponse("INVALID_INPUT", "Invalid request body", 400);
   }
 
   if (!body.email || !body.password) return errorResponse("INVALID_INPUT", "Email and password are required", 400);
   if (body.password.length < 8) return errorResponse("INVALID_INPUT", "Password must be at least 8 characters", 400);
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
@@ -105,14 +123,13 @@ async function handleRegister(request: Request): Promise<Response> {
     return errorResponse("SERVER_ERROR", "Registration failed", 500);
   }
 
-  const headers: Record<string, string> = {};
-  if (result.data!.setCookie) headers["Set-Cookie"] = result.data!.setCookie;
-  return jsonResponse(result.data!.data, 201, headers);
+  return authSuccessResponse(request, result.data!, 201);
 }
 
-async function handleLogin(request: Request): Promise<Response> {
-  const env = getEnv(request);
-  const rateLimiter = env.RATE_LIMITER as KVNamespace | undefined;
+async function handleLogin(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
+  const rateLimiter = env.RATE_LIMITER;
 
   if (rateLimiter) {
     const key = getRateLimitKey(request, "login");
@@ -123,16 +140,14 @@ async function handleLogin(request: Request): Promise<Response> {
     }
   }
 
-  let body: { email: string; password: string };
-  try {
-    body = await request.json();
-  } catch {
+  const body = await readCredentials(request);
+  if (!body) {
     return errorResponse("INVALID_INPUT", "Invalid request body", 400);
   }
 
   if (!body.email || !body.password) return errorResponse("INVALID_INPUT", "Email and password are required", 400);
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
@@ -145,27 +160,32 @@ async function handleLogin(request: Request): Promise<Response> {
     return errorResponse("SERVER_ERROR", "Login failed", 500);
   }
 
-  const headers: Record<string, string> = {};
-  if (result.data!.setCookie) headers["Set-Cookie"] = result.data!.setCookie;
-  return jsonResponse(result.data!.data, 200, headers);
+  return authSuccessResponse(request, result.data!, 200);
 }
 
-async function handleLogout(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleLogout(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
   const refreshToken = request.headers.get("Cookie")?.match(/refreshToken=([^;]+)/)?.[1];
-  const tokenRevocation = env.TOKEN_REVOCATION as KVNamespace | undefined;
+  const tokenRevocation = env.TOKEN_REVOCATION;
   if (refreshToken && tokenRevocation) {
     await tokenRevocation.put(refreshToken, "revoked", { expirationTtl: 604800 });
   }
+  const db = env.DB;
+  if (db) {
+    const userRepo = new UserRepository(db);
+    await userRepo.updateRefreshToken(auth.context.userId, "");
+  }
 
-  return jsonResponse({ success: true }, 200, { "Set-Cookie": "refreshToken=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0" });
+  return jsonResponse({ success: true }, 200, { "Set-Cookie": getClearRefreshTokenCookie(env) });
 }
 
-async function handleRefresh(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleRefresh(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
 
   let body: { refreshToken: string };
   try {
@@ -178,9 +198,9 @@ async function handleRefresh(request: Request): Promise<Response> {
 
   if (!body.refreshToken) return errorResponse("INVALID_INPUT", "Refresh token required", 400);
 
-  const db = env.DB as D1Database | undefined;
-  const tokenRevocation = env.TOKEN_REVOCATION as KVNamespace | undefined;
-  if (!db || !tokenRevocation) return errorResponse("SERVER_ERROR", "Server not configured", 500);
+  const db = env.DB;
+  const tokenRevocation = env.TOKEN_REVOCATION;
+  if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
   const authService = new AuthService(userRepo, env.PASSWORD_PEPPER as string, env);
@@ -198,9 +218,9 @@ async function handleRefresh(request: Request): Promise<Response> {
   return jsonResponse(result.data!.data, 200, headers);
 }
 
-async function handleGoogleRedirect(request: Request): Promise<Response> {
-  const env = getEnv(request);
-  const appUrl = env.APP_URL as string;
+async function handleGoogleRedirect(): Promise<Response> {
+  const env = getRuntimeEnv();
+  const appUrl = getAppUrl(env);
   const authUrl = getGoogleAuthUrl({
     clientId: env.GOOGLE_CLIENT_ID as string,
     clientSecret: env.GOOGLE_CLIENT_SECRET as string,
@@ -209,7 +229,8 @@ async function handleGoogleRedirect(request: Request): Promise<Response> {
   return Response.redirect(authUrl, 302);
 }
 
-async function handleGoogleCallbackRoute(request: Request): Promise<Response> {
+async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
@@ -217,8 +238,8 @@ async function handleGoogleCallbackRoute(request: Request): Promise<Response> {
   if (error) return Response.redirect(`${url.origin}/?auth=error&message=${encodeURIComponent(error)}`, 302);
   if (!code) return Response.redirect(`${url.origin}/?auth=error&message=missing_code`, 302);
 
-  const env = getEnv(request);
-  const db = env.DB as D1Database | undefined;
+  const env = getRuntimeEnv();
+  const db = env.DB;
   if (!db) return Response.redirect(`${url.origin}/?auth=error&message=server_error`, 302);
 
   const userRepo = new UserRepository(db);
@@ -226,7 +247,7 @@ async function handleGoogleCallbackRoute(request: Request): Promise<Response> {
     {
       clientId: env.GOOGLE_CLIENT_ID as string,
       clientSecret: env.GOOGLE_CLIENT_SECRET as string,
-      redirectUri: `${env.APP_URL as string}/api/auth/google/callback`,
+      redirectUri: `${getAppUrl(env)}/api/auth/google/callback`,
     },
     userRepo,
     env,

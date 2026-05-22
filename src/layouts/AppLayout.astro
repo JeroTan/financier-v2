@@ -1,4 +1,7 @@
 ---
+import { Sidebar } from "@/components/layout/Sidebar";
+import { Toaster } from "@/components/ui/toaster";
+
 interface Props {
   title: string;
   currentPage: string;
@@ -67,8 +70,3 @@ const { title, currentPage, userEmail } = Astro.props;
     </script>
   </body>
 </html>
-
-<script>
-  import { Sidebar } from "@/components/layout/Sidebar";
-  import { Toaster } from "@/components/ui/toaster";
-</script>

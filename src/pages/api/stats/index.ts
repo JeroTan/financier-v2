@@ -2,6 +2,7 @@ import { z } from "zod";
 import { routeDetail } from "@/server/openapi/route-metadata";
 import { TransactionRepository } from "@/server/repositories/transactionRepository";
 import { authMiddleware } from "@/server/middleware/auth";
+import { getRuntimeEnv } from "@/server/context/bindings";
 
 const statsQuerySchema = z.object({
   period: z.enum(["daily", "monthly", "yearly"]).default("monthly"),
@@ -33,14 +34,6 @@ export const getStatsRouteDetail = routeDetail("GET", "/api/stats", {
     { code: "SERVER_ERROR", status: 500, description: "Database error" },
   ],
 });
-
-type AppLocals = {
-  db?: D1Database;
-};
-
-function getLocals(request: Request): AppLocals {
-  return ((request as any).locals ?? {}) as AppLocals;
-}
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -78,10 +71,9 @@ function getDateRange(period: string, dateStr?: string): { startDate: string; en
 
 export const GET = async (context: any) => {
   const request = context.request;
-  const locals = getLocals(request);
-  const env = (context as any).env as Record<string, unknown> | undefined;
+  const env = getRuntimeEnv();
 
-  const auth = await authMiddleware(request, env ?? {});
+  const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
   const url = new URL(request.url);
@@ -93,7 +85,7 @@ export const GET = async (context: any) => {
     return errorResponse("INVALID_INPUT", parseResult.error.message, 400);
   }
 
-  const db = locals.db;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const { period, date } = parseResult.data;

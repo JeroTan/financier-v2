@@ -13,7 +13,7 @@ type UseStatsReturn = {
   refetch: () => void;
 };
 
-export function useStats(period: string, date: string, token: string): UseStatsReturn {
+export function useStats(period: string, date: string, token?: string): UseStatsReturn {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +24,8 @@ export function useStats(period: string, date: string, token: string): UseStatsR
     try {
       const params = new URLSearchParams({ period, date });
       const response = await fetch(`/api/stats?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "same-origin",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       });
       if (!response.ok) throw new Error("Failed to fetch stats");
       const data = await response.json() as { success: boolean; data: StatsData };

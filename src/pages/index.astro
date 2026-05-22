@@ -1,6 +1,8 @@
 ---
+import { getAppUrl } from "@/server/context/bindings";
+
 // Landing page — public route, no auth required
-const APP_URL = Astro.env.APP_URL ?? "https://financier.app";
+const APP_URL = getAppUrl();
 ---
 
 <!doctype html>

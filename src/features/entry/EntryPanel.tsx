@@ -3,7 +3,7 @@ import { EntryForm } from "@/features/entry/EntryForm";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type EntryPanelProps = {
-  token: string;
+  token?: string;
 };
 
 export function EntryPanel({ token }: EntryPanelProps) {
@@ -12,7 +12,8 @@ export function EntryPanel({ token }: EntryPanelProps) {
 
   useEffect(() => {
     fetch("/api/categories", {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: "same-origin",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
       .then((res) => res.json() as Promise<{ success: boolean; data: { name: string }[] }>)
       .then((data) => {
@@ -28,9 +29,10 @@ export function EntryPanel({ token }: EntryPanelProps) {
     async (name: string) => {
       const response = await fetch("/api/categories", {
         method: "POST",
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ name }),
       });

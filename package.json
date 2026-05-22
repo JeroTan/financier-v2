@@ -17,6 +17,9 @@
     "deploy-development": "npx wrangler@latest deploy --env=\"development\"",
     "deploy-production": "npx wrangler@latest deploy --env=\"production\"",
     "check": "astro check",
+    "smoke:auth": "tsx scripts/smoke-auth-routes.ts",
+    "smoke:routes": "tsx scripts/smoke-routes.ts",
+    "smoke:layout": "tsx scripts/smoke-layout.ts",
     "test": "vitest",
     "preview": "astro preview",
     "astro": "astro",
@@ -65,7 +68,9 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260520.1",
+    "@playwright/test": "^1.60.0",
     "@types/lodash": "^4.17.24",
+    "@types/node": "^25.9.1",
     "drizzle-kit": "^0.31.10",
     "prettier": "3.8.3",
     "tsx": "^4.22.0"

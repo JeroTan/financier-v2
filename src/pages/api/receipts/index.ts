@@ -1,6 +1,7 @@
 import { routeDetail } from "@/server/openapi/route-metadata";
 import { z } from "zod";
 import { authMiddleware } from "@/server/middleware/auth";
+import { getRuntimeEnv } from "@/server/context/bindings";
 
 export const uploadReceiptDetail = routeDetail("POST", "/api/receipts", {
   summary: "Upload a receipt image",
@@ -27,14 +28,6 @@ export const uploadReceiptDetail = routeDetail("POST", "/api/receipts", {
   ],
 });
 
-type AppLocals = {
-  storage?: R2Bucket;
-};
-
-function getLocals(request: Request): AppLocals {
-  return ((request as any).locals ?? {}) as AppLocals;
-}
-
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -51,13 +44,12 @@ const MAX_SIZE = 10 * 1024 * 1024;
 
 export const POST = async (context: any) => {
   const request = context.request;
-  const locals = getLocals(request);
-  const env = (context as any).env as Record<string, unknown> | undefined;
+  const env = getRuntimeEnv();
 
-  const auth = await authMiddleware(request, env ?? {});
+  const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
-  const storage = locals.storage;
+  const storage = env.STORAGE;
   if (!storage) return errorResponse("STORAGE_ERROR", "Storage not configured", 500);
 
   const formData = await request.formData();

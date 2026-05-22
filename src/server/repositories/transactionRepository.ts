@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc, count, sum } from "drizzle-orm";
+import { eq, and, gte, lte, desc, count, sum, like } from "drizzle-orm";
 import type { D1Database } from "@cloudflare/workers-types";
 import { drizzle } from "drizzle-orm/d1";
 
@@ -47,11 +47,7 @@ export class TransactionRepository {
     if (startDate) baseWhere.push(gte(transactions.date, startDate));
     if (endDate) baseWhere.push(lte(transactions.date, endDate));
     if (search) {
-      baseWhere.push(
-        and(
-          eq(transactions.description, search),
-        ) as any,
-      );
+      baseWhere.push(like(transactions.description, `%${search}%`));
     }
 
     const [totalResult] = await this.db

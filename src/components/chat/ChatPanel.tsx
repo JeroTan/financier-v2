@@ -7,7 +7,7 @@ import { useChatSSE } from "@/features/chat/useChatSSE";
 import { toast } from "sonner";
 
 type ChatPanelProps = {
-  token: string;
+  token?: string;
 };
 
 type Message = {
@@ -17,10 +17,10 @@ type Message = {
   timestamp: string;
 };
 
-export function ChatPanel({ token }: ChatPanelProps) {
+export function ChatPanel(_props: ChatPanelProps) {
   const { state, transition, setState } = useChatStateMachine();
   const { trail, addMessage, getTrailForAPI, clearTrail } = useMessageTrail();
-  const { streamingText, doneData, error, startStream, abort } = useChatSSE();
+  const { streamingText, doneData, error, startStream } = useChatSSE();
   const [messages, setMessages] = useState<Message[]>([]);
   const [confirmationData, setConfirmationData] = useState<Record<string, unknown> | null>(null);
 
@@ -82,10 +82,10 @@ export function ChatPanel({ token }: ChatPanelProps) {
         addMessage({ role: "assistant", content: aiContent });
       }
 
-      if (doneData.confirmation) {
-        setConfirmationData(doneData.confirmation as Record<string, unknown>);
+      if (doneData.type === "confirmation" && doneData.parsedData) {
+        setConfirmationData(doneData.parsedData as Record<string, unknown>);
         setState("confirm");
-      } else if (doneData.saved) {
+      } else if (doneData.type === "saved") {
         toast.success("Transaction saved!");
         window.dispatchEvent(new CustomEvent("transaction_saved", { detail: doneData }));
         transition("done");

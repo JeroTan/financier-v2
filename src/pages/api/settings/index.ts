@@ -1,31 +1,13 @@
 import { UserRepository } from "@/server/repositories/userRepository";
 import { AuthService } from "@/server/auth/service";
 import { authMiddleware } from "@/server/middleware/auth";
-import { getSettingsDetail, updatePasswordDetail, updatePreferencesDetail, unlinkGoogleDetail } from "./routes";
+import "./routes";
 import { isValidPersonality } from "@/server/ai/personalities/constants";
+import { getRuntimeEnv } from "@/server/context/bindings";
 
-type AppLocals = {
-  db?: D1Database;
-  tokenRevocation?: KVNamespace;
-  pepper?: string;
-  CLOUDFLARE_ENV?: string;
-  JWT_SECRET?: string;
+type AstroApiContext = {
+  request: Request;
 };
-
-function getLocals(request: Request): AppLocals {
-  return ((request as any).locals ?? {}) as AppLocals;
-}
-
-function getEnv(request: Request): Record<string, unknown> {
-  const locals = getLocals(request);
-  return {
-    CLOUDFLARE_ENV: locals.CLOUDFLARE_ENV ?? "development",
-    PASSWORD_PEPPER: locals.pepper ?? "dev-pepper",
-    JWT_SECRET: locals.JWT_SECRET ?? "dev-secret-do-not-use-in-production",
-    DB: locals.db,
-    TOKEN_REVOCATION: locals.tokenRevocation,
-  };
-}
 
 function jsonResponse(data: unknown, status = 200, headers: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(data), {
@@ -40,29 +22,30 @@ function errorResponse(code: string, message: string, status: number): Response 
 
 export const GET = async (context: any) => {
   const url = new URL(context.request.url);
-  if (url.pathname === "/api/settings") return handleGetSettings(context.request);
+  if (url.pathname === "/api/settings") return handleGetSettings(context);
   return errorResponse("NOT_FOUND", "Route not found", 404);
 };
 
 export const PUT = async (context: any) => {
   const url = new URL(context.request.url);
-  if (url.pathname === "/api/settings/password") return handleUpdatePassword(context.request);
-  if (url.pathname === "/api/settings/preferences") return handleUpdatePreferences(context.request);
+  if (url.pathname === "/api/settings/password") return handleUpdatePassword(context);
+  if (url.pathname === "/api/settings/preferences") return handleUpdatePreferences(context);
   return errorResponse("NOT_FOUND", "Route not found", 404);
 };
 
 export const POST = async (context: any) => {
   const url = new URL(context.request.url);
-  if (url.pathname === "/api/settings/unlink-google") return handleUnlinkGoogle(context.request);
+  if (url.pathname === "/api/settings/unlink-google") return handleUnlinkGoogle(context);
   return errorResponse("NOT_FOUND", "Route not found", 404);
 };
 
-async function handleGetSettings(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleGetSettings(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
@@ -82,8 +65,9 @@ async function handleGetSettings(request: Request): Promise<Response> {
   });
 }
 
-async function handleUpdatePassword(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleUpdatePassword(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
@@ -97,7 +81,7 @@ async function handleUpdatePassword(request: Request): Promise<Response> {
   if (!body.currentPassword || !body.newPassword) return errorResponse("INVALID_INPUT", "Current and new password are required", 400);
   if (body.newPassword.length < 8) return errorResponse("INVALID_INPUT", "New password must be at least 8 characters", 400);
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
@@ -112,8 +96,9 @@ async function handleUpdatePassword(request: Request): Promise<Response> {
   return jsonResponse({ success: true });
 }
 
-async function handleUpdatePreferences(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleUpdatePreferences(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
@@ -128,7 +113,7 @@ async function handleUpdatePreferences(request: Request): Promise<Response> {
     body.personality = "default";
   }
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);
@@ -153,12 +138,13 @@ async function handleUpdatePreferences(request: Request): Promise<Response> {
   });
 }
 
-async function handleUnlinkGoogle(request: Request): Promise<Response> {
-  const env = getEnv(request);
+async function handleUnlinkGoogle(context: AstroApiContext): Promise<Response> {
+  const request = context.request;
+  const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
-  const db = env.DB as D1Database | undefined;
+  const db = env.DB;
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const userRepo = new UserRepository(db);

@@ -30,7 +30,7 @@ export function ActionChart({ data }: ActionChartProps) {
       <CardContent className="p-3">
         {label && <p className="text-sm font-medium mb-2">{label}</p>}
         <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-10" preserveAspectRatio="none">
-          <path d={pathD} fill="none" stroke="hsl(var(--gold-500))" strokeWidth="2" />
+          <path d={pathD} fill="none" stroke="var(--gold-500)" strokeWidth="2" />
         </svg>
       </CardContent>
     </Card>

@@ -31,10 +31,10 @@ export class ApiErrorClass extends Error {
   }
 }
 
-function getCookie(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : null;
+let accessToken: string | null = null;
+
+export function setApiAccessToken(token: string | null): void {
+  accessToken = token;
 }
 
 async function parseResponse<T, D>(response: Response): Promise<ApiResult<T, D>> {
@@ -89,15 +89,14 @@ async function request<T, D = unknown>(
     ...options.headers,
   };
 
-  // Inject JWT from cookie
-  const refreshToken = getCookie("refreshToken");
-  if (refreshToken) {
-    headers["Authorization"] = `Bearer ${refreshToken}`;
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
   const init: RequestInit = {
     method,
     headers,
+    credentials: "same-origin",
   };
 
   if (options.body) {

@@ -18,6 +18,10 @@
   "env": {
     "development": {
       "name": "financier-v2-development",
+      "vars": {
+        "CLOUDFLARE_ENV": "development",
+        "APP_URL": "http://localhost:4321",
+      },
       "d1_databases": [
         {
           "binding": "DB",
@@ -38,23 +42,36 @@
         },
       ],
       "kv_namespaces": [
+        // Replace placeholder IDs before remote migrations/deploy:
+        // wrangler kv namespace create TOKEN_REVOCATION --env development
+        // wrangler kv namespace create RATE_LIMITER --env development
+        // wrangler kv namespace create SESSION --env development
         {
           "binding": "TOKEN_REVOCATION",
-          "id": "replace-with-dev-kv-id",
+          "id": "replace-with-dev-token-revocation-kv-id",
         },
         {
           "binding": "RATE_LIMITER",
-          "id": "replace-with-dev-kv-id",
+          "id": "replace-with-dev-rate-limiter-kv-id",
+        },
+        {
+          "binding": "SESSION",
+          "id": "replace-with-dev-session-kv-id",
         },
       ],
     },
     "production": {
-      "name": "jrw-simple-ecommerce-site",
+      "name": "financier-v2-production",
+      "vars": {
+        "CLOUDFLARE_ENV": "production",
+        "APP_URL": "https://financier.app",
+      },
       "d1_databases": [
         {
           "binding": "DB",
           "database_name": "financier-v2-production",
           "database_id": "fd08e264-2046-4648-9164-84f66948533e",
+          "migrations_dir": "./drizzle/migrations",
           "remote": true,
         },
       ],
@@ -69,13 +86,21 @@
         },
       ],
       "kv_namespaces": [
+        // Replace placeholder IDs before production deploy:
+        // wrangler kv namespace create TOKEN_REVOCATION --env production
+        // wrangler kv namespace create RATE_LIMITER --env production
+        // wrangler kv namespace create SESSION --env production
         {
           "binding": "TOKEN_REVOCATION",
-          "id": "replace-with-prod-kv-id",
+          "id": "replace-with-prod-token-revocation-kv-id",
         },
         {
           "binding": "RATE_LIMITER",
-          "id": "replace-with-prod-kv-id",
+          "id": "replace-with-prod-rate-limiter-kv-id",
+        },
+        {
+          "binding": "SESSION",
+          "id": "replace-with-prod-session-kv-id",
         },
       ],
     },

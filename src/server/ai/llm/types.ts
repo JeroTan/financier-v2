@@ -11,6 +11,7 @@ export type SSERequest = {
   messageTrail: ChatMessage[];
   newMessage: string;
   image?: string;
+  confirmationData?: ConfirmationData;
 };
 
 export type ChatMessage = {

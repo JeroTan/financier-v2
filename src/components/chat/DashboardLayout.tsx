@@ -3,7 +3,7 @@ import { ChatPanel } from "@/components/chat/ChatPanel";
 import { StatsDashboard } from "@/components/stats/StatsDashboard";
 
 type DashboardLayoutProps = {
-  token: string;
+  token?: string;
 };
 
 export function DashboardLayout({ token }: DashboardLayoutProps) {

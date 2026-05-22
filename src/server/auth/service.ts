@@ -1,5 +1,5 @@
 import { hashPassword, verifyPassword } from "@/lib/crypto/password";
-import { createTokens, verifyAccessToken, getRefreshTokenCookie, getClearRefreshTokenCookie } from "./tokens";
+import { createTokens, getRefreshTokenCookie, getClearRefreshTokenCookie } from "./tokens";
 import type { UserRepository } from "@/server/repositories/userRepository";
 import type { JwtResult } from "@/lib/crypto/jwt";
 
@@ -64,6 +64,8 @@ export class AuthService {
     const tokens = await createTokens(user.id, user.email, this.env);
     if (tokens.error) return tokens;
 
+    await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+
     return {
       data: {
         data: {
@@ -75,7 +77,7 @@ export class AuthService {
             refreshToken: tokens.data!.refreshToken,
           },
         },
-        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken),
+        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken, this.env),
       },
       error: null,
     };
@@ -95,6 +97,8 @@ export class AuthService {
     const tokens = await createTokens(user.id, user.email, this.env);
     if (tokens.error) return tokens;
 
+    await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+
     return {
       data: {
         data: {
@@ -106,22 +110,21 @@ export class AuthService {
             refreshToken: tokens.data!.refreshToken,
           },
         },
-        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken),
+        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken, this.env),
       },
       error: null,
     };
   }
 
   async logout(): Promise<{ setCookie: string }> {
-    return { setCookie: getClearRefreshTokenCookie() };
+    return { setCookie: getClearRefreshTokenCookie(this.env) };
   }
 
   async refresh(
     refreshToken: string,
-    tokenRevocation: KVNamespace,
+    tokenRevocation?: KVNamespace,
   ): Promise<JwtResult<AuthSuccess<AuthResponse>>> {
-    const revoked = await tokenRevocation.get(refreshToken);
-    if (revoked) {
+    if (tokenRevocation && await tokenRevocation.get(refreshToken)) {
       return { data: null, error: "TOKEN_REVOKED" };
     }
 
@@ -146,7 +149,7 @@ export class AuthService {
             refreshToken: tokens.data!.refreshToken,
           },
         },
-        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken),
+        setCookie: getRefreshTokenCookie(tokens.data!.refreshToken, this.env),
       },
       error: null,
     };

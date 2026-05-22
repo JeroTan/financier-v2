@@ -85,6 +85,28 @@
   --error-container: #ffdad6;
   --on-error-container: #93000a;
 
+  /* Tailwind/shadcn aliases */
+  --card: var(--surface-container-lowest);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface-container-lowest);
+  --popover-foreground: var(--on-surface);
+  --muted: var(--surface-container);
+  --muted-foreground: var(--on-surface-variant);
+  --accent: var(--surface-container-high);
+  --accent-foreground: var(--on-surface);
+  --border: var(--outline-variant);
+  --input: var(--outline-variant);
+  --ring: var(--primary);
+  --destructive: var(--error);
+  --destructive-foreground: var(--on-error);
+  --gold-50: #fff8e1;
+  --gold-300: #ffd966;
+  --gold-500: #fbbc00;
+  --gold-600: #d49b00;
+  --gold-700: #a87800;
+  --gold-950: #261a00;
+  --gold-500-hsl: 45 100% 49%;
+
   /* Semantic */
   --income: #059669;
   --income-bg: #ecfdf5;
@@ -99,11 +121,11 @@
   --chat-border: #edeef2;
 
   /* Spacing */
-  --spacing-xs: 4px;
-  --spacing-sm: 12px;
-  --spacing-md: 24px;
-  --spacing-lg: 40px;
-  --spacing-chat-gap: 16px;
+  --app-spacing-xs: 4px;
+  --app-spacing-sm: 12px;
+  --app-spacing-md: 24px;
+  --app-spacing-lg: 40px;
+  --app-spacing-chat-gap: 16px;
   --container-max: 1200px;
 
   /* Border Radius */
@@ -173,6 +195,27 @@
   --error-container: #93000a;
   --on-error-container: #ffdad6;
 
+  --card: var(--surface-container-lowest);
+  --card-foreground: var(--on-surface);
+  --popover: var(--surface-container-lowest);
+  --popover-foreground: var(--on-surface);
+  --muted: var(--surface-container);
+  --muted-foreground: var(--on-surface-variant);
+  --accent: var(--surface-container-high);
+  --accent-foreground: var(--on-surface);
+  --border: var(--outline-variant);
+  --input: var(--outline-variant);
+  --ring: var(--primary);
+  --destructive: var(--error);
+  --destructive-foreground: var(--on-error);
+  --gold-50: #2b2100;
+  --gold-300: #a87800;
+  --gold-500: #fbbc00;
+  --gold-600: #ffd34d;
+  --gold-700: #ffe8a3;
+  --gold-950: #261a00;
+  --gold-500-hsl: 45 100% 49%;
+
   --income: #34d399;
   --income-bg: #064e3b;
   --expense: #f87171;
@@ -207,10 +250,23 @@
   --color-outline-variant: var(--outline-variant);
   --color-surface-tint: var(--surface-tint);
   --color-background: var(--background);
+  --color-foreground: var(--on-background);
   --color-on-background: var(--on-background);
   --color-surface-variant: var(--surface-variant);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
   --color-primary: var(--primary);
+  --color-primary-foreground: var(--on-primary);
   --color-on-primary: var(--on-primary);
   --color-primary-container: var(--primary-container);
   --color-on-primary-container: var(--on-primary-container);
@@ -221,6 +277,7 @@
   --color-on-primary-fixed-variant: var(--on-primary-fixed-variant);
 
   --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--on-secondary);
   --color-on-secondary: var(--on-secondary);
   --color-secondary-container: var(--secondary-container);
   --color-on-secondary-container: var(--on-secondary-container);
@@ -242,6 +299,15 @@
   --color-on-error: var(--on-error);
   --color-error-container: var(--error-container);
   --color-on-error-container: var(--on-error-container);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-gold-50: var(--gold-50);
+  --color-gold-300: var(--gold-300);
+  --color-gold-500: var(--gold-500);
+  --color-gold-600: var(--gold-600);
+  --color-gold-700: var(--gold-700);
+  --color-gold-950: var(--gold-950);
 
   --color-income: var(--income);
   --color-income-bg: var(--income-bg);
@@ -286,11 +352,11 @@
   --text-data-display--font-weight: 700;
 
   /* Spacing */
-  --spacing-xs: var(--spacing-xs);
-  --spacing-sm: var(--spacing-sm);
-  --spacing-md: var(--spacing-md);
-  --spacing-lg: var(--spacing-lg);
-  --spacing-chat-gap: var(--spacing-chat-gap);
+  --spacing-app-xs: var(--app-spacing-xs);
+  --spacing-app-sm: var(--app-spacing-sm);
+  --spacing-app-md: var(--app-spacing-md);
+  --spacing-app-lg: var(--app-spacing-lg);
+  --spacing-chat-gap: var(--app-spacing-chat-gap);
 
   /* Border Radius */
   --radius-sm: var(--radius-sm);
@@ -445,12 +511,12 @@ a:hover {
 
 /* Chat Content Inset */
 .chat-content {
-  padding: var(--spacing-md);
+  padding: var(--app-spacing-md);
 }
 
 @media (max-width: 767px) {
   .chat-content {
-    padding: var(--spacing-chat-gap);
+    padding: var(--app-spacing-chat-gap);
   }
 }
 
@@ -458,11 +524,11 @@ a:hover {
 .message-cluster {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: var(--app-spacing-xs);
 }
 
 .message-cluster + .message-cluster {
-  margin-top: var(--spacing-chat-gap);
+  margin-top: var(--app-spacing-chat-gap);
 }
 
 /* ── Component Styles ─ */

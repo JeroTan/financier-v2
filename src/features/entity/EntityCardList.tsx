@@ -20,7 +20,7 @@ type Transaction = {
 };
 
 type EntityCardListProps = {
-  token: string;
+  token?: string;
 };
 
 export function EntityCardList({ token }: EntityCardListProps) {
@@ -47,12 +47,15 @@ export function EntityCardList({ token }: EntityCardListProps) {
     params.set("limit", String(limit));
 
     try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
       const [txRes, catRes] = await Promise.all([
         fetch(`/api/transactions?${params}`, {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "same-origin",
+          headers,
         }),
         fetch("/api/categories", {
-          headers: { Authorization: `Bearer ${token}` },
+          credentials: "same-origin",
+          headers,
         }),
       ]);
 

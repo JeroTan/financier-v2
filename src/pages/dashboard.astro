@@ -2,12 +2,10 @@
 import AppLayout from "@/layouts/AppLayout.astro";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DashboardLayout } from "@/components/chat/DashboardLayout";
-
-const token = Astro.cookies.get("refresh_token")?.value ?? "";
 ---
 
 <AppLayout title="Dashboard" currentPage="/dashboard">
   <ErrorBoundary>
-    <DashboardLayout client:load token={token} />
+    <DashboardLayout client:load />
   </ErrorBoundary>
 </AppLayout>

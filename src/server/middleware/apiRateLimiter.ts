@@ -1,3 +1,4 @@
+import { getRuntimeEnv } from "@/server/context/bindings";
 import type { RateLimitConfig } from "./rateLimiter";
 import { checkRateLimit, getRateLimitKey } from "./rateLimiter";
 
@@ -55,7 +56,7 @@ function getClientIp(request: Request): string {
 
 export async function rateLimiterMiddleware(
   request: Request,
-  env: Record<string, unknown>,
+  env: Record<string, unknown> = getRuntimeEnv(),
 ): Promise<Response | null> {
   const url = new URL(request.url);
   const category = classifyEndpoint(url.pathname, request.method);

@@ -11,7 +11,7 @@ import { CategorySelector } from "./CategorySelector";
 import { ImageUpload } from "./ImageUpload";
 
 type EntryFormProps = {
-  token: string;
+  token?: string;
   categories: string[];
   onAddCategory: (name: string) => Promise<void>;
 };
@@ -61,9 +61,10 @@ export function EntryForm({ token, categories, onAddCategory }: EntryFormProps) 
       try {
         const response = await fetch("/api/transactions", {
           method: "POST",
+          credentials: "same-origin",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             type: data.type,

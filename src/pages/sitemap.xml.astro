@@ -1,5 +1,7 @@
 ---
-const APP_URL = Astro.env.APP_URL ?? "https://financier.app";
+import { getAppUrl } from "@/server/context/bindings";
+
+const APP_URL = getAppUrl();
 const pages = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/login", changefreq: "monthly", priority: "0.5" },

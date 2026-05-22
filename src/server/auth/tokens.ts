@@ -1,4 +1,4 @@
-import { jwtEncrypt, jwtDecrypt, generateRefreshToken, type JwtResult, type JwtConfig, getJwtConfig } from "@/lib/crypto/jwt";
+import { jwtEncrypt, jwtDecrypt, generateRefreshToken, type JwtResult, getJwtConfig } from "@/lib/crypto/jwt";
 
 const ACCESS_TOKEN_TTL = 900;
 const REFRESH_TOKEN_TTL = 604800;
@@ -51,11 +51,15 @@ export function getRefreshTokenExpiry(): number {
   return Math.floor(Date.now() / 1000) + REFRESH_TOKEN_TTL;
 }
 
-export function getRefreshTokenCookie(refreshToken: string): string {
-  const maxAge = REFRESH_TOKEN_TTL;
-  return `refreshToken=${refreshToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${maxAge}`;
+function secureCookiePart(env?: Record<string, unknown>): string {
+  return env?.CLOUDFLARE_ENV === "production" ? "; Secure" : "";
 }
 
-export function getClearRefreshTokenCookie(): string {
-  return `refreshToken=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
+export function getRefreshTokenCookie(refreshToken: string, env?: Record<string, unknown>): string {
+  const maxAge = REFRESH_TOKEN_TTL;
+  return `refreshToken=${refreshToken}; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Strict; Max-Age=${maxAge}`;
+}
+
+export function getClearRefreshTokenCookie(env?: Record<string, unknown>): string {
+  return `refreshToken=; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Strict; Max-Age=0`;
 }

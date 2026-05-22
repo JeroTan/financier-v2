@@ -126,12 +126,14 @@ export async function handleGoogleCallback(
   const authTokens = await createTokens(user.id, user.email, env);
   if (authTokens.error) return authTokens;
 
-  const redirectUrl = `/?auth=success&userId=${user.id}`;
+  await userRepo.updateRefreshToken(user.id, authTokens.data!.refreshToken);
+
+  const redirectUrl = `/dashboard?auth=success`;
 
   return {
     data: {
       redirectUrl,
-      setCookie: getRefreshTokenCookie(authTokens.data!.refreshToken),
+      setCookie: getRefreshTokenCookie(authTokens.data!.refreshToken, env),
     },
     error: null,
   };

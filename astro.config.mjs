@@ -9,7 +9,9 @@ const serverOnlyOptimizeExcludes = ["drizzle-orm", "drizzle-orm/d1"];
 // https://astro.build/config
 export default defineConfig({
   output: "server",
-  adapter: cloudflare(),
+  adapter: cloudflare({
+    imageService: "passthrough",
+  }),
   integrations: [react()],
   vite: {
     optimizeDeps: {

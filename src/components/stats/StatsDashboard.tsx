@@ -7,7 +7,7 @@ import { GoalCreationForm } from "@/components/stats/GoalCreationForm";
 import { useStats } from "@/features/stats/useStats";
 
 type StatsDashboardProps = {
-  token: string;
+  token?: string;
 };
 
 type Goal = {

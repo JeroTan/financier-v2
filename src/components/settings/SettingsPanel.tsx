@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 
 type SettingsPanelProps = {
-  token: string;
+  token?: string;
 };
 
 export default function SettingsPanel({ token }: SettingsPanelProps) {
@@ -14,7 +14,8 @@ export default function SettingsPanel({ token }: SettingsPanelProps) {
 
   useEffect(() => {
     fetch("/api/settings", {
-      headers: { Authorization: `Bearer ${token}` },
+      credentials: "same-origin",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
       .then((res) => res.json() as Promise<{ success: boolean; data: { personality?: string; email?: string } }>)
       .then((data) => {
@@ -30,9 +31,10 @@ export default function SettingsPanel({ token }: SettingsPanelProps) {
   const handlePersonalityChange = async (personality: string) => {
     const response = await fetch("/api/settings/preferences", {
       method: "PUT",
+      credentials: "same-origin",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ personality }),
     });

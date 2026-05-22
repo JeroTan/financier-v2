@@ -5,6 +5,7 @@ import { UserRepository } from "@/server/repositories/userRepository";
 import { TransactionRepository } from "@/server/repositories/transactionRepository";
 import { CategoryRepository } from "@/server/repositories/categoryRepository";
 import { authMiddleware } from "@/server/middleware/auth";
+import { getRuntimeEnv } from "@/server/context/bindings";
 
 const chatRequestSchema = z.object({
   messageTrail: z.array(z.object({
@@ -13,6 +14,14 @@ const chatRequestSchema = z.object({
   })).default([]),
   newMessage: z.string().min(1).max(4000),
   image: z.string().base64().optional(),
+  confirmationData: z.object({
+    type: z.enum(["income", "expense"]),
+    amount: z.number().positive(),
+    currency: z.string().default("PHP"),
+    category: z.string().optional(),
+    description: z.string().optional(),
+    date: z.string(),
+  }).optional(),
 });
 
 export const chatRouteDetail = routeDetail("POST", "/api/chat", {
@@ -34,24 +43,12 @@ export const chatRouteDetail = routeDetail("POST", "/api/chat", {
   ],
 });
 
-type AppLocals = {
-  db?: D1Database;
-  ai?: Ai;
-  userId?: string;
-  userEmail?: string;
-};
-
-function getLocals(request: Request): AppLocals {
-  return ((request as any).locals ?? {}) as AppLocals;
-}
-
 export const POST = async (context: any) => {
   const request = context.request;
-  const locals = getLocals(request);
 
   // Auth check
-  const env = (context as any).env as Record<string, unknown> | undefined;
-  const auth = await authMiddleware(request, env ?? {});
+  const env = getRuntimeEnv();
+  const auth = await authMiddleware(request, env);
   if (!auth.authenticated) {
     return new Response(
       JSON.stringify({ error: { code: "UNAUTHORIZED", message: auth.error } }),
@@ -79,11 +76,11 @@ export const POST = async (context: any) => {
     );
   }
 
-  const { messageTrail, newMessage, image } = parseResult.data;
+  const { messageTrail, newMessage, image, confirmationData } = parseResult.data;
 
   // Check for AI binding
-  const ai = locals.ai;
-  const db = locals.db;
+  const ai = env.AI;
+  const db = env.DB;
   if (!ai) {
     return new Response(
       JSON.stringify({ error: { code: "AI_SERVICE_ERROR", message: "AI service not configured" } }),
@@ -112,7 +109,7 @@ export const POST = async (context: any) => {
       categoryRepo,
       userRepo,
     },
-    { messageTrail, newMessage, image },
+    { messageTrail, newMessage, image, confirmationData },
   );
 
   return new Response(stream, {

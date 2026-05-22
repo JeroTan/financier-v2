@@ -1,7 +1,7 @@
 import { chatService, type ChatServiceDeps } from "@/server/services/chatService";
 import { createToolDefinitions, type ToolDefinition } from "@/server/ai/tooling/tools";
-import { executeToolLoop, type ToolExecutorResult } from "@/server/ai/tooling/toolExecutor";
-import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type SSERequest } from "@/server/ai/llm/types";
+import { executeToolLoop } from "@/server/ai/tooling/toolExecutor";
+import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type ConfirmationData, type SSERequest } from "@/server/ai/llm/types";
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
 import type { CategoryRepository } from "@/server/repositories/categoryRepository";
 import type { UserRepository } from "@/server/repositories/userRepository";
@@ -19,7 +19,7 @@ export async function aiChatController(
   request: SSERequest,
 ): Promise<ReadableStream> {
   const encoder = new TextEncoder();
-  const { messageTrail, newMessage, image } = request;
+  const { messageTrail, newMessage, image, confirmationData } = request;
 
   const tools = createToolDefinitions(deps.transactionRepo, deps.categoryRepo, deps.userId);
 
@@ -58,6 +58,17 @@ export async function aiChatController(
   return new ReadableStream({
     async start(controller) {
       try {
+        if (confirmationData) {
+          const saved = await saveConfirmedTransaction(deps, confirmationData);
+          const message = "Saved. Transaction added to your ledger.";
+          controller.enqueue(encoder.encode(formatMessageEvent(message)));
+          controller.enqueue(encoder.encode(formatDoneEvent("saved", {
+            transactionId: saved.id,
+          })));
+          controller.close();
+          return;
+        }
+
         // Initial AI call
         const initialResult = await chatService(chatDeps, messageTrail, newMessage, image);
 
@@ -122,4 +133,28 @@ export async function aiChatController(
       }
     },
   });
+}
+
+async function saveConfirmedTransaction(
+  deps: AiChatControllerDeps,
+  data: ConfirmationData,
+): Promise<{ id: string }> {
+  const categories = await deps.categoryRepo.seedDefaultCategories(deps.userId);
+  const categoryName = data.category?.trim().toLowerCase();
+  const matchedCategory = categoryName
+    ? categories.find((category) => category.name.toLowerCase() === categoryName)
+    : undefined;
+
+  const transaction = await deps.transactionRepo.createTransaction({
+    id: crypto.randomUUID(),
+    userId: deps.userId,
+    type: data.type,
+    amount: data.amount,
+    currency: data.currency ?? "PHP",
+    categoryId: matchedCategory?.id ?? null,
+    description: data.description ?? null,
+    date: data.date,
+  });
+
+  return { id: transaction.id };
 }

@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 
 type SSEEvent = {
   type: "message" | "done" | "error";
-  data?: string;
+  data?: unknown;
 };
 
 type UseChatSSEReturn = {
@@ -10,7 +10,7 @@ type UseChatSSEReturn = {
   streamingText: string;
   doneData: Record<string, unknown> | null;
   error: string | null;
-  startStream: (body: Record<string, unknown>) => void;
+  startStream: (body: Record<string, unknown>) => Promise<void>;
   abort: () => void;
 };
 
@@ -21,15 +21,26 @@ export function useChatSSE(): UseChatSSEReturn {
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const parseSSELine = useCallback((line: string): SSEEvent | null => {
-    if (line.startsWith("event: ")) {
-      const type = line.slice(7) as SSEEvent["type"];
-      return { type };
+  const parseSSEBlock = useCallback((block: string): SSEEvent | null => {
+    let type: SSEEvent["type"] = "message";
+    const dataLines: string[] = [];
+
+    for (const line of block.split(/\r?\n/)) {
+      if (line.startsWith("event:")) {
+        type = line.slice(6).trim() as SSEEvent["type"];
+      } else if (line.startsWith("data:")) {
+        dataLines.push(line.slice(5).trimStart());
+      }
     }
-    if (line.startsWith("data: ")) {
-      return { type: "message", data: line.slice(6) };
+
+    if (dataLines.length === 0) return null;
+
+    const rawData = dataLines.join("\n");
+    try {
+      return { type, data: JSON.parse(rawData) };
+    } catch {
+      return { type, data: rawData };
     }
-    return null;
   }, []);
 
   const startStream = useCallback(async (body: Record<string, unknown>) => {
@@ -42,6 +53,7 @@ export function useChatSSE(): UseChatSSEReturn {
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
+        credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
         signal: abortRef.current.signal,
@@ -62,39 +74,28 @@ export function useChatSSE(): UseChatSSEReturn {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
+        const blocks = buffer.split(/\r?\n\r?\n/);
+        buffer = blocks.pop() ?? "";
 
-        let currentEvent: SSEEvent | null = null;
+        for (const block of blocks) {
+          const parsed = parseSSEBlock(block);
+          if (!parsed) continue;
 
-        for (const line of lines) {
-          const parsed = parseSSELine(line);
-          if (parsed) {
-            if (parsed.type === "message" && parsed.data) {
-              setStreamingText((prev) => prev + parsed.data);
-            } else if (parsed.type === "done") {
-              currentEvent = { type: "done" };
-            } else if (parsed.type === "error") {
-              currentEvent = { type: "error" };
-            }
+          if (parsed.type === "message") {
+            const payload = parsed.data as { content?: string } | string;
+            setStreamingText((prev) => prev + (typeof payload === "string" ? payload : payload.content ?? ""));
           }
-        }
 
-        if (currentEvent?.type === "done") {
-          try {
-            const dataMatch = buffer.match(/data:\s*(.+)/);
-            if (dataMatch) {
-              setDoneData(JSON.parse(dataMatch[1]));
-            }
-          } catch {
-            // Ignore parse errors
+          if (parsed.type === "done") {
+            setDoneData((parsed.data ?? {}) as Record<string, unknown>);
+            return;
           }
-          break;
-        }
 
-        if (currentEvent?.type === "error") {
-          setError("AI response error");
-          break;
+          if (parsed.type === "error") {
+            const payload = parsed.data as { message?: string } | string;
+            setError(typeof payload === "string" ? payload : payload.message ?? "AI response error");
+            return;
+          }
         }
       }
     } catch (err: unknown) {
@@ -104,7 +105,7 @@ export function useChatSSE(): UseChatSSEReturn {
       setIsConnected(false);
       abortRef.current = null;
     }
-  }, [parseSSELine]);
+  }, [parseSSEBlock]);
 
   const abort = useCallback(() => {
     abortRef.current?.abort();
