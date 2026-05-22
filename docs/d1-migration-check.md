@@ -15,4 +15,4 @@ Before applying remote migrations, verify Wrangler bindings point to real resour
    - `npm run db:migrate-development`
    - `npm run db:migrate-production`
 
-Note: `0003_add_personality_column.sql` was removed because `personality` already exists in `0000_fluffy_blackheart.sql` and `0003` was not present in Drizzle journal metadata.
+Note: Some local or remote D1 databases may predate the current `users` columns. `UserRepository` repairs missing `password_salt`, `refresh_token`, `personality`, and `theme` columns before auth queries so stale databases do not block login or signup.

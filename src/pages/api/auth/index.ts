@@ -235,12 +235,12 @@ async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Resp
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
-  if (error) return Response.redirect(`${url.origin}/?auth=error&message=${encodeURIComponent(error)}`, 302);
-  if (!code) return Response.redirect(`${url.origin}/?auth=error&message=missing_code`, 302);
+  if (error) return Response.redirect(`${url.origin}/login?auth=error&message=${encodeURIComponent(error)}`, 302);
+  if (!code) return Response.redirect(`${url.origin}/login?auth=error&message=missing_code`, 302);
 
   const env = getRuntimeEnv();
   const db = env.DB;
-  if (!db) return Response.redirect(`${url.origin}/?auth=error&message=server_error`, 302);
+  if (!db) return Response.redirect(`${url.origin}/login?auth=error&message=server_error`, 302);
 
   const userRepo = new UserRepository(db);
   const result = await handleGoogleCallback(
@@ -254,7 +254,7 @@ async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Resp
     code,
   );
 
-  if (result.error) return Response.redirect(`${url.origin}/?auth=error&message=${encodeURIComponent(result.error)}`, 302);
+  if (result.error) return Response.redirect(`${url.origin}/login?auth=error&message=${encodeURIComponent(result.error)}`, 302);
 
   const redirectUrl = new URL(result.data!.redirectUrl, url.origin);
   const response = Response.redirect(redirectUrl.toString(), 302);

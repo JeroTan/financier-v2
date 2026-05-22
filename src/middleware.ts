@@ -3,7 +3,7 @@ import { getRuntimeEnv } from "@/server/context/bindings";
 import { rateLimiterMiddleware } from "@/server/middleware/apiRateLimiter";
 import { UserRepository } from "@/server/repositories/userRepository";
 
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/api/auth", "/api/openapi.json", "/api/docs"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/signup", "/api/auth", "/api/openapi.json", "/api/docs"];
 const PUBLIC_PREFIXES = ["/api/auth/"];
 
 function isPublicRoute(pathname: string): boolean {

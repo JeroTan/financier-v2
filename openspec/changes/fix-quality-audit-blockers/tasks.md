@@ -40,6 +40,7 @@
 - [x] 5.3 Ensure users table migration includes `password_salt`, `refresh_token`, `personality`, and `theme`.
 - [x] 5.4 Add safe verification notes or script for checking local/remote D1 schema before migration apply.
 - [x] 5.5 Run migration generation/check workflow and confirm no unexpected schema drift.
+- [x] 5.6 Document and implement repository-level repair for stale D1 `users` tables missing auth/settings columns.
 
 ## 6. Runtime Configuration
 

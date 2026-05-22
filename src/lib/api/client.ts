@@ -32,9 +32,37 @@ export class ApiErrorClass extends Error {
 }
 
 let accessToken: string | null = null;
+const ACCESS_TOKEN_STORAGE_KEY = "financier:accessToken";
+
+function getBrowserSessionStorage(): Storage | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
 
 export function setApiAccessToken(token: string | null): void {
   accessToken = token;
+
+  const storage = getBrowserSessionStorage();
+  if (!storage) return;
+
+  if (token) {
+    storage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+  } else {
+    storage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+  }
+}
+
+export function getApiAccessToken(): string | null {
+  if (accessToken) return accessToken;
+
+  const storage = getBrowserSessionStorage();
+  accessToken = storage?.getItem(ACCESS_TOKEN_STORAGE_KEY) ?? null;
+  return accessToken;
 }
 
 async function parseResponse<T, D>(response: Response): Promise<ApiResult<T, D>> {
@@ -89,8 +117,9 @@ async function request<T, D = unknown>(
     ...options.headers,
   };
 
-  if (accessToken) {
-    headers["Authorization"] = `Bearer ${accessToken}`;
+  const token = getApiAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   const init: RequestInit = {

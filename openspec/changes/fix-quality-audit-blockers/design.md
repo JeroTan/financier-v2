@@ -70,6 +70,14 @@ Rationale: D1 remote databases may already have some migrations applied. Duplica
 
 Alternative considered: rebuild migration history from scratch. Rejected because it risks remote database drift.
 
+### Repair Stale Users Columns Before Auth Queries
+
+Before user repository reads or writes, inspect `PRAGMA table_info(users)` and add missing auth/settings columns: `password_salt`, `refresh_token`, `personality`, and `theme`. Cache successful repair per D1 binding and allow retry after repair failure.
+
+Rationale: some local or remote D1 databases were created before current `users` columns existed. `CREATE TABLE IF NOT EXISTS` will not add columns to existing tables, so register/login/Google auth can fail even when source schema looks correct.
+
+Alternative considered: rely only on manual D1 reset or migration re-apply. Rejected because it breaks existing user data and does not help stale deployed databases during auth.
+
 ### Quality Gates Become Release Criteria
 
 Add a small validation matrix: type-check, tests, build, route smoke checks, auth smoke checks, and viewport/layout probes for key pages.

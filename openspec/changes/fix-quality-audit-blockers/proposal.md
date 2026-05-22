@@ -11,6 +11,7 @@ Quality audit found blockers that prevent Financier from building, testing, auth
 - Add project quality gates for `npm run check`, `npm test -- --run`, development build, route smoke tests, and responsive visual checks.
 - Correct Vitest alias configuration so tests run.
 - Correct D1/Drizzle schema and migration metadata so fresh and existing databases migrate without duplicate-column failures.
+- Add a D1 users-table repair guard so auth survives stale local or remote databases missing current user columns.
 - Normalize Cloudflare runtime configuration, Wrangler bindings, env examples, and deploy names.
 - Fix chat SSE parsing and confirmation flow so streamed `message`, `done`, and `error` events drive frontend state reliably.
 
@@ -33,7 +34,7 @@ Quality audit found blockers that prevent Financier from building, testing, auth
 - `base-component-styles`: shadcn-derived components must resolve all referenced token classes.
 - `app-layout`: desktop and mobile app shell widths, sidebar, and content areas must remain responsive.
 - `drizzle-orm-setup`: migration files and journal metadata must be ordered, idempotent where needed, and apply cleanly.
-- `d1-schema`: schema specs must include auth/session columns used by repositories.
+- `d1-schema`: schema specs must include auth/session columns used by repositories and guard stale databases before auth queries.
 - `chat-sse-consumer`: frontend SSE parser must read event/data pairs and close on done/error.
 - `chat-confirmation-ui`: confirmation request/response flow must preserve pending transaction data and save only after confirmation.
 
