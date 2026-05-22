@@ -62,3 +62,14 @@ Login and register auth controls SHALL use shared styling and accessible contras
 #### Scenario: OAuth buttons match
 - **WHEN** login and register pages are rendered
 - **THEN** their Google OAuth buttons use the same layout, icon treatment, disabled state, and contrast behavior
+
+### Requirement: OAuth redirects preserve mutable headers
+Auth redirect responses SHALL allow middleware diagnostics headers and auth cookies to be attached without runtime header mutation failures.
+
+#### Scenario: Google auth redirect enters provider flow
+- **WHEN** a user starts Google OAuth from login or register
+- **THEN** `/api/auth/google` returns a redirect response that middleware can tag with `X-Request-ID`
+
+#### Scenario: Google callback sets session cookie
+- **WHEN** Google OAuth callback succeeds
+- **THEN** the callback redirects to the app with its refresh cookie attached and no `Can't modify immutable headers.` runtime error

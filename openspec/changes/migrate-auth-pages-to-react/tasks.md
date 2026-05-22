@@ -24,6 +24,7 @@
 - [x] 4.1 Start Google OAuth from React using top-level navigation to `/api/auth/google`.
 - [x] 4.2 Update callback failure redirects to land on an auth page that displays the error.
 - [x] 4.3 Verify Google button behavior is consistent on login and register.
+- [x] 4.4 Return mutable redirect responses so OAuth redirects can carry cookies and middleware headers.
 
 ## 5. Validation
 

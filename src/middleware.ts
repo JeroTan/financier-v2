@@ -15,6 +15,17 @@ function isApiRoute(pathname: string): boolean {
   return pathname.startsWith("/api/");
 }
 
+function withRequestId(response: Response, requestId: string): Response {
+  const headers = new Headers(response.headers);
+  headers.set("X-Request-ID", requestId);
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 export const onRequest = defineMiddleware(async (context, next) => {
   const env = getRuntimeEnv();
   const request = context.request;
@@ -28,23 +39,20 @@ export const onRequest = defineMiddleware(async (context, next) => {
   if (isApiRoute(pathname)) {
     const rateLimitResponse = await rateLimiterMiddleware(request, env);
     if (rateLimitResponse) {
-      rateLimitResponse.headers.set("X-Request-ID", requestId);
-      return rateLimitResponse;
+      return withRequestId(rateLimitResponse, requestId);
     }
   }
 
   // Skip auth for public routes
   if (isPublicRoute(pathname)) {
     const response = await next();
-    response.headers.set("X-Request-ID", requestId);
-    return response;
+    return withRequestId(response, requestId);
   }
 
   // API routes validate auth inside each endpoint so Bearer tokens and cookie sessions both work.
   if (isApiRoute(pathname)) {
     const response = await next();
-    response.headers.set("X-Request-ID", requestId);
-    return response;
+    return withRequestId(response, requestId);
   }
 
   // Check for refresh token session cookie on protected pages.
@@ -52,30 +60,29 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const refreshTokenMatch = cookie.match(/refreshToken=([^;]+)/);
 
   if (!refreshTokenMatch) {
-    return Response.redirect(new URL("/login", request.url), 302);
+    return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
   }
 
   const db = env.DB;
   if (!db) {
-    return Response.redirect(new URL("/login", request.url), 302);
+    return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
   }
 
   const tokenRevocation = env.TOKEN_REVOCATION;
   const refreshToken = decodeURIComponent(refreshTokenMatch[1]);
   if (tokenRevocation && await tokenRevocation.get(refreshToken)) {
-    return Response.redirect(new URL("/login", request.url), 302);
+    return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
   }
 
   const userRepo = new UserRepository(db);
   const user = await userRepo.findByRefreshToken(refreshToken);
   if (!user) {
-    return Response.redirect(new URL("/login", request.url), 302);
+    return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
   }
 
   context.locals.userId = user.id;
   context.locals.userEmail = user.email;
 
   const response = await next();
-  response.headers.set("X-Request-ID", requestId);
-  return response;
+  return withRequestId(response, requestId);
 });

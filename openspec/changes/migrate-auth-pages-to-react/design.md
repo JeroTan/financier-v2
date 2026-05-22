@@ -62,6 +62,12 @@ Rationale: OAuth is a browser redirect flow, not a JSON API call. Making it a fe
 
 Alternative considered: fetch `/api/auth/google` and follow JSON. Rejected because current endpoint correctly returns a redirect.
 
+### Clone Responses Before Middleware Headers
+
+Middleware adds `X-Request-ID` by returning a cloned `Response` with copied headers instead of mutating `next()` output directly. OAuth endpoints also create redirect responses with explicit `Location` headers instead of mutating `Response.redirect()` output when cookies must be attached.
+
+Rationale: Worker and Astro redirect responses can expose immutable headers. Cloning keeps diagnostics headers and auth cookies without throwing `Can't modify immutable headers.`
+
 ## Risks / Trade-offs
 
 - React auth UI can fail to hydrate -> keep semantic form markup, labels, and disabled states; run `npm run check`.

@@ -22,6 +22,16 @@ function errorResponse(code: string, message: string, status: number, headers: R
   return jsonResponse({ error: { code, message } }, status, headers);
 }
 
+function redirectResponse(location: string | URL, headers: Record<string, string> = {}): Response {
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: location.toString(),
+      ...headers,
+    },
+  });
+}
+
 async function readCredentials(request: Request): Promise<{ email: string; password: string } | null> {
   const contentType = request.headers.get("Content-Type") ?? "";
 
@@ -226,7 +236,7 @@ async function handleGoogleRedirect(): Promise<Response> {
     clientSecret: env.GOOGLE_CLIENT_SECRET as string,
     redirectUri: `${appUrl}/api/auth/google/callback`,
   });
-  return Response.redirect(authUrl, 302);
+  return redirectResponse(authUrl);
 }
 
 async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Response> {
@@ -235,12 +245,12 @@ async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Resp
   const code = url.searchParams.get("code");
   const error = url.searchParams.get("error");
 
-  if (error) return Response.redirect(`${url.origin}/login?auth=error&message=${encodeURIComponent(error)}`, 302);
-  if (!code) return Response.redirect(`${url.origin}/login?auth=error&message=missing_code`, 302);
+  if (error) return redirectResponse(`${url.origin}/login?auth=error&message=${encodeURIComponent(error)}`);
+  if (!code) return redirectResponse(`${url.origin}/login?auth=error&message=missing_code`);
 
   const env = getRuntimeEnv();
   const db = env.DB;
-  if (!db) return Response.redirect(`${url.origin}/login?auth=error&message=server_error`, 302);
+  if (!db) return redirectResponse(`${url.origin}/login?auth=error&message=server_error`);
 
   const userRepo = new UserRepository(db);
   const result = await handleGoogleCallback(
@@ -254,10 +264,11 @@ async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Resp
     code,
   );
 
-  if (result.error) return Response.redirect(`${url.origin}/login?auth=error&message=${encodeURIComponent(result.error)}`, 302);
+  if (result.error) return redirectResponse(`${url.origin}/login?auth=error&message=${encodeURIComponent(result.error)}`);
 
   const redirectUrl = new URL(result.data!.redirectUrl, url.origin);
-  const response = Response.redirect(redirectUrl.toString(), 302);
-  if (result.data!.setCookie) response.headers.set("Set-Cookie", result.data!.setCookie);
-  return response;
+  return redirectResponse(
+    redirectUrl,
+    result.data!.setCookie ? { "Set-Cookie": result.data!.setCookie } : {},
+  );
 }
