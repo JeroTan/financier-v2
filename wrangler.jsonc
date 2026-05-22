@@ -42,21 +42,17 @@
         },
       ],
       "kv_namespaces": [
-        // Replace placeholder IDs before remote migrations/deploy:
-        // wrangler kv namespace create TOKEN_REVOCATION --env development
-        // wrangler kv namespace create RATE_LIMITER --env development
-        // wrangler kv namespace create SESSION --env development
         {
           "binding": "TOKEN_REVOCATION",
-          "id": "replace-with-dev-token-revocation-kv-id",
+          "id": "2e4f63f32a184f25b07331cb5d6f5fa5",
         },
         {
           "binding": "RATE_LIMITER",
-          "id": "replace-with-dev-rate-limiter-kv-id",
+          "id": "d51dffe651254d9881a57848cce34a4a",
         },
         {
           "binding": "SESSION",
-          "id": "replace-with-dev-session-kv-id",
+          "id": "70fd3fae5f4e4764847ccaa3843b5e3b",
         },
       ],
     },
@@ -86,21 +82,17 @@
         },
       ],
       "kv_namespaces": [
-        // Replace placeholder IDs before production deploy:
-        // wrangler kv namespace create TOKEN_REVOCATION --env production
-        // wrangler kv namespace create RATE_LIMITER --env production
-        // wrangler kv namespace create SESSION --env production
         {
           "binding": "TOKEN_REVOCATION",
-          "id": "replace-with-prod-token-revocation-kv-id",
+          "id": "2e4f63f32a184f25b07331cb5d6f5fa5",
         },
         {
           "binding": "RATE_LIMITER",
-          "id": "replace-with-prod-rate-limiter-kv-id",
+          "id": "d51dffe651254d9881a57848cce34a4a",
         },
         {
           "binding": "SESSION",
-          "id": "replace-with-prod-session-kv-id",
+          "id": "70fd3fae5f4e4764847ccaa3843b5e3b",
         },
       ],
     },
