@@ -56,7 +56,7 @@ Alternative considered: keep form POST fallback as the primary path. Rejected be
 
 ### Treat Google As Navigation, Not Fetch
 
-Google OAuth starts with `window.location.assign("/api/auth/google")`. The button enters loading state before navigation. Callback errors are read from `auth=error` and `message` query params on public/auth pages and shown in the React auth UI.
+Google OAuth starts with `window.location.assign("/api/auth/google")`. The server builds the OAuth `redirect_uri` from `new URL(request.url).origin`, so local dev, preview, and deployed custom domains use the same origin the browser is actually visiting. Callback errors are read from `auth=error` and `message` query params on public/auth pages and shown in the React auth UI.
 
 Rationale: OAuth is a browser redirect flow, not a JSON API call. Making it a fetch would fail due provider redirects and CORS.
 

@@ -5,7 +5,7 @@ import { getGoogleAuthUrl, handleGoogleCallback } from "@/server/auth/google";
 import { authMiddleware } from "@/server/middleware/auth";
 import { checkRateLimit, getRateLimitKey } from "@/server/middleware/rateLimiter";
 import { getClearRefreshTokenCookie } from "@/server/auth/tokens";
-import { getAppUrl, getRuntimeEnv } from "@/server/context/bindings";
+import { getRuntimeEnv } from "@/server/context/bindings";
 
 type AstroApiContext = {
   request: Request;
@@ -30,6 +30,11 @@ function redirectResponse(location: string | URL, headers: Record<string, string
       ...headers,
     },
   });
+}
+
+function getGoogleRedirectUri(request: Request): string {
+  const origin = new URL(request.url).origin;
+  return `${origin}/api/auth/google/callback`;
 }
 
 async function readCredentials(request: Request): Promise<{ email: string; password: string } | null> {
@@ -92,7 +97,7 @@ export const GET = async (context: any) => {
   const url = new URL(context.request.url);
   const path = url.pathname;
 
-  if (path === "/api/auth/google") return handleGoogleRedirect();
+  if (path === "/api/auth/google") return handleGoogleRedirect(context);
   if (path === "/api/auth/google/callback") return handleGoogleCallbackRoute(context);
 
   return errorResponse("NOT_FOUND", "Route not found", 404);
@@ -228,13 +233,12 @@ async function handleRefresh(context: AstroApiContext): Promise<Response> {
   return jsonResponse(result.data!.data, 200, headers);
 }
 
-async function handleGoogleRedirect(): Promise<Response> {
+async function handleGoogleRedirect(context: AstroApiContext): Promise<Response> {
   const env = getRuntimeEnv();
-  const appUrl = getAppUrl(env);
   const authUrl = getGoogleAuthUrl({
     clientId: env.GOOGLE_CLIENT_ID as string,
     clientSecret: env.GOOGLE_CLIENT_SECRET as string,
-    redirectUri: `${appUrl}/api/auth/google/callback`,
+    redirectUri: getGoogleRedirectUri(context.request),
   });
   return redirectResponse(authUrl);
 }
@@ -257,7 +261,7 @@ async function handleGoogleCallbackRoute(context: AstroApiContext): Promise<Resp
     {
       clientId: env.GOOGLE_CLIENT_ID as string,
       clientSecret: env.GOOGLE_CLIENT_SECRET as string,
-      redirectUri: `${getAppUrl(env)}/api/auth/google/callback`,
+      redirectUri: getGoogleRedirectUri(request),
     },
     userRepo,
     env,

@@ -66,6 +66,10 @@ Login and register auth controls SHALL use shared styling and accessible contras
 ### Requirement: OAuth redirects preserve mutable headers
 Auth redirect responses SHALL allow middleware diagnostics headers and auth cookies to be attached without runtime header mutation failures.
 
+#### Scenario: Google redirect URI uses request origin
+- **WHEN** a user starts Google OAuth from a local, preview, or deployed origin
+- **THEN** `/api/auth/google` sends `redirect_uri` as that request origin plus `/api/auth/google/callback`
+
 #### Scenario: Google auth redirect enters provider flow
 - **WHEN** a user starts Google OAuth from login or register
 - **THEN** `/api/auth/google` returns a redirect response that middleware can tag with `X-Request-ID`
