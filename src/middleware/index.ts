@@ -31,6 +31,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const request = context.request;
   const pathname = new URL(request.url).pathname;
 
+
   // Generate request ID
   const requestId = crypto.randomUUID();
   context.locals.requestId = requestId;
