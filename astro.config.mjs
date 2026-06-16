@@ -12,6 +12,10 @@ export default defineConfig({
   devToolbar: {
     enabled: false,
   },
+  server: {
+    port: 4333,
+    host: true,
+  },
   adapter: cloudflare(),
   integrations: [react()],
   vite: {
