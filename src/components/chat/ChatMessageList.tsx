@@ -25,7 +25,7 @@ export function ChatMessageList({ messages, streamingText, confirmation, onConfi
   }, [messages, streamingText, confirmation]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+    <div className="chat-content min-h-0 flex-1 overflow-y-auto space-y-chat-gap bg-surface-container-lowest">
       {messages.map((msg) => (
         <ChatMessage
           key={msg.id}

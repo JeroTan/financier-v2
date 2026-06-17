@@ -57,9 +57,9 @@ function secureCookiePart(env?: Record<string, unknown>): string {
 
 export function getRefreshTokenCookie(refreshToken: string, env?: Record<string, unknown>): string {
   const maxAge = REFRESH_TOKEN_TTL;
-  return `refreshToken=${refreshToken}; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Strict; Max-Age=${maxAge}`;
+  return `refreshToken=${refreshToken}; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Lax; Max-Age=${maxAge}`;
 }
 
 export function getClearRefreshTokenCookie(env?: Record<string, unknown>): string {
-  return `refreshToken=; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Strict; Max-Age=0`;
+  return `refreshToken=; Path=/; HttpOnly${secureCookiePart(env)}; SameSite=Lax; Max-Age=0`;
 }

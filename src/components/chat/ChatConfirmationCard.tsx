@@ -18,6 +18,8 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel }: ChatConfirma
   const [date, setDate] = useState(String(data.date ?? new Date().toISOString().split("T")[0]));
   const [description, setDescription] = useState(String(data.description ?? ""));
 
+  const accentClass = type === "income" ? "income" : "expense";
+
   const handleConfirm = () => {
     onConfirm({
       amount: parseFloat(amount) || 0,
@@ -31,7 +33,9 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel }: ChatConfirma
   return (
     <div className="flex gap-3">
       <div className="w-8 flex-shrink-0" />
-      <Card className="w-full max-w-md border-gold-500/50">
+      <Card
+        className={`financial-card w-full max-w-md border-0 shadow-card ${accentClass}`}
+      >
         <CardHeader className="pb-2">
           <CardTitle className="text-base">Confirm Transaction</CardTitle>
         </CardHeader>
@@ -68,8 +72,14 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel }: ChatConfirma
           </div>
         </CardContent>
         <CardFooter className="gap-2">
-          <Button variant="outline" onClick={onCancel} className="flex-1">Cancel</Button>
-          <Button onClick={handleConfirm} className="flex-1 bg-gold-500 text-gold-950 hover:bg-gold-600">Confirm</Button>
+          <Button variant="outline" onClick={onCancel} className="flex-1 rounded-full">Cancel</Button>
+          <Button
+            onClick={handleConfirm}
+            className="flex-1 rounded-full bg-primary text-white hover:bg-primary-container hover:text-on-primary-container"
+            style={{ color: "var(--on-primary)" }}
+          >
+            Confirm
+          </Button>
         </CardFooter>
       </Card>
     </div>

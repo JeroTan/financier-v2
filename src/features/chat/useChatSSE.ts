@@ -5,19 +5,38 @@ type SSEEvent = {
   data?: unknown;
 };
 
+type DonePayload = Record<string, unknown> & {
+  streamedText?: string;
+};
+
 type UseChatSSEReturn = {
   isConnected: boolean;
   streamingText: string;
-  doneData: Record<string, unknown> | null;
+  doneData: DonePayload | null;
   error: string | null;
   startStream: (body: Record<string, unknown>) => Promise<void>;
   abort: () => void;
 };
 
+function dataAsObject(data: unknown): Record<string, unknown> {
+  return data && typeof data === "object" && !Array.isArray(data)
+    ? data as Record<string, unknown>
+    : {};
+}
+
+async function readErrorMessage(response: Response): Promise<string> {
+  try {
+    const payload = await response.json() as { error?: { message?: string } };
+    return payload.error?.message ?? `HTTP ${response.status}`;
+  } catch {
+    return `HTTP ${response.status}`;
+  }
+}
+
 export function useChatSSE(): UseChatSSEReturn {
   const [isConnected, setIsConnected] = useState(false);
   const [streamingText, setStreamingText] = useState("");
-  const [doneData, setDoneData] = useState<Record<string, unknown> | null>(null);
+  const [doneData, setDoneData] = useState<DonePayload | null>(null);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -44,11 +63,13 @@ export function useChatSSE(): UseChatSSEReturn {
   }, []);
 
   const startStream = useCallback(async (body: Record<string, unknown>) => {
+    abortRef.current?.abort();
     abortRef.current = new AbortController();
     setIsConnected(true);
     setStreamingText("");
     setDoneData(null);
     setError(null);
+    let accumulatedText = "";
 
     try {
       const response = await fetch("/api/chat", {
@@ -60,7 +81,7 @@ export function useChatSSE(): UseChatSSEReturn {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+        throw new Error(await readErrorMessage(response));
       }
 
       const reader = response.body?.getReader();
@@ -83,11 +104,16 @@ export function useChatSSE(): UseChatSSEReturn {
 
           if (parsed.type === "message") {
             const payload = parsed.data as { content?: string } | string;
-            setStreamingText((prev) => prev + (typeof payload === "string" ? payload : payload.content ?? ""));
+            const chunk = typeof payload === "string" ? payload : payload.content ?? "";
+            accumulatedText += chunk;
+            setStreamingText(accumulatedText);
           }
 
           if (parsed.type === "done") {
-            setDoneData((parsed.data ?? {}) as Record<string, unknown>);
+            setDoneData({
+              ...dataAsObject(parsed.data),
+              streamedText: accumulatedText,
+            });
             return;
           }
 

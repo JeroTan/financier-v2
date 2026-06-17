@@ -21,6 +21,8 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
   const [period, setPeriod] = useState<"daily" | "monthly" | "yearly">("monthly");
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [goals, setGoals] = useState<Goal[]>(() => {
+    if (typeof window === "undefined") return [];
+
     try {
       const stored = localStorage.getItem("financier:goals");
       return stored ? JSON.parse(stored) : [];
@@ -32,6 +34,7 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
   const { stats, loading, error, refetch } = useStats(period, date, token);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     localStorage.setItem("financier:goals", JSON.stringify(goals));
   }, [goals]);
 

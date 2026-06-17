@@ -1,13 +1,17 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, type ReactNode } from "react";
 import { ChatMessageList } from "@/components/chat/ChatMessageList";
 import { ChatInput } from "@/components/chat/ChatInput";
 import { useChatStateMachine } from "@/features/chat/useChatStateMachine";
 import { useMessageTrail } from "@/features/chat/useMessageTrail";
 import { useChatSSE } from "@/features/chat/useChatSSE";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 type ChatPanelProps = {
   token?: string;
+  className?: string;
+  headerAction?: ReactNode;
+  onMessageSent?: () => void;
 };
 
 type Message = {
@@ -17,14 +21,17 @@ type Message = {
   timestamp: string;
 };
 
-export function ChatPanel(_props: ChatPanelProps) {
+export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelProps) {
   const { state, transition, setState } = useChatStateMachine();
-  const { trail, addMessage, getTrailForAPI, clearTrail } = useMessageTrail();
+  const { trail, ready: trailReady, addMessage, getTrailForAPI, clearTrail } = useMessageTrail();
   const { streamingText, doneData, error, startStream } = useChatSSE();
   const [messages, setMessages] = useState<Message[]>([]);
   const [confirmationData, setConfirmationData] = useState<Record<string, unknown> | null>(null);
+  const [restoredTrail, setRestoredTrail] = useState(false);
 
   useEffect(() => {
+    if (!trailReady || restoredTrail) return;
+
     const stored = trail
       .filter((m) => m.role === "user" || m.role === "assistant")
       .map((m) => ({
@@ -34,7 +41,8 @@ export function ChatPanel(_props: ChatPanelProps) {
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       }));
     setMessages(stored);
-  }, []);
+    setRestoredTrail(true);
+  }, [trail, trailReady, restoredTrail]);
 
   const handleSend = useCallback(
     async (text: string, image?: string) => {
@@ -48,6 +56,7 @@ export function ChatPanel(_props: ChatPanelProps) {
       };
       setMessages((prev) => [...prev, userMsg]);
       addMessage({ role: "user", content: text || "[Image attached]" });
+      onMessageSent?.();
 
       transition("send");
 
@@ -59,7 +68,7 @@ export function ChatPanel(_props: ChatPanelProps) {
 
       await startStream(body);
     },
-    [addMessage, getTrailForAPI, transition, startStream],
+    [addMessage, getTrailForAPI, onMessageSent, transition, startStream],
   );
 
   useEffect(() => {
@@ -70,7 +79,9 @@ export function ChatPanel(_props: ChatPanelProps) {
 
   useEffect(() => {
     if (doneData) {
-      const aiContent = streamingText;
+      const aiContent = typeof doneData.streamedText === "string"
+        ? doneData.streamedText
+        : streamingText;
       if (aiContent) {
         const aiMsg: Message = {
           id: crypto.randomUUID() as string,
@@ -93,14 +104,14 @@ export function ChatPanel(_props: ChatPanelProps) {
         transition("done");
       }
     }
-  }, [doneData]);
+  }, [addMessage, doneData, setState, streamingText, transition]);
 
   useEffect(() => {
     if (error) {
       toast.error(error);
       transition("error");
     }
-  }, [error]);
+  }, [error, transition]);
 
   const handleConfirm = useCallback(
     async (data: Record<string, unknown>) => {
@@ -135,19 +146,23 @@ export function ChatPanel(_props: ChatPanelProps) {
     clearTrail();
     setMessages([]);
     setConfirmationData(null);
+    setRestoredTrail(true);
     transition("reset");
   }, [clearTrail, transition]);
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between px-4 py-2 border-b">
-        <h2 className="font-semibold">AI Chat</h2>
-        <button
-          onClick={handleNewChat}
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          New Chat
-        </button>
+    <div className={cn("flex h-full min-h-0 flex-col bg-surface-container-lowest", className)}>
+      <div className="flex items-center justify-between border-b border-chat-border px-4 py-3">
+        <h2 className="headline-md text-foreground">FinChat</h2>
+        <div className="flex items-center gap-3">
+          {headerAction}
+          <button
+            onClick={handleNewChat}
+            className="rounded-full border border-outline-variant px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary-fixed hover:text-on-primary-fixed"
+          >
+            New Chat
+          </button>
+        </div>
       </div>
       <ChatMessageList
         messages={messages}

@@ -14,17 +14,17 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
 
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
-      <Avatar className="h-8 w-8 flex-shrink-0">
+      <Avatar className="h-8 w-8 flex-shrink-0 shadow-sm">
         <AvatarFallback className={isUser ? "bg-gold-500 text-gold-950" : "bg-muted"}>
           {isUser ? "U" : "AI"}
         </AvatarFallback>
       </Avatar>
-      <div className={`max-w-[75%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
+      <div className={`max-w-[70%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
         <div
-          className={`rounded-2xl px-4 py-2 ${
+          className={`rounded-xl border px-4 py-3 ${
             isUser
-              ? "bg-gold-500 text-gold-950 rounded-tr-sm"
-              : "bg-muted text-foreground rounded-tl-sm"
+              ? "rounded-tr-sm border-primary-container bg-primary-container text-on-primary-fixed"
+              : "rounded-tl-sm border-chat-border bg-chat-bot-bg text-chat-bot-text"
           }`}
         >
           {isUser ? (
@@ -36,7 +36,7 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
           )}
         </div>
         {timestamp && (
-          <span className="text-xs text-muted-foreground mt-1 px-1">{timestamp}</span>
+          <span className="mt-1 px-1 text-xs text-muted-foreground">{timestamp}</span>
         )}
       </div>
     </div>

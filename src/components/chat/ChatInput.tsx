@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Paperclip, Send, X } from "lucide-react";
+import { Plus, Send, X } from "lucide-react";
 
 type ChatInputProps = {
   onSend: (message: string, image?: string) => void;
@@ -63,7 +63,7 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
   };
 
   return (
-    <div className="border-t bg-background p-3">
+    <div className="border-t border-chat-border bg-surface-container-lowest px-4 py-3">
       {imagePreview && (
         <div className="relative inline-block mb-2">
           <img src={imagePreview} alt="Preview" className="h-16 w-16 rounded-lg object-cover border" />
@@ -76,7 +76,7 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
           </button>
         </div>
       )}
-      <div className="flex gap-2">
+      <div className="flex items-center gap-2 rounded-full border border-chat-border bg-card px-2 py-1 shadow-sm">
         <input
           ref={fileInputRef}
           type="file"
@@ -89,8 +89,9 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
           size="icon"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled}
+          className="h-8 w-8 rounded-full text-outline hover:bg-surface-container"
         >
-          <Paperclip className="h-4 w-4" />
+          <Plus className="h-4 w-4" />
         </Button>
         <Input
           value={text}
@@ -98,9 +99,14 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder={placeholder ?? "Type a message..."}
           disabled={disabled}
-          className="flex-1"
+          className="h-9 flex-1 border-0 bg-transparent px-2 shadow-none focus-visible:ring-0"
         />
-        <Button onClick={handleSend} disabled={disabled || (!text.trim() && !imageBase64)} size="icon">
+        <Button
+          onClick={handleSend}
+          disabled={disabled || (!text.trim() && !imageBase64)}
+          size="icon"
+          className="h-9 w-9 rounded-full bg-primary text-on-primary shadow-float hover:bg-primary-container hover:text-on-primary-container"
+        >
           <Send className="h-4 w-4" />
         </Button>
       </div>

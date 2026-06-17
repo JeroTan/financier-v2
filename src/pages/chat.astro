@@ -1,0 +1,11 @@
+---
+import AppLayout from "@/layouts/AppLayout.astro";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
+---
+
+<AppLayout title="Chat" currentPage="/chat">
+  <ErrorBoundary>
+    <ChatWorkspace client:load />
+  </ErrorBoundary>
+</AppLayout>

@@ -2,6 +2,7 @@ import { chatService, type ChatServiceDeps } from "@/server/services/chatService
 import { createToolDefinitions, type ToolDefinition } from "@/server/ai/tooling/tools";
 import { executeToolLoop } from "@/server/ai/tooling/toolExecutor";
 import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type ConfirmationData, type SSERequest } from "@/server/ai/llm/types";
+import { formatTransactionConfirmation, parseTransactionIntent } from "@/server/ai/transactions/transactionIntent";
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
 import type { CategoryRepository } from "@/server/repositories/categoryRepository";
 import type { UserRepository } from "@/server/repositories/userRepository";
@@ -57,6 +58,13 @@ export async function aiChatController(
 
   return new ReadableStream({
     async start(controller) {
+      const streamText = async (content: string) => {
+        for (let i = 0; i < content.length; i += 20) {
+          controller.enqueue(encoder.encode(formatMessageEvent(content.substring(i, i + 20))));
+          await new Promise((r) => setTimeout(r, 10));
+        }
+      };
+
       try {
         if (confirmationData) {
           const saved = await saveConfirmedTransaction(deps, confirmationData);
@@ -69,16 +77,22 @@ export async function aiChatController(
           return;
         }
 
+        const parsedTransaction = image ? null : parseTransactionIntent(newMessage);
+        if (parsedTransaction) {
+          await streamText(formatTransactionConfirmation(parsedTransaction));
+          controller.enqueue(encoder.encode(formatDoneEvent("confirmation", {
+            parsedData: parsedTransaction,
+          })));
+          controller.close();
+          return;
+        }
+
         // Initial AI call
         const initialResult = await chatService(chatDeps, messageTrail, newMessage, image);
 
         if (!initialResult.success) {
           // Stream fallback content
-          const fallback = initialResult.fallbackContent;
-          for (let i = 0; i < fallback.length; i += 20) {
-            controller.enqueue(encoder.encode(formatMessageEvent(fallback.substring(i, i + 20))));
-            await new Promise((r) => setTimeout(r, 10));
-          }
+          await streamText(initialResult.fallbackContent);
           controller.enqueue(encoder.encode(formatDoneEvent("error", { message: initialResult.error })));
           controller.close();
           return;
@@ -86,10 +100,13 @@ export async function aiChatController(
 
         // Stream the initial response
         const content = initialResult.content;
-        for (let i = 0; i < content.length; i += 20) {
-          controller.enqueue(encoder.encode(formatMessageEvent(content.substring(i, i + 20))));
-          await new Promise((r) => setTimeout(r, 10));
+        if (!content.trim()) {
+          await streamText("I can help record income and expenses. Try: \"I spent 50 pesos on lunch.\"");
+          controller.enqueue(encoder.encode(formatDoneEvent("normal")));
+          controller.close();
+          return;
         }
+        await streamText(content);
 
         // Execute tool loop
         const toolResult = await executeToolLoop(
@@ -105,11 +122,7 @@ export async function aiChatController(
         // Stream remaining content from tool loop
         const lastMessage = toolResult.messages[toolResult.messages.length - 1];
         if (lastMessage && lastMessage.content !== content) {
-          const additionalContent = lastMessage.content;
-          for (let i = 0; i < additionalContent.length; i += 20) {
-            controller.enqueue(encoder.encode(formatMessageEvent(additionalContent.substring(i, i + 20))));
-            await new Promise((r) => setTimeout(r, 10));
-          }
+          await streamText(lastMessage.content);
         }
 
         // Send done event with metadata

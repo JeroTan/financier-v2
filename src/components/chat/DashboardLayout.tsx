@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ChatPanel } from "@/components/chat/ChatPanel";
+import { ChatWorkspace } from "@/components/chat/ChatWorkspace";
 import { StatsDashboard } from "@/components/stats/StatsDashboard";
 
 type DashboardLayoutProps = {
@@ -19,47 +19,26 @@ export function DashboardLayout({ token }: DashboardLayoutProps) {
   }, [chatActive]);
 
   return (
-    <div className="flex flex-col lg:flex-row h-[calc(100vh-4rem)]">
-      {/* Stats Panel */}
-      <div
-        className={`transition-all duration-300 ease-in-out overflow-y-auto ${
-          chatActive ? "lg:w-0 lg:overflow-hidden lg:p-0" : "lg:w-2/5 p-4"
-        }`}
-      >
-        {!chatActive && (
-          <div className="h-full">
-            <StatsDashboard token={token} />
-          </div>
-        )}
-      </div>
-
-      {/* Divider */}
+    <div className="flex min-h-[calc(100vh-6rem)] flex-col gap-4 lg:h-[calc(100vh-3rem)]">
       {!chatActive && (
-        <div className="hidden lg:block w-px bg-border self-stretch" />
+        <section className="max-h-[34vh] overflow-y-auto rounded-lg bg-surface-container-lowest p-4 shadow-card">
+          <StatsDashboard token={token} />
+        </section>
       )}
 
-      {/* Chat Panel */}
-      <div
-        className={`transition-all duration-300 ease-in-out ${
-          chatActive ? "w-full" : "lg:w-3/5"
-        }`}
-      >
-        <div className="h-full flex flex-col">
-          {!chatActive && (
-            <div className="px-4 py-2 flex items-center justify-between border-b">
-              <h2 className="font-semibold">AI Chat</h2>
-              <button
-                onClick={() => setChatActive(true)}
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Expand
-              </button>
-            </div>
-          )}
-          <div className="flex-1">
-            <ChatPanel token={token} />
-          </div>
-        </div>
+      <div className="min-h-0 flex-1">
+        <ChatWorkspace
+          token={token}
+          onMessageSent={() => setChatActive(true)}
+          headerAction={
+            <button
+              onClick={() => setChatActive((active) => !active)}
+              className="rounded-full border border-outline-variant px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-primary-fixed hover:text-on-primary-fixed"
+            >
+              {chatActive ? "Show Stats" : "Focus Chat"}
+            </button>
+          }
+        />
       </div>
     </div>
   );
