@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatsSummary } from "@/components/stats/StatsSummary";
 import { StatsLedgerTable } from "@/components/stats/StatsLedgerTable";
@@ -19,7 +20,7 @@ type Goal = {
 
 export function StatsDashboard({ token }: StatsDashboardProps) {
   const [period, setPeriod] = useState<"daily" | "monthly" | "yearly">("monthly");
-  const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [date] = useState(() => new Date().toISOString().split("T")[0]);
   const [goals, setGoals] = useState<Goal[]>(() => {
     if (typeof window === "undefined") return [];
 
@@ -43,7 +44,7 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
       id: crypto.randomUUID() as string,
       label,
       target,
-      icon: "🎯",
+      icon: "G",
     };
     setGoals((prev) => [...prev, newGoal]);
   };
@@ -54,14 +55,13 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
 
   const ledgerEntries = stats
     ? [
-        { label: "Total Income", icon: "📈", amount: stats.totalIncome, type: "income" as const },
-        { label: "Total Expenses", icon: "📉", amount: stats.totalExpenses, type: "expense" as const },
+        { label: "Total Income", icon: "+", amount: stats.totalIncome, type: "income" as const },
+        { label: "Total Expenses", icon: "-", amount: stats.totalExpenses, type: "expense" as const },
       ]
     : [];
 
   return (
     <div className="space-y-4">
-      {/* Period Toggle */}
       <div className="flex gap-2">
         {(["daily", "monthly", "yearly"] as const).map((p) => (
           <Button
@@ -76,7 +76,6 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
         ))}
       </div>
 
-      {/* Stats Summary */}
       <StatsSummary
         totalIncome={stats?.totalIncome ?? 0}
         totalExpenses={stats?.totalExpenses ?? 0}
@@ -84,7 +83,6 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
         loading={loading}
       />
 
-      {/* Error State */}
       {error && (
         <div className="text-center py-4">
           <p className="text-destructive mb-2">{error}</p>
@@ -92,15 +90,13 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
         </div>
       )}
 
-      {/* Ledger Table */}
       {!error && <StatsLedgerTable entries={ledgerEntries} loading={loading} />}
 
-      {/* Goals */}
       <div className="space-y-3">
         <h3 className="text-lg font-semibold">Goals</h3>
         {goals.length === 0 ? (
           <div className="text-center py-6 text-muted-foreground">
-            <div className="text-3xl mb-2">🎯</div>
+            <Target className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
             <p>No goals set yet. Create your first financial goal!</p>
           </div>
         ) : (
@@ -110,7 +106,7 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
                 key={goal.id}
                 id={goal.id}
                 label={goal.label}
-                current={stats?.net ?? 0 > 0 ? Math.min(stats!.net, goal.target) : 0}
+                current={stats && stats.net > 0 ? Math.min(stats.net, goal.target) : 0}
                 target={goal.target}
                 icon={goal.icon}
                 onDelete={handleDeleteGoal}

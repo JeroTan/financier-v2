@@ -12,6 +12,11 @@ type GoalCardProps = {
   onDelete?: (id: string) => void;
 };
 
+const formatCurrency = (amount: number) => new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+}).format(amount);
+
 export function GoalCard({ id, label, current, target, icon, onDelete }: GoalCardProps) {
   const percentage = target > 0 ? Math.min((current / target) * 100, 100) : 0;
 
@@ -33,8 +38,8 @@ export function GoalCard({ id, label, current, target, icon, onDelete }: GoalCar
       <CardContent>
         <Progress value={percentage} className="h-2" />
         <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-          <span>${current.toFixed(2)}</span>
-          <span>${target.toFixed(2)}</span>
+          <span>{formatCurrency(current)}</span>
+          <span>{formatCurrency(target)}</span>
         </div>
         <p className="text-xs text-center mt-1 text-gold-600">{percentage.toFixed(0)}%</p>
       </CardContent>

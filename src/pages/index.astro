@@ -57,12 +57,12 @@ const APP_URL = getAppUrl();
 
     <style>
       .landing-body { font-family: "Hanken Grotesk", system-ui, sans-serif; }
-      .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; max-width: 1200px; margin: 0 auto; }
+      .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 24px; max-width: 1200px; margin: 0 auto; }
       .nav-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); text-decoration: none; }
-      .nav-links { display: flex; align-items: center; gap: 16px; }
+      .nav-links { display: flex; align-items: center; gap: 16px; min-width: 0; }
       .nav-link { color: var(--on-surface-variant); text-decoration: none; font-size: 0.9rem; }
       .nav-link:hover { color: var(--primary); }
-      .nav-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; }
+      .nav-btn { display: inline-flex; align-items: center; height: 36px; padding: 0 20px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; transition: all 0.2s; }
       .nav-btn-primary { background: var(--primary); color: var(--on-primary); }
       .nav-btn-primary:hover { opacity: 0.9; }
       .nav-btn-ghost { color: var(--on-surface); background: transparent; }
@@ -102,6 +102,19 @@ const APP_URL = getAppUrl();
       .icon-moon { display: block; }
       [data-theme="dark"] .icon-sun { display: block; }
       [data-theme="dark"] .icon-moon { display: none; }
+
+      @media (max-width: 520px) {
+        .nav { padding: 12px 16px; gap: 10px; }
+        .nav-logo { font-size: 1.25rem; }
+        .nav-links { gap: 6px; }
+        .nav-link { display: none; }
+        .nav-btn { height: 34px; padding: 0 10px; font-size: 13px; }
+        .theme-toggle { width: 34px; height: 34px; flex: 0 0 auto; }
+        .hero { padding: 56px 16px 44px; }
+        .features { padding: 44px 16px 60px; }
+        .feature-card { padding: 24px; }
+        .cta { padding: 44px 16px 60px; }
+      }
     </style>
   </head>
   <body class="landing-body" style="margin: 0; background: var(--background); color: var(--on-background);">
@@ -137,7 +150,7 @@ const APP_URL = getAppUrl();
         <div class="feature-card">
           <div class="feature-icon">💬</div>
           <h3>AI Chat Entry</h3>
-          <p>Just chat with your finances. "I spent $50 on groceries" — done. AI parses, confirms, and saves your transactions.</p>
+          <p>Just chat with your finances. "I spent ₱50 on groceries" — done. AI parses, confirms, and saves your transactions.</p>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📝</div>

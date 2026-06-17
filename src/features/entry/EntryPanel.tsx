@@ -1,14 +1,24 @@
 import { useState, useEffect, useCallback } from "react";
 import { EntryForm } from "@/features/entry/EntryForm";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type EntryPanelProps = {
   token?: string;
 };
 
+const DEFAULT_CATEGORY_NAMES = [
+  "Food",
+  "Transport",
+  "Shopping",
+  "Entertainment",
+  "Bills",
+  "Salary",
+  "Freelance",
+  "Investment",
+  "Other",
+];
+
 export function EntryPanel({ token }: EntryPanelProps) {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORY_NAMES);
 
   useEffect(() => {
     fetch("/api/categories", {
@@ -22,7 +32,6 @@ export function EntryPanel({ token }: EntryPanelProps) {
         }
       })
       .catch(() => {})
-      .finally(() => setLoading(false));
   }, [token]);
 
   const handleAddCategory = useCallback(
@@ -44,18 +53,6 @@ export function EntryPanel({ token }: EntryPanelProps) {
     },
     [token],
   );
-
-  if (loading) {
-    return (
-      <div className="space-y-6 max-w-lg">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-20 w-full" />
-      </div>
-    );
-  }
 
   return <EntryForm token={token} categories={categories} onAddCategory={handleAddCategory} />;
 }

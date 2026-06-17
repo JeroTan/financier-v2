@@ -8,6 +8,11 @@ type StatsSummaryProps = {
   loading?: boolean;
 };
 
+const formatCurrency = (amount: number) => new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+}).format(amount);
+
 export function StatsSummary({ totalIncome, totalExpenses, net, loading }: StatsSummaryProps) {
   if (loading) {
     return (
@@ -33,7 +38,7 @@ export function StatsSummary({ totalIncome, totalExpenses, net, loading }: Stats
           <CardTitle className="text-sm font-medium text-muted-foreground">Income</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-green-600">+${totalIncome.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-green-600">+{formatCurrency(totalIncome)}</p>
         </CardContent>
       </Card>
       <Card>
@@ -41,7 +46,7 @@ export function StatsSummary({ totalIncome, totalExpenses, net, loading }: Stats
           <CardTitle className="text-sm font-medium text-muted-foreground">Expenses</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-2xl font-bold text-red-600">-${totalExpenses.toFixed(2)}</p>
+          <p className="text-2xl font-bold text-red-600">-{formatCurrency(totalExpenses)}</p>
         </CardContent>
       </Card>
       <Card>
@@ -50,7 +55,7 @@ export function StatsSummary({ totalIncome, totalExpenses, net, loading }: Stats
         </CardHeader>
         <CardContent>
           <p className={`text-2xl font-bold ${net >= 0 ? "text-green-600" : "text-red-600"}`}>
-            {net >= 0 ? "+" : ""}${net.toFixed(2)}
+            {net >= 0 ? "+" : ""}{formatCurrency(net)}
           </p>
         </CardContent>
       </Card>

@@ -15,7 +15,10 @@ type TransactionCardProps = {
 
 export function TransactionCard({ type, amount, date, description, categoryName, categoryIcon, receiptUrl }: TransactionCardProps) {
   const isIncome = type === "income";
-  const formattedAmount = `$${amount.toFixed(2)}`;
+  const formattedAmount = new Intl.NumberFormat("en-PH", {
+    style: "currency",
+    currency: "PHP",
+  }).format(amount);
   const formattedDate = new Date(date).toLocaleDateString();
 
   return (

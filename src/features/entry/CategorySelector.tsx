@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Check, X } from "lucide-react";
@@ -46,7 +46,7 @@ export function CategorySelector({ categories, value, onChange, onAddCategory }:
           <span className={value ? "text-foreground" : "text-muted-foreground"}>
             {value || "Select category"}
           </span>
-          <span className="text-xs text-muted-foreground">▼</span>
+          <span className="text-xs text-muted-foreground">v</span>
         </button>
       ) : (
         <div className="absolute z-50 w-full mt-1 border rounded-md bg-background shadow-lg">
@@ -100,7 +100,7 @@ export function CategorySelector({ categories, value, onChange, onAddCategory }:
                     }}
                   />
                   <Button type="button" size="sm" onClick={handleAdd} disabled={saving || !newCategory.trim()}>
-                    {saving ? "..." : "✓"}
+                    {saving ? "..." : <Check className="h-3 w-3" />}
                   </Button>
                   <Button type="button" variant="ghost" size="sm" onClick={() => setAdding(false)}>
                     <X className="h-3 w-3" />

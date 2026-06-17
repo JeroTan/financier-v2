@@ -1,4 +1,6 @@
 const baseUrl = process.env.SMOKE_BASE_URL ?? "http://127.0.0.1:4321";
+const origin = new URL(baseUrl).origin;
+const smokeIp = `127.0.1.${Math.floor(Math.random() * 200) + 2}`;
 
 async function assertJsonError(
   path: string,
@@ -6,7 +8,11 @@ async function assertJsonError(
   expectedStatus: number,
   expectedCode: string,
 ): Promise<void> {
-  const response = await fetch(new URL(path, baseUrl), { ...init, redirect: "manual" });
+  const headers = new Headers(init.headers);
+  headers.set("Origin", origin);
+  headers.set("CF-Connecting-IP", smokeIp);
+
+  const response = await fetch(new URL(path, baseUrl), { ...init, headers, redirect: "manual" });
   if (response.status !== expectedStatus) {
     throw new Error(`${path} expected ${expectedStatus}, got ${response.status}`);
   }

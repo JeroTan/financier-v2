@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Inbox } from "lucide-react";
 import { TransactionCard } from "./TransactionCard";
 import { EntityFilters } from "./EntityFilters";
 import { EntityPagination } from "./EntityPagination";
@@ -116,7 +117,7 @@ export function EntityCardList({ token }: EntityCardListProps) {
         </div>
       ) : transactions.length === 0 ? (
         <div className="text-center py-12">
-          <div className="text-4xl mb-2">📭</div>
+          <Inbox className="mx-auto mb-2 h-10 w-10 text-muted-foreground" aria-hidden="true" />
           <p className="text-muted-foreground">
             {hasActiveFilters(typeFilter, search, startDate, endDate) ? "No transactions match your filters." : "No transactions yet. Start by adding one!"}
           </p>

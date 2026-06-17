@@ -1,3 +1,4 @@
+import { ClipboardList } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SkeletonTable } from "@/components/ui/SkeletonTable";
 
@@ -13,6 +14,11 @@ type StatsLedgerTableProps = {
   loading?: boolean;
 };
 
+const formatCurrency = (amount: number) => new Intl.NumberFormat("en-PH", {
+  style: "currency",
+  currency: "PHP",
+}).format(amount);
+
 export function StatsLedgerTable({ entries, loading }: StatsLedgerTableProps) {
   if (loading) {
     return <SkeletonTable />;
@@ -22,7 +28,7 @@ export function StatsLedgerTable({ entries, loading }: StatsLedgerTableProps) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground">
-          <div className="text-3xl mb-2">📋</div>
+          <ClipboardList className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
           <p>No transactions for this period.</p>
         </CardContent>
       </Card>
@@ -53,17 +59,17 @@ export function StatsLedgerTable({ entries, loading }: StatsLedgerTableProps) {
                   <td className="px-4 py-2 text-lg">{entry.icon}</td>
                   <td className="px-4 py-2">{entry.label}</td>
                   <td className={`px-4 py-2 text-right font-medium ${entry.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                    {entry.type === "income" ? "+" : "-"}${entry.amount.toFixed(2)}
+                    {entry.type === "income" ? "+" : "-"}{formatCurrency(entry.amount)}
                   </td>
                 </tr>
               ))}
               <tr className="border-t font-semibold bg-muted/30">
                 <td colSpan={2} className="px-4 py-2">Total Income</td>
-                <td className="px-4 py-2 text-right text-green-600">+${totalIncome.toFixed(2)}</td>
+                <td className="px-4 py-2 text-right text-green-600">+{formatCurrency(totalIncome)}</td>
               </tr>
               <tr className="border-t font-semibold bg-muted/30">
                 <td colSpan={2} className="px-4 py-2">Total Expenses</td>
-                <td className="px-4 py-2 text-right text-red-600">-${totalExpenses.toFixed(2)}</td>
+                <td className="px-4 py-2 text-right text-red-600">-{formatCurrency(totalExpenses)}</td>
               </tr>
             </tbody>
           </table>

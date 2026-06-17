@@ -42,6 +42,11 @@ function errorResponse(code: string, message: string, status: number): Response 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 const MAX_SIZE = 10 * 1024 * 1024;
 
+function isFormContentType(request: Request): boolean {
+  const contentType = request.headers.get("Content-Type") ?? "";
+  return contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded");
+}
+
 export const POST = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
@@ -49,10 +54,20 @@ export const POST = async (context: any) => {
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
 
+  if (!isFormContentType(request)) {
+    return errorResponse("INVALID_FILE", "Receipt upload requires multipart form data", 400);
+  }
+
   const storage = env.STORAGE;
   if (!storage) return errorResponse("STORAGE_ERROR", "Storage not configured", 500);
 
-  const formData = await request.formData();
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return errorResponse("INVALID_FILE", "Invalid form data", 400);
+  }
+
   const file = formData.get("file") as File | null;
 
   if (!file) return errorResponse("INVALID_FILE", "No file provided", 400);

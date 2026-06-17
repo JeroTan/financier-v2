@@ -11,7 +11,17 @@ import {
   Settings,
   Menu,
   X,
+  LogOut,
+  SunMoon,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import { setApiAccessToken } from "@/lib/api/client";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -29,6 +39,18 @@ interface SidebarProps {
 
 export function Sidebar({ currentPage, userEmail }: SidebarProps) {
   const [mobileOpen, setMobileOpen] = React.useState(false);
+
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (res.ok) {
+        setApiAccessToken(null);
+        window.location.href = "/login";
+      }
+    } catch {
+      // Logout failed — user stays on current page
+    }
+  };
 
   return (
     <>
@@ -92,14 +114,29 @@ export function Sidebar({ currentPage, userEmail }: SidebarProps) {
 
         {/* User */}
         <div className="border-t border-chat-border p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-sm font-semibold text-on-primary-fixed">
-              {userEmail?.[0]?.toUpperCase() ?? "U"}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">{userEmail ?? "User"}</p>
-            </div>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex w-full items-center gap-3 rounded-lg transition-colors hover:bg-accent">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-sm font-semibold text-on-primary-fixed">
+                  {userEmail?.[0]?.toUpperCase() ?? "U"}
+                </div>
+                <div className="min-w-0 flex-1 text-left">
+                  <p className="text-sm font-medium truncate">{userEmail ?? "User"}</p>
+                </div>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="end" sideOffset={8} className="w-[--radix-dropdown-menu-trigger-width]">
+              <DropdownMenuItem onClick={() => window.toggleTheme?.()} className="gap-2 cursor-pointer">
+                <SunMoon className="h-4 w-4" />
+                <span>Change appearance</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="gap-2 cursor-pointer">
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
 

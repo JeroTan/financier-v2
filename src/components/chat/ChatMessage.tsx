@@ -23,7 +23,7 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
         <div
           className={`rounded-xl border px-4 py-3 ${
             isUser
-              ? "rounded-tr-sm border-primary-container bg-primary-container text-on-primary-fixed"
+              ? "rounded-tr-sm border-primary-fixed-dim bg-primary-fixed-dim text-on-primary-fixed"
               : "rounded-tl-sm border-chat-border bg-chat-bot-bg text-chat-bot-text"
           }`}
         >

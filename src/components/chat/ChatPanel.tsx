@@ -167,6 +167,7 @@ export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelP
       <ChatMessageList
         messages={messages}
         streamingText={state === "streaming" ? streamingText : undefined}
+        isThinking={state === "loading" && !streamingText}
         confirmation={confirmationData}
         onConfirm={handleConfirm}
         onCancel={handleCancel}

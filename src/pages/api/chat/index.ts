@@ -24,6 +24,19 @@ const chatRequestSchema = z.object({
   }).optional(),
 });
 
+function normalizeChatBody(body: unknown): unknown {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return body;
+
+  const data = body as Record<string, unknown>;
+  if (typeof data.newMessage === "string") return data;
+  if (typeof data.message !== "string") return data;
+
+  return {
+    ...data,
+    newMessage: data.message,
+  };
+}
+
 export const chatRouteDetail = routeDetail("POST", "/api/chat", {
   summary: "Send a message to the AI assistant",
   description: "Sends a user message to the AI finance assistant. Returns a streaming SSE response with the AI's reply. Supports text messages and optional image attachments for receipt analysis.",
@@ -68,7 +81,7 @@ export const POST = async (context: any) => {
   }
 
   // Validate
-  const parseResult = chatRequestSchema.safeParse(body);
+  const parseResult = chatRequestSchema.safeParse(normalizeChatBody(body));
   if (!parseResult.success) {
     return new Response(
       JSON.stringify({ error: { code: "INVALID_INPUT", message: parseResult.error.message } }),

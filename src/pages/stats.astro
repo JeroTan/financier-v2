@@ -1,6 +1,7 @@
 ---
 import AppLayout from "@/layouts/AppLayout.astro";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { StatsDashboard } from "@/components/stats/StatsDashboard";
 ---
 
 <AppLayout title="Stats" currentPage="/stats">
@@ -8,8 +9,9 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
     <div class="space-y-6">
       <h1 class="headline-lg">Statistics</h1>
       <p class="body-lg text-muted-foreground">
-        View your financial statistics and trends. Feature content coming soon.
+        View your financial statistics and trends.
       </p>
+      <StatsDashboard client:load />
     </div>
   </ErrorBoundary>
 </AppLayout>

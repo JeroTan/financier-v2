@@ -125,7 +125,7 @@ export const POST = async (context: any) => {
   const categoryRepo = new CategoryRepository(db);
   const data = parseResult.data;
 
-  const categories = await categoryRepo.getCategoriesByUserId(auth.context.userId);
+  const categories = await categoryRepo.seedDefaultCategories(auth.context.userId);
   const matchedCategory = categories.find((c) => c.name.toLowerCase() === data.category.toLowerCase());
 
   const transaction = await repo.createTransaction({

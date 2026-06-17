@@ -8,12 +8,21 @@ export const chatDetail = routeDetail("POST", "/api/chat", {
   auth: true,
   request: {
     body: z.object({
-      message: z.string().min(1).max(4000),
       messageTrail: z.array(z.object({
         role: z.enum(["user", "assistant"]),
         content: z.string(),
-      })).optional(),
+      })).default([]),
+      newMessage: z.string().min(1).max(4000),
+      message: z.string().min(1).max(4000).optional().describe("Legacy alias for newMessage."),
       image: z.string().base64().optional(),
+      confirmationData: z.object({
+        type: z.enum(["income", "expense"]),
+        amount: z.number().positive(),
+        currency: z.string().default("PHP"),
+        category: z.string().optional(),
+        description: z.string().optional(),
+        date: z.string(),
+      }).optional(),
     }),
   },
   response: {

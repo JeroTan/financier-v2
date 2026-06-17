@@ -1,0 +1,453 @@
+
+> orbital-osiris@0.0.1 dev
+> cross-env CLOUDFLARE_ENV=development astro dev
+
+[2m14:28:37[22m [34m[@astrojs/cloudflare][39m Enabling image processing with Cloudflare Images for production with the "IMAGES" Images binding.
+[2m14:28:37[22m [34m[@astrojs/cloudflare][39m Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+⎔ Establishing remote connection...
+Using secrets defined in .env
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mAI bindings always access remote resources, and so may incur usage charges even in local dev. To suppress this warning, set `remote: true` for the binding definition in your configuration file.[0m
+
+
+[2m14:29:20[22m [34m[types][39m Generated [2m26ms[22m
+[33m[1m14:29:20[22m [WARN] [content][39m Content config not loaded
+[42m[1m astro [22m[49m [32mv6.1.9[39m [2mready in[22m 56928 [2mms[22m
+[2m┃[22m Local    [36mhttp://localhost:4333/[39m
+[2m┃[22m Network  [36mhttp://10.3.0.66:4333/[39m
+[2m14:29:20[22m [32mwatching for file changes...[39m
+[2m14:31:07[22m [34m[vite][39m 14:31:07 [200] /api/openapi.json 434ms
+[2m14:32:45[22m [34m[vite][39m 14:32:45 [201] POST /api/auth/register 6010ms
+[2m14:33:15[22m [34m[vite][39m 14:33:15 [200] /dashboard 1960ms
+[2m14:34:08[22m [34m[vite][39m 14:34:08 [201] POST /api/auth/register 3234ms
+[2m14:34:17[22m [34m[vite][39m 14:34:17 [200] /dashboard 1908ms
+[2m14:35:42[22m [34m[vite][39m 14:35:42 [201] POST /api/auth/register 4728ms
+[2m14:35:53[22m [34m[vite][39m 14:35:53 [200] /entry 1845ms
+[2m14:36:34[22m [34m[vite][39m 14:36:34 [200] /api/categories 35598ms
+[2m14:37:00[22m [34m[vite][39m 14:37:00 [201] POST /api/auth/register 2703ms
+[2m14:37:35[22m [34m[vite][39m 14:37:35 [200] /entry 1211ms
+[2m14:38:06[22m [34m[vite][39m 14:38:06 [200] /api/categories 27400ms
+[2m14:38:44[22m [34m[vite][39m 14:38:44 [201] POST /api/auth/register 3828ms
+[2m14:38:54[22m [34m[vite][39m 14:38:54 [200] /entry 1376ms
+[2m14:39:37[22m [34m[vite][39m 14:39:37 [200] /api/categories 23118ms
+[2m14:40:20[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /@id/virtual:cloudflare/worker-entry
+[2m14:40:20[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /@id/@/features/entry/EntryPanel.tsx
+[2m14:40:21[22m [34m[vite][39m [vite] hot updated: virtual:cloudflare/worker-entry
+[2m14:40:39[22m [34m[vite][39m [vite] program reload
+[2m14:41:26[22m [34m[vite][39m 14:41:26 [201] POST /api/auth/register 5096ms
+[2m14:41:42[22m [34m[vite][39m 14:41:42 [200] /dashboard 2387ms
+[2m14:41:51[22m [34m[vite][39m 14:41:51 [200] /entry 4435ms
+[2m14:42:01[22m [34m[vite][39m 14:42:01 [200] /api/stats 13480ms
+[2m14:43:05[22m [34m[vite][39m 14:43:05 [201] POST /api/auth/register 3529ms
+[2m14:43:11[22m [34m[vite][39m 14:43:11 [200] /entry 2565ms
+[2m14:43:13[22m [34m[vite][39m 14:43:13 [200] /api/categories 80297ms
+[2m14:44:18[22m [34m[vite][39m 14:44:18 [201] POST /api/auth/register 6195ms
+[2m14:44:20[22m [34m[vite][39m 14:44:20 [200] /entry 719ms
+[2m14:44:49[22m [34m[vite][39m 14:44:49 [200] /api/categories 25688ms
+[2m14:45:29[22m [34m[vite][39m 14:45:29 [201] POST /api/auth/register 3478ms
+[2m14:45:31[22m [34m[vite][39m 14:45:31 [200] /dashboard 1109ms
+[2m14:45:35[22m [34m[vite][39m 14:45:35 [200] /entry 810ms
+[2m14:45:35[22m [34m[vite][39m 14:45:35 [200] /api/stats 1621ms
+[31m[1m14:45:40[22m [ERROR] [vite][39m 14:45:40 [ERROR] Error: D1_ERROR: UNIQUE constraint failed: categories.slug: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+    at cloudflare-internal:d1-api:353:41
+    at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:135:5)
+    at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:83:21)
+    at Module.POST (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:128:22)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[31m[1m14:45:40[22m [ERROR] [vite][39m [31mInternal server error: D1_ERROR: UNIQUE constraint failed: categories.slug: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)[39m
+      at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+      at null.<anonymous> (cloudflare-internal:d1-api:353:41)
+      at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:135:5)
+      at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:83:21)
+      at Module.POST (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:128:22)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+      at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[2m14:45:54[22m [34m[vite][39m 14:45:54 [200] /api/categories 17990ms
+[2m14:46:42[22m [34m[vite][39m 14:46:42 [201] POST /api/auth/register 6730ms
+[2m14:46:44[22m [34m[vite][39m 14:46:44 [200] /entry 1254ms
+[31m[1m14:46:56[22m [ERROR] [vite][39m 14:46:56 [ERROR] Error: D1_ERROR: UNIQUE constraint failed: categories.slug: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+    at cloudflare-internal:d1-api:353:41
+    at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:135:5)
+    at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:83:21)
+    at Module.POST (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:128:22)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[31m[1m14:46:56[22m [ERROR] [vite][39m [31mInternal server error: D1_ERROR: UNIQUE constraint failed: categories.slug: SQLITE_CONSTRAINT (extended: SQLITE_CONSTRAINT_UNIQUE)[39m
+      at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:139:19)
+      at null.<anonymous> (cloudflare-internal:d1-api:353:41)
+      at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:135:5)
+      at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:83:21)
+      at Module.POST (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:128:22)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+      at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[2m14:47:15[22m [34m[vite][39m 14:47:15 [200] /api/categories 27989ms
+[2m14:47:41[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css
+[2m14:48:10[22m [34m[vite][39m 14:48:10 [201] POST /api/auth/register 2346ms
+[2m14:48:13[22m [34m[vite][39m 14:48:13 [200] /entry 735ms
+[2m14:48:32[22m [34m[vite][39m 14:48:32 [200] /api/categories 15011ms
+[2m14:48:33[22m [34m[vite][39m 14:48:33 [200] POST /api/transactions 15242ms
+[2m14:48:57[22m [34m[vite][39m 14:48:57 [201] POST /api/auth/register 2114ms
+[2m14:48:58[22m [34m[vite][39m 14:48:58 [200] /entry 724ms
+[2m14:49:17[22m [34m[vite][39m 14:49:17 [200] /api/categories 15748ms
+[2m14:49:17[22m [34m[vite][39m 14:49:17 [200] POST /api/transactions 15619ms
+[31m[1m14:58:25[22m [ERROR] [vite][39m [31mInternal server error: internal error; reference = 6v1e8dj63clj24md7pts7qks[39m
+      at runInRunnerObject (workers/runner-worker/index.js:107:3)
+      at getWorkerEntryExport (workers/runner-worker/index.js:235:17)
+      at null.<anonymous> (workers/runner-worker/index.js:354:24)
+      at maybeCaptureError (workers/runner-worker/index.js:51:10)
+[2m14:58:27[22m [34m[vite][39m 14:58:27 [200] / 480ms
+[2m14:58:34[22m [34m[vite][39m 14:58:34 [200] /login 238ms
+[2m14:58:36[22m [34m[vite][39m 14:58:36 [200] /register 676ms
+[2m14:58:38[22m [34m[vite][39m 14:58:38 [200] /api/docs 186ms
+[2m14:58:40[22m [34m[vite][39m 14:58:40 [200] /api/openapi.json 206ms
+[2m14:58:41[22m [34m[vite][39m 14:58:41 [302] /dashboard 74ms
+[2m14:58:42[22m [34m[vite][39m 14:58:42 [401] /api/stats 354ms
+[2m15:00:47[22m [34m[vite][39m 15:00:47 [400] POST /api/auth/register 196ms
+[2m15:01:31[22m [34m[vite][39m 15:01:31 [400] POST /api/auth/register 421ms
+[2m15:01:36[22m [34m[vite][39m 15:01:36 [400] POST /api/auth/login 436ms
+[2m15:01:39[22m [34m[vite][39m 15:01:39 [400] POST /api/auth/refresh 747ms
+[2m15:01:43[22m [34m[vite][39m 15:01:43 [401] POST /api/auth/logout 295ms
+[2m15:02:49[22m [34m[vite][39m 15:02:49 [201] POST /api/auth/register 3686ms
+[2m15:02:53[22m [34m[vite][39m 15:02:53 [200] POST /api/auth/login 2397ms
+[2m15:02:57[22m [34m[vite][39m 15:02:57 [200] POST /api/auth/refresh 3017ms
+[2m15:03:45[22m [34m[vite][39m 15:03:45 [200] /api/categories 48063ms
+[2m15:03:48[22m [34m[vite][39m 15:03:48 [200] POST /api/categories 1956ms
+[2m15:03:50[22m [34m[vite][39m 15:03:50 [200] POST /api/transactions 1373ms
+[2m15:03:52[22m [34m[vite][39m 15:03:52 [200] /api/transactions 1748ms
+[2m15:05:20[22m [34m[vite][39m 15:05:20 [201] POST /api/auth/register 5372ms
+[2m15:05:24[22m [34m[vite][39m 15:05:24 [200] POST /api/auth/login 3937ms
+[2m15:05:29[22m [34m[vite][39m 15:05:29 [200] POST /api/auth/refresh 4744ms
+[2m15:05:54[22m [34m[vite][39m 15:05:54 [200] /api/categories 23691ms
+[2m15:06:07[22m [34m[vite][39m 15:06:07 [200] POST /api/categories 13177ms
+[2m15:06:09[22m [34m[vite][39m 15:06:09 [200] POST /api/transactions 1790ms
+[2m15:06:11[22m [34m[vite][39m 15:06:11 [200] /api/transactions 1308ms
+[2m15:06:12[22m [34m[vite][39m 15:06:12 [200] /api/stats 690ms
+[2m15:06:15[22m [34m[vite][39m 15:06:15 [200] /api/stats 1355ms
+[2m15:06:17[22m [34m[vite][39m 15:06:17 [200] /api/settings 1360ms
+[2m15:06:19[22m [34m[vite][39m 15:06:19 [200] PUT /api/settings/preferences 1373ms
+[2m15:06:21[22m [34m[vite][39m 15:06:21 [401] PUT /api/settings/password 1033ms
+[2m15:06:23[22m [34m[vite][39m 15:06:23 [400] POST /api/settings/unlink-google 1348ms
+[2m15:06:24[22m [34m[vite][39m 15:06:24 [400] POST /api/chat 268ms
+[2m15:08:13[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css
+[2m15:08:37[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css
+[2m15:09:30[22m [34m[vite][39m 15:09:30 [201] POST /api/auth/register 3442ms
+[2m15:09:32[22m [34m[vite][39m 15:09:32 [200] POST /api/auth/login 1481ms
+[2m15:09:35[22m [34m[vite][39m 15:09:35 [200] POST /api/auth/refresh 1864ms
+[2m15:09:56[22m [34m[vite][39m 15:09:56 [200] /api/categories 20726ms
+[2m15:09:59[22m [34m[vite][39m 15:09:59 [200] POST /api/categories 2451ms
+[2m15:10:01[22m [34m[vite][39m 15:10:01 [200] POST /api/transactions 1337ms
+[2m15:10:02[22m [34m[vite][39m 15:10:02 [200] /api/transactions 1242ms
+[2m15:10:04[22m [34m[vite][39m 15:10:04 [200] /api/stats 900ms
+[2m15:10:05[22m [34m[vite][39m 15:10:05 [200] /api/stats 717ms
+[2m15:10:06[22m [34m[vite][39m 15:10:06 [200] /api/settings 683ms
+[2m15:10:08[22m [34m[vite][39m 15:10:08 [200] PUT /api/settings/preferences 1368ms
+[2m15:10:10[22m [34m[vite][39m 15:10:10 [401] PUT /api/settings/password 1306ms
+[2m15:10:11[22m [34m[vite][39m 15:10:11 [400] POST /api/settings/unlink-google 783ms
+[2m15:10:13[22m [34m[vite][39m 15:10:13 [200] POST /api/chat 724ms
+[2m15:11:06[22m [34m[vite][39m 15:11:06 [201] POST /api/auth/register 1973ms
+[2m15:11:08[22m [34m[vite][39m 15:11:08 [200] POST /api/auth/login 1683ms
+[2m15:11:10[22m [34m[vite][39m 15:11:10 [200] POST /api/auth/refresh 1322ms
+[2m15:11:29[22m [34m[vite][39m 15:11:29 [200] /api/categories 18524ms
+[2m15:11:32[22m [34m[vite][39m 15:11:32 [200] POST /api/categories 2228ms
+[2m15:11:34[22m [34m[vite][39m 15:11:34 [200] POST /api/transactions 2204ms
+[2m15:11:36[22m [34m[vite][39m 15:11:36 [200] /api/transactions 1312ms
+[2m15:11:37[22m [34m[vite][39m 15:11:37 [200] /api/stats 619ms
+[2m15:11:38[22m [34m[vite][39m 15:11:38 [200] /api/stats 683ms
+[2m15:11:40[22m [34m[vite][39m 15:11:40 [200] /api/settings 717ms
+[2m15:11:42[22m [34m[vite][39m 15:11:42 [200] PUT /api/settings/preferences 1826ms
+[2m15:11:44[22m [34m[vite][39m 15:11:44 [401] PUT /api/settings/password 1132ms
+[2m15:11:46[22m [34m[vite][39m 15:11:46 [400] POST /api/settings/unlink-google 718ms
+[2m15:11:47[22m [34m[vite][39m 15:11:47 [200] POST /api/chat 1116ms
+[2m15:11:50[22m [34m[vite][39m 15:11:50 [200] POST /api/chat 1185ms
+[31m[1m15:11:52[22m [ERROR] [vite][39m 15:11:52 [ERROR] TypeError: Unrecognized Content-Type header value. FormData can only parse the following MIME types: multipart/form-data, application/x-www-form-urlencoded
+    at Module.POST (C:/dev/Web Application/financier/src/pages/api/receipts/index.ts:55:20)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+    at DevApp.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2997:20)
+    at handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/@astrojs_cloudflare_handler.js?v=29baaa6d:209:20)
+    at maybeCaptureError (workers/runner-worker/index.js:51:10)
+[31m[1m15:11:52[22m [ERROR] [vite][39m [31mInternal server error: Unrecognized Content-Type header value. FormData can only parse the following MIME types: multipart/form-data, application/x-www-form-urlencoded[39m
+      at Module.POST (C:/dev/Web Application/financier/src/pages/api/receipts/index.ts:55:20)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+      at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+      at DevApp.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2997:20)
+      at handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/@astrojs_cloudflare_handler.js?v=29baaa6d:209:20)
+      at maybeCaptureError (workers/runner-worker/index.js:51:10)
+[2m15:12:33[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css
+[2m15:13:22[22m [34m[vite][39m 15:13:22 [201] POST /api/auth/register 3860ms
+[2m15:13:24[22m [34m[vite][39m 15:13:24 [200] POST /api/auth/login 1852ms
+[2m15:13:27[22m [34m[vite][39m 15:13:27 [200] POST /api/auth/refresh 1381ms
+[2m15:13:48[22m [34m[vite][39m 15:13:48 [200] /api/categories 20786ms
+[2m15:13:51[22m [34m[vite][39m 15:13:51 [200] POST /api/categories 2414ms
+[2m15:13:53[22m [34m[vite][39m 15:13:53 [200] POST /api/transactions 1287ms
+[2m15:13:55[22m [34m[vite][39m 15:13:55 [200] /api/transactions 1603ms
+[2m15:13:57[22m [34m[vite][39m 15:13:57 [200] /api/stats 1035ms
+[2m15:13:58[22m [34m[vite][39m 15:13:58 [200] /api/stats 915ms
+[2m15:14:01[22m [34m[vite][39m 15:14:01 [200] /api/settings 2202ms
+[2m15:14:04[22m [34m[vite][39m 15:14:04 [200] PUT /api/settings/preferences 2737ms
+[2m15:14:06[22m [34m[vite][39m 15:14:06 [401] PUT /api/settings/password 1138ms
+[2m15:14:07[22m [34m[vite][39m 15:14:07 [400] POST /api/settings/unlink-google 810ms
+[2m15:14:09[22m [34m[vite][39m 15:14:09 [200] POST /api/chat 823ms
+[2m15:14:11[22m [34m[vite][39m 15:14:11 [200] POST /api/chat 880ms
+[2m15:14:13[22m [34m[vite][39m 15:14:13 [400] POST /api/receipts 106ms
+[2m15:14:15[22m [34m[vite][39m 15:14:15 [200] POST /api/auth/logout 965ms
+[2m15:15:19[22m [34m[vite][39m 15:15:19 [201] POST /api/auth/register 2871ms
+[2m15:15:23[22m [34m[vite][39m 15:15:23 [200] /dashboard 1086ms
+[2m15:15:30[22m [34m[vite][39m 15:15:30 [200] /entry 1094ms
+[2m15:15:30[22m [34m[vite][39m 15:15:30 [200] /api/stats 1330ms
+[2m15:15:48[22m [34m[vite][39m 15:15:48 [200] /api/categories 16002ms
+[2m15:15:48[22m [34m[vite][39m 15:15:48 [200] POST /api/transactions 15883ms
+[2m15:15:50[22m [34m[vite][39m 15:15:50 [200] /entity 758ms
+[2m15:15:53[22m [34m[vite][39m 15:15:53 [200] /api/categories 1249ms
+[2m15:15:53[22m [34m[vite][39m 15:15:53 [200] /api/transactions 1784ms
+[2m15:17:33[22m [34m[vite][39m 15:17:33 [201] POST /api/auth/register 4899ms
+[2m15:17:35[22m [34m[vite][39m 15:17:35 [200] /dashboard 2093ms
+[2m15:17:39[22m [34m[vite][39m 15:17:39 [200] /entry 989ms
+[2m15:17:40[22m [34m[vite][39m 15:17:40 [200] /api/stats 1111ms
+[2m15:18:21[22m [34m[vite][39m 15:18:21 [200] /api/categories 40441ms
+[2m15:18:23[22m [34m[vite][39m 15:18:23 [200] POST /api/transactions 41779ms
+[2m15:18:26[22m [34m[vite][39m 15:18:26 [200] /entity 1524ms
+[2m15:18:31[22m [34m[vite][39m 15:18:31 [200] /api/categories 4122ms
+[2m15:18:33[22m [34m[vite][39m 15:18:33 [200] /api/transactions 6423ms
+[2m15:18:36[22m [34m[vite][39m 15:18:36 [200] /stats 1926ms
+[2m15:18:38[22m [34m[vite][39m 15:18:38 [200] /api/stats 1261ms
+[2m15:19:39[22m [34m[vite][39m 15:19:39 [201] POST /api/auth/register 4305ms
+[2m15:19:42[22m [34m[vite][39m 15:19:42 [200] /dashboard 2058ms
+[2m15:19:49[22m [34m[vite][39m 15:19:49 [200] /entry 3107ms
+[2m15:19:50[22m [34m[vite][39m 15:19:50 [200] /api/stats 4614ms
+[2m15:20:16[22m [34m[vite][39m 15:20:16 [200] /api/categories 25820ms
+[2m15:20:16[22m [34m[vite][39m 15:20:16 [200] POST /api/transactions 25126ms
+[2m15:20:17[22m [34m[vite][39m 15:20:17 [200] /entity 481ms
+[2m15:20:19[22m [34m[vite][39m 15:20:19 [200] /api/categories 1238ms
+[2m15:20:19[22m [34m[vite][39m 15:20:19 [200] /api/transactions 1456ms
+[2m15:20:21[22m [34m[vite][39m 15:20:21 [200] /stats 767ms
+[2m15:20:23[22m [34m[vite][39m 15:20:23 [200] /api/stats 1411ms
+[2m15:20:26[22m [34m[vite][39m 15:20:26 [200] /chat 1075ms
+[2m15:20:28[22m [34m[vite][39m 15:20:28 [200] /api/stats 1512ms
+[2m15:20:28[22m [34m[vite][39m 15:20:28 [200] POST /api/chat 1516ms
+[2m15:20:30[22m [34m[vite][39m 15:20:30 [200] POST /api/chat 1242ms
+[2m15:20:34[22m [34m[vite][39m 15:20:34 [200] /stats 679ms
+[2m15:20:35[22m [34m[vite][39m 15:20:35 [200] /api/stats 2547ms
+[2m15:20:35[22m [34m[vite][39m 15:20:35 [200] /api/stats 738ms
+[2m15:20:37[22m [34m[vite][39m 15:20:37 [200] /settings 985ms
+[2m15:20:41[22m [34m[vite][39m 15:20:41 [200] /api/settings 3185ms
+[2m15:20:44[22m [34m[vite][39m 15:20:44 [200] /chat 1546ms
+[2m15:20:47[22m [34m[vite][39m 15:20:47 [200] /api/stats 1944ms
+[2m15:21:56[22m [34m[watch][39m src/layouts/AppLayout.astro
+[2m15:23:15[22m [34m[vite][39m 15:23:15 [201] POST /api/auth/register 3174ms
+[2m15:23:21[22m [34m[vite][39m 15:23:21 [200] / 364ms
+[2m15:23:38[22m [34m[vite][39m 15:23:38 [200] / 37ms
+[2m15:24:45[22m [34m[watch][39m /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=1&lang.css
+[2m15:24:45[22m [34m[watch][39m /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=1&lang.css
+[2m15:25:39[22m [34m[vite][39m 15:25:39 [201] POST /api/auth/register 16328ms
+[2m15:25:45[22m [34m[vite][39m 15:25:45 [200] / 67ms
+[2m15:26:04[22m [34m[vite][39m 15:26:04 [200] / 165ms
+[2m15:26:10[22m [34m[vite][39m 15:26:10 [200] /dashboard 1052ms
+[2m15:26:16[22m [34m[vite][39m 15:26:16 [200] /login 205ms
+[2m15:26:27[22m [34m[vite][39m 15:26:27 [200] /login 151ms
+[2m15:26:28[22m [34m[vite][39m 15:26:28 [200] /register 56ms
+[2m15:26:30[22m [34m[vite][39m 15:26:30 [200] /register 232ms
+[2m15:26:31[22m [34m[vite][39m 15:26:31 [200] /api/stats 877ms
+[2m15:26:32[22m [34m[vite][39m 15:26:32 [200] /api/stats 947ms
+[2m15:26:32[22m [34m[vite][39m 15:26:32 [200] /api/docs 46ms
+[2m15:26:35[22m [34m[vite][39m 15:26:35 [200] /api/openapi.json 21ms
+[2m15:27:56[22m [34m[vite][39m 15:27:56 [201] POST /api/auth/register 21138ms
+[2m15:27:57[22m [34m[vite][39m 15:27:57 [200] / 41ms
+[2m15:28:06[22m [34m[vite][39m 15:28:06 [200] / 79ms
+[2m15:28:08[22m [34m[vite][39m 15:28:08 [200] /login 76ms
+[2m15:28:09[22m [34m[vite][39m 15:28:09 [200] /login 43ms
+[2m15:28:11[22m [34m[vite][39m 15:28:11 [200] /register 51ms
+[2m15:28:13[22m [34m[vite][39m 15:28:13 [200] /register 103ms
+[2m15:28:24[22m [34m[vite][39m 15:28:24 [200] /dashboard 8708ms
+[2m15:28:32[22m [34m[vite][39m 15:28:32 [200] /dashboard 5911ms
+[2m15:28:35[22m [34m[vite][39m 15:28:35 [200] /api/stats 8963ms
+[2m15:28:51[22m [34m[vite][39m 15:28:51 [200] /entry 17361ms
+[31m[1m15:29:10[22m [ERROR] [vite][39m 15:29:10 [ERROR] Error: Failed query: select "type", sum("amount") from "transactions" where ("transactions"."user_id" = ? and "transactions"."date" >= ? and "transactions"."date" <= ?) group by "transactions"."type"
+params: 8065005a-9844-465b-bcd3-8f7860ff7f02,2026-06-01T00:00:00.000Z,2026-06-30T23:59:59.999Z
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at TransactionRepository.aggregateTransactions (C:/dev/Web Application/financier/src/server/repositories/transactionRepository.ts:120:21)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/stats/index.ts:73:18)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[2m15:29:14[22m [34m[vite][39m 15:29:14 [200] /entry 21591ms
+[2m15:29:36[22m [34m[vite][39m 15:29:36 [200] /entity 19780ms
+[31m[1m15:29:46[22m [ERROR] [vite][39m 15:29:46 [ERROR] Error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."id" = ?
+params: a1945ba4-8af6-4a7d-bdaa-b74d0d714c2d
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at UserRepository.findById (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:86:22)
+    at aiChatController (C:/dev/Web Application/financier/src/server/controller/aiChatController.ts:27:16)
+    at Module.POST (C:/dev/Web Application/financier/src/pages/api/chat/index.ts:117:18)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:29:46[22m [ERROR] [vite][39m [31mInternal server error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."id" = ?
+params: a1945ba4-8af6-4a7d-bdaa-b74d0d714c2d[39m
+      at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+      at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+      at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+      at UserRepository.findById (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:86:22)
+      at aiChatController (C:/dev/Web Application/financier/src/server/controller/aiChatController.ts:27:16)
+      at Module.POST (C:/dev/Web Application/financier/src/pages/api/chat/index.ts:117:18)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[2m15:29:57[22m [34m[vite][39m 15:29:57 [200] /entity 19242ms
+[31m[1m15:30:16[22m [ERROR] [vite][39m 15:30:16 [ERROR] Error: D1_ERROR: Failed to parse body as JSON, got: Error: Network connection lost.
+    at async Object.fetch (file:///C:/dev/Web%20Application/financier/node_modules/miniflare/dist/src/workers/core/entry.worker.js:4672:22)
+    at D1DatabaseSessionAlwaysPrimary._send (cloudflare-internal:d1-api:181:19)
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:135:25)
+    at cloudflare-internal:d1-api:366:41
+    at CategoryRepository.getCategoryColumns (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:153:25)
+    at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:113:21)
+    at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:84:23)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/categories/index.ts:83:22)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+[31m[1m15:30:16[22m [ERROR] [vite][39m 15:30:16 [ERROR] Error: Failed query: select count(*) from "transactions" where "transactions"."user_id" = ?
+params: 8065005a-9844-465b-bcd3-8f7860ff7f02
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at TransactionRepository.getTransactions (C:/dev/Web Application/financier/src/server/repositories/transactionRepository.ts:93:27)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:179:18)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+[31m[1m15:30:17[22m [ERROR] [vite][39m 15:30:17 [ERROR] Error: D1_ERROR: Failed to parse body as JSON, got: Error: Network connection lost.
+    at async Object.fetch (file:///C:/dev/Web%20Application/financier/node_modules/miniflare/dist/src/workers/core/entry.worker.js:4672:22)
+    at D1DatabaseSessionAlwaysPrimary._send (cloudflare-internal:d1-api:181:19)
+    at D1DatabaseSessionAlwaysPrimary._sendOrThrow (cloudflare-internal:d1-api:135:25)
+    at cloudflare-internal:d1-api:353:41
+    at CategoryRepository.insertCategory (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:140:5)
+    at CategoryRepository.seedDefaultCategories (C:/dev/Web Application/financier/src/server/repositories/categoryRepository.ts:84:23)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/categories/index.ts:83:22)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:30:17[22m [ERROR] [vite][39m 15:30:17 [ERROR] Error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+    at authMiddleware (C:/dev/Web Application/financier/src/server/middleware/auth.ts:54:16)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/categories/index.ts:76:16)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:30:17[22m [ERROR] [vite][39m [31mInternal server error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3[39m
+      at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+      at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+      at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+      at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+      at authMiddleware (C:/dev/Web Application/financier/src/server/middleware/auth.ts:54:16)
+      at Module.GET (C:/dev/Web Application/financier/src/pages/api/categories/index.ts:76:16)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:30:17[22m [ERROR] [vite][39m 15:30:17 [ERROR] Error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+    at authMiddleware (C:/dev/Web Application/financier/src/server/middleware/auth.ts:54:16)
+    at Module.GET (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:161:16)
+    at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+    at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:55:22
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:30:17[22m [ERROR] [vite][39m [31mInternal server error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3[39m
+      at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+      at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+      at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+      at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+      at authMiddleware (C:/dev/Web Application/financier/src/server/middleware/auth.ts:54:16)
+      at Module.GET (C:/dev/Web Application/financier/src/pages/api/transactions/index.ts:161:16)
+      at renderEndpoint (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-X7WHAAA4.js?v=29baaa6d:46:18)
+      at lastNext (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2036:23)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:55:22)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+[31m[1m15:30:20[22m [ERROR] [vite][39m 15:30:20 [ERROR] Error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3
+    at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+    at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+    at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+    at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+    at C:/dev/Web Application/financier/src/middleware/index.ts:79:16
+    at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+    at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+    at DevApp.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2997:20)
+    at handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/@astrojs_cloudflare_handler.js?v=29baaa6d:209:20)
+    at maybeCaptureError (workers/runner-worker/index.js:51:10)
+[31m[1m15:30:20[22m [ERROR] [vite][39m [31mInternal server error: Failed query: select "id", "email", "password_hash", "password_salt", "google_id", "refresh_token", "personality", "theme", "created_at", "updated_at" from "users" where "users"."refresh_token" = ?
+params: dc0548749785ab6540d5ff206db8209833c9a32a8da9591dbd6ea454732029a3[39m
+      at D1PreparedQuery.queryWithCache (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-KG2DYWJQ.js?v=29baaa6d:3460:15)
+      at D1PreparedQuery.values (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:196:12)
+      at D1PreparedQuery.all (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/drizzle-orm_d1.js?v=29baaa6d:148:18)
+      at UserRepository.findByRefreshToken (C:/dev/Web Application/financier/src/server/repositories/userRepository.ts:116:22)
+      at null.<anonymous> (C:/dev/Web Application/financier/src/middleware/index.ts:79:16)
+      at callMiddleware (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:1039:10)
+      at _RenderContext.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2083:73)
+      at DevApp.render (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/chunk-JZMCM6KS.js?v=29baaa6d:2997:20)
+      at handle (C:/dev/Web Application/financier/node_modules/.vite/deps_ssr/@astrojs_cloudflare_handler.js?v=29baaa6d:209:20)
+      at maybeCaptureError (workers/runner-worker/index.js:51:10)
+[2m15:31:28[22m [34m[vite][39m 15:31:28 [201] POST /api/auth/register 16113ms
+[2m15:31:43[22m [34m[vite][39m 15:31:43 [200] /stats 13196ms
+[2m15:31:52[22m [34m[vite][39m 15:31:52 [200] /dashboard 18930ms
+[2m15:31:57[22m [34m[vite][39m 15:31:57 [200] /api/stats 4048ms
+[2m15:32:00[22m [34m[vite][39m 15:32:00 [200] /api/categories 143561ms
+[2m15:32:01[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/layouts/Layout.astro?astro&type=style&index=0&lang.css, /@id/virtual:cloudflare/worker-entry
+[2m15:32:01[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/layouts/Layout.astro?astro&type=style&index=0&lang.css, /src/components/chat/ChatMessageList.tsx
+[2m15:32:01[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/layouts/Layout.astro?astro&type=style&index=0&lang.css, /@id/virtual:cloudflare/worker-entry
+[2m15:32:01[22m [34m[watch][39m /src/layouts/AppLayout.astro?astro&type=style&index=0&lang.css, /src/pages/index.astro?astro&type=style&index=0&lang.css, /src/layouts/Layout.astro?astro&type=style&index=0&lang.css, /src/components/chat/ChatPanel.tsx
+[2m15:32:07[22m [34m[vite][39m 15:32:01 [200] /api/stats 2350ms
+[2m15:32:07[22m [34m[vite][39m 15:32:02 [200] /api/stats 3797ms
+[2m15:32:07[22m [34m[vite][39m [vite] [Error: internal error; reference = ra0vru4d0e0pr54gdgfr7s3e] {
+  remote: true
+}
+[2m15:32:07[22m [34m[vite][39m [vite] Failed to reload virtual:cloudflare/worker-entry. This could be due to syntax errors or importing non-existent modules. (see errors above)
+[2m15:32:10[22m [34m[vite][39m [vite] hot updated: virtual:cloudflare/worker-entry
+[33m[1m15:34:26[22m [WARN] [vite][39m [PersonalityLoader] Failed to load personality: influencer
+[33m[1m15:34:26[22m [WARN] [vite][39m [PersonalityLoader] Falling back to default for: influencer
+[2m15:34:26[22m [34m[vite][39m 15:34:26 [200] POST /api/chat 22277ms
+[2m15:35:02[22m [34m[vite][39m 15:35:02 [200] /dashboard 2453ms
+[2m15:37:05[22m [34m[vite][39m 15:37:05 [200] /api/stats 1522ms
+[2m15:37:12[22m [34m[vite][39m 15:37:12 [200] /api/stats 5585ms

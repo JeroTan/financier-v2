@@ -3,6 +3,7 @@ import { routeDetail } from "@/server/openapi/route-metadata";
 import { TransactionRepository } from "@/server/repositories/transactionRepository";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
+import { getPeriodRange } from "@/server/utils/dateRange";
 
 const statsQuerySchema = z.object({
   period: z.enum(["daily", "monthly", "yearly"]).default("monthly"),
@@ -46,29 +47,6 @@ function errorResponse(code: string, message: string, status: number): Response 
   return jsonResponse({ error: { code, message } }, status);
 }
 
-function getDateRange(period: string, dateStr?: string): { startDate: string; endDate: string } {
-  const refDate = dateStr ? new Date(dateStr) : new Date();
-
-  if (period === "daily") {
-    const start = new Date(refDate);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(refDate);
-    end.setHours(23, 59, 59, 999);
-    return { startDate: start.toISOString(), endDate: end.toISOString() };
-  }
-
-  if (period === "monthly") {
-    const start = new Date(refDate.getFullYear(), refDate.getMonth(), 1);
-    const end = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0, 23, 59, 59, 999);
-    return { startDate: start.toISOString(), endDate: end.toISOString() };
-  }
-
-  // yearly
-  const start = new Date(refDate.getFullYear(), 0, 1);
-  const end = new Date(refDate.getFullYear(), 11, 31, 23, 59, 59, 999);
-  return { startDate: start.toISOString(), endDate: end.toISOString() };
-}
-
 export const GET = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
@@ -89,7 +67,7 @@ export const GET = async (context: any) => {
   if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
 
   const { period, date } = parseResult.data;
-  const { startDate, endDate } = getDateRange(period, date);
+  const { startDate, endDate } = getPeriodRange(period, date);
 
   const repo = new TransactionRepository(db);
   const result = await repo.aggregateTransactions({
