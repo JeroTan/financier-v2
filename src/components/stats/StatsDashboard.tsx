@@ -44,7 +44,6 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
       id: crypto.randomUUID() as string,
       label,
       target,
-      icon: "G",
     };
     setGoals((prev) => [...prev, newGoal]);
   };
@@ -55,25 +54,46 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
 
   const ledgerEntries = stats
     ? [
-        { label: "Total Income", icon: "+", amount: stats.totalIncome, type: "income" as const },
-        { label: "Total Expenses", icon: "-", amount: stats.totalExpenses, type: "expense" as const },
+        { label: "Income", amount: stats.totalIncome, type: "income" as const },
+        { label: "Expenses", amount: stats.totalExpenses, type: "expense" as const },
       ]
     : [];
 
+  const periodLabel = new Intl.DateTimeFormat("en-PH", {
+    day: period === "daily" ? "numeric" : undefined,
+    month: period === "yearly" ? undefined : "long",
+    year: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
+
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        {(["daily", "monthly", "yearly"] as const).map((p) => (
-          <Button
-            key={p}
-            variant={period === p ? "default" : "outline"}
-            size="sm"
-            onClick={() => setPeriod(p)}
-            className={period === p ? "bg-gold-500 text-gold-950 hover:bg-gold-600" : ""}
-          >
-            {p.charAt(0).toUpperCase() + p.slice(1)}
-          </Button>
-        ))}
+    <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="label-md text-muted-foreground">Reporting period</p>
+          <p className="mt-1 text-lg font-semibold">{periodLabel}</p>
+        </div>
+        <div
+          className="grid grid-cols-3 rounded-lg bg-surface-container p-1"
+          data-testid="stats-period-selector"
+          role="group"
+          aria-label="Reporting period"
+        >
+          {(["daily", "monthly", "yearly"] as const).map((p) => {
+            const active = period === p;
+
+            return (
+              <button
+                key={p}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setPeriod(p)}
+                className={`h-9 rounded-md px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${active ? "bg-primary-container text-on-primary-fixed shadow-sm" : "text-muted-foreground hover:bg-surface-container-high hover:text-foreground"}`}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <StatsSummary
@@ -84,7 +104,7 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
       />
 
       {error && (
-        <div className="text-center py-4">
+        <div className="rounded-lg border border-error/40 bg-error-container p-5 text-center">
           <p className="text-destructive mb-2">{error}</p>
           <Button variant="outline" size="sm" onClick={refetch}>Retry</Button>
         </div>
@@ -92,12 +112,17 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
 
       {!error && <StatsLedgerTable entries={ledgerEntries} loading={loading} />}
 
-      <div className="space-y-3">
-        <h3 className="text-lg font-semibold">Goals</h3>
+      <section className="space-y-4 border-t border-outline-variant pt-6">
+        <div>
+          <p className="label-md text-muted-foreground">Planning</p>
+          <h2 className="mt-1 text-lg font-semibold">Goals</h2>
+        </div>
         {goals.length === 0 ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <Target className="mx-auto mb-2 h-8 w-8" aria-hidden="true" />
-            <p>No goals set yet. Create your first financial goal!</p>
+          <div className="rounded-lg border border-dashed border-outline-variant bg-surface-container-low p-6 text-center text-muted-foreground">
+            <span className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary-fixed text-on-primary-fixed">
+              <Target className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <p className="text-sm">No goals yet.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -115,7 +140,7 @@ export function StatsDashboard({ token }: StatsDashboardProps) {
           </div>
         )}
         <GoalCreationForm onCreate={handleCreateGoal} />
-      </div>
+      </section>
     </div>
   );
 }

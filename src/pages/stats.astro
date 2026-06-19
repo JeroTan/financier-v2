@@ -6,11 +6,11 @@ import { StatsDashboard } from "@/components/stats/StatsDashboard";
 
 <AppLayout title="Stats" currentPage="/stats">
   <ErrorBoundary>
-    <div class="space-y-6">
-      <h1 class="headline-lg">Statistics</h1>
-      <p class="body-lg text-muted-foreground">
-        View your financial statistics and trends.
-      </p>
+    <div class="mx-auto max-w-5xl space-y-6">
+      <header class="border-b border-outline-variant pb-5">
+        <p class="label-md text-primary">Financial overview</p>
+        <h1 class="headline-lg mt-2">Statistics</h1>
+      </header>
       <StatsDashboard client:load />
     </div>
   </ErrorBoundary>

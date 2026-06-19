@@ -41,7 +41,7 @@ export function GoalCreationForm({ onCreate }: GoalCreationFormProps) {
   }
 
   return (
-    <Card>
+    <Card className="rounded-lg border-outline-variant shadow-card">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">New Goal</CardTitle>
       </CardHeader>
@@ -62,6 +62,8 @@ export function GoalCreationForm({ onCreate }: GoalCreationFormProps) {
             <Input
               id="goal-target"
               type="number"
+              min="0.01"
+              step="0.01"
               value={target}
               onChange={(e) => setTarget(e.target.value)}
               placeholder="1000"
@@ -72,7 +74,7 @@ export function GoalCreationForm({ onCreate }: GoalCreationFormProps) {
             <Button type="button" variant="outline" className="flex-1" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" className="flex-1 bg-gold-500 text-gold-950" disabled={saving || !label || !target}>
+            <Button type="submit" className="flex-1" disabled={saving || !label || !target}>
               {saving ? "Saving..." : "Create"}
             </Button>
           </div>
