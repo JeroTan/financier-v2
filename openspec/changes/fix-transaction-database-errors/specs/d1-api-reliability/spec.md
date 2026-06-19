@@ -1,17 +1,22 @@
 ## ADDED Requirements
 
 ### Requirement: Explicit D1 development mode
-The system SHALL use local D1 for normal local development and SHALL require an explicit command or configuration choice to use a deployed remote D1 database.
+The system SHALL use deployed remote D1 for normal development and SHALL keep local D1 limited to explicitly requested emergency/debug workflows.
 
-#### Scenario: Normal local development
+#### Scenario: Normal development
 - **WHEN** the developer runs the standard development command
-- **THEN** D1 reads and writes use the local persisted database
-- **AND** local requests do not depend on network access to the deployed development database
+- **THEN** D1 reads and writes use the deployed development database through remote Cloudflare bindings
+- **AND** the workflow may depend on network access to Cloudflare
 
-#### Scenario: Explicit remote development
-- **WHEN** the developer runs the documented remote-development command
+#### Scenario: Built Worker remote preview
+- **WHEN** the developer runs the documented remote-preview command
 - **THEN** D1 calls are routed to the deployed development database
 - **AND** the command clearly identifies that remote data may be modified
+
+#### Scenario: Local D1 debug exception
+- **WHEN** a task explicitly targets Miniflare-local D1 behavior
+- **THEN** local D1 may be used only for that isolated debug task
+- **AND** the OpenSpec fragment must not describe local D1 as the default workflow
 
 ### Requirement: Stable database API failures
 D1-backed JSON endpoints SHALL map database failures to the standard API error envelope and include the request ID response header.

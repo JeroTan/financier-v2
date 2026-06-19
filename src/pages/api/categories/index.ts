@@ -3,6 +3,8 @@ import { routeDetail } from "@/server/openapi/route-metadata";
 import { CategoryRepository } from "@/server/repositories/categoryRepository";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
+import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
+import { isUniqueConstraintError } from "@/server/db/errors";
 
 const createCategorySchema = z.object({
   name: z.string().min(1).max(100),
@@ -69,15 +71,18 @@ function errorResponse(code: string, message: string, status: number): Response 
   return jsonResponse({ error: { code, message } }, status);
 }
 
-export const GET = async (context: any) => {
+const handleGET = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
 
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return errorResponse(code, auth.error, auth.status);
+  }
 
   const db = env.DB;
-  if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
+  if (!db) throw databaseUnavailableError("D1_ERROR: DB binding not available");
 
   const repo = new CategoryRepository(db);
   const categories = await repo.seedDefaultCategories(auth.context.userId);
@@ -88,12 +93,15 @@ export const GET = async (context: any) => {
   });
 };
 
-export const POST = async (context: any) => {
+const handlePOST = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
 
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return errorResponse(code, auth.error, auth.status);
+  }
 
   let body: unknown;
   try {
@@ -108,18 +116,26 @@ export const POST = async (context: any) => {
   }
 
   const db = env.DB;
-  if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
+  if (!db) throw databaseUnavailableError("D1_ERROR: DB binding not available");
 
   const repo = new CategoryRepository(db);
   const data = parseResult.data;
 
-  const category = await repo.createCategory({
-    id: crypto.randomUUID(),
-    userId: auth.context.userId,
-    name: data.name,
-    icon: data.icon ?? "📦",
-    isDefault: 0,
-  });
+  let category;
+  try {
+    category = await repo.createCategory({
+      id: crypto.randomUUID(),
+      userId: auth.context.userId,
+      name: data.name,
+      icon: data.icon ?? "📦",
+      isDefault: 0,
+    });
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return errorResponse("CATEGORY_EXISTS", "Category already exists", 409);
+    }
+    throw error;
+  }
 
   return jsonResponse({
     success: true,
@@ -130,3 +146,9 @@ export const POST = async (context: any) => {
     },
   });
 };
+
+export const GET = (context: any) =>
+  withDatabaseErrorResponse(context, () => handleGET(context));
+
+export const POST = (context: any) =>
+  withDatabaseErrorResponse(context, () => handlePOST(context));

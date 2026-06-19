@@ -2,6 +2,7 @@ import { routeDetail } from "@/server/openapi/route-metadata";
 import { z } from "zod";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
+import { withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 
 export const uploadReceiptDetail = routeDetail("POST", "/api/receipts", {
   summary: "Upload a receipt image",
@@ -47,12 +48,15 @@ function isFormContentType(request: Request): boolean {
   return contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded");
 }
 
-export const POST = async (context: any) => {
+const handlePOST = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
 
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return errorResponse(code, auth.error, auth.status);
+  }
 
   if (!isFormContentType(request)) {
     return errorResponse("INVALID_FILE", "Receipt upload requires multipart form data", 400);
@@ -91,3 +95,6 @@ export const POST = async (context: any) => {
     return errorResponse("STORAGE_ERROR", "Failed to upload file", 500);
   }
 };
+
+export const POST = (context: any) =>
+  withDatabaseErrorResponse(context, () => handlePOST(context));

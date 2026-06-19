@@ -6,6 +6,7 @@ import { TransactionRepository } from "@/server/repositories/transactionReposito
 import { CategoryRepository } from "@/server/repositories/categoryRepository";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
+import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 
 const chatRequestSchema = z.object({
   messageTrail: z.array(z.object({
@@ -56,15 +57,16 @@ export const chatRouteDetail = routeDetail("POST", "/api/chat", {
   ],
 });
 
-export const POST = async (context: any) => {
+const handlePOST = async (context: any) => {
   const request = context.request;
 
   // Auth check
   const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
   if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
     return new Response(
-      JSON.stringify({ error: { code: "UNAUTHORIZED", message: auth.error } }),
+      JSON.stringify({ error: { code, message: auth.error } }),
       { status: auth.status, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -102,10 +104,7 @@ export const POST = async (context: any) => {
   }
 
   if (!db) {
-    return new Response(
-      JSON.stringify({ error: { code: "SERVER_ERROR", message: "Database not available" } }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    throw databaseUnavailableError("D1_ERROR: DB binding not available");
   }
 
   const userId = auth.context.userId;
@@ -134,3 +133,6 @@ export const POST = async (context: any) => {
     },
   });
 };
+
+export const POST = (context: any) =>
+  withDatabaseErrorResponse(context, () => handlePOST(context));

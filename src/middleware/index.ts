@@ -2,6 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { rateLimiterMiddleware } from "@/server/middleware/apiRateLimiter";
 import { UserRepository } from "@/server/repositories/userRepository";
+import { databaseErrorResponse, databaseUnavailableError } from "@/server/http/databaseErrorResponse";
 
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/signup", "/api/auth", "/api/openapi.json", "/api/docs"];
 const PUBLIC_PREFIXES = ["/api/auth/"];
@@ -66,7 +67,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   const db = env.DB;
   if (!db) {
-    return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
+    return databaseErrorResponse(databaseUnavailableError("D1_ERROR: DB binding not available"), requestId);
   }
 
   const tokenRevocation = env.TOKEN_REVOCATION;
@@ -76,7 +77,12 @@ export const onRequest = defineMiddleware(async (context, next) => {
   }
 
   const userRepo = new UserRepository(db);
-  const user = await userRepo.findByRefreshToken(refreshToken);
+  let user;
+  try {
+    user = await userRepo.findByRefreshToken(refreshToken);
+  } catch (error) {
+    return databaseErrorResponse(error, requestId);
+  }
   if (!user) {
     return withRequestId(Response.redirect(new URL("/login", request.url), 302), requestId);
   }

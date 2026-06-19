@@ -5,6 +5,8 @@ import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 
 const serverOnlyOptimizeExcludes = ["drizzle-orm", "drizzle-orm/d1"];
+const remoteBindings = process.env.CLOUDFLARE_REMOTE_BINDINGS !== "false";
+const inspectorPort = process.env.CLOUDFLARE_INSPECTOR === "false" ? false : undefined;
 
 // https://astro.build/config
 export default defineConfig({
@@ -16,7 +18,7 @@ export default defineConfig({
     port: 4333,
     host: true,
   },
-  adapter: cloudflare(),
+  adapter: cloudflare({ remoteBindings, inspectorPort }),
   integrations: [react()],
   vite: {
     optimizeDeps: {

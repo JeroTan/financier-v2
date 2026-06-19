@@ -4,16 +4,22 @@ import { AuthService } from "@/server/auth/service";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { checkRateLimit, getRateLimitKey } from "@/server/middleware/rateLimiter";
 import { authSuccessResponse, errorResponse, readCredentials } from "@/server/auth/utils";
+import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
+import { isUniqueConstraintError } from "@/server/db/errors";
 import "./routes";
 
-export const POST = async (context: APIContext) => {
+const handlePOST = async (context: APIContext) => {
   const request = context.request;
   const env = getRuntimeEnv();
   const rateLimiter = env.RATE_LIMITER;
 
   if (rateLimiter) {
     const key = getRateLimitKey(request, "register");
-    const limit = await checkRateLimit(rateLimiter, key, { maxAttempts: 3, windowSeconds: 900 });
+    const isDevelopment = env.CLOUDFLARE_ENV === "development";
+    const limit = await checkRateLimit(rateLimiter, key, {
+      maxAttempts: isDevelopment ? 30 : 3,
+      windowSeconds: isDevelopment ? 60 : 900,
+    });
     if (!limit.allowed) {
       const retryAfter = limit.resetAt - Math.floor(Date.now() / 1000);
       return errorResponse("RATE_LIMITED", "Too many registration attempts", 429, { "Retry-After": String(retryAfter) });
@@ -26,12 +32,20 @@ export const POST = async (context: APIContext) => {
   if (body.password.length < 8) return errorResponse("INVALID_INPUT", "Password must be at least 8 characters", 400);
 
   const db = env.DB;
-  if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
+  if (!db) throw databaseUnavailableError("D1_ERROR: DB binding not available");
 
   const userRepo = new UserRepository(db);
   const authService = new AuthService(userRepo, env.PASSWORD_PEPPER as string, env);
 
-  const result = await authService.register({ email: body.email, password: body.password });
+  let result;
+  try {
+    result = await authService.register({ email: body.email, password: body.password });
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return errorResponse("EMAIL_EXISTS", "Email already registered", 409);
+    }
+    throw error;
+  }
 
   if (result.error) {
     if (result.error === "EMAIL_EXISTS") return errorResponse("EMAIL_EXISTS", "Email already registered", 409);
@@ -40,3 +54,6 @@ export const POST = async (context: APIContext) => {
 
   return authSuccessResponse(request, result.data!, 201);
 };
+
+export const POST = (context: APIContext) =>
+  withDatabaseErrorResponse(context, () => handlePOST(context));

@@ -1,0 +1,30 @@
+
+> orbital-osiris@0.0.1 dev
+> cross-env CLOUDFLARE_ENV=development astro dev --host 127.0.0.1 --port 4333
+
+[2m15:50:15[22m [34m[@astrojs/cloudflare][39m Enabling image processing with Cloudflare Images for production with the "IMAGES" Images binding.
+[2m15:50:15[22m [34m[@astrojs/cloudflare][39m Enabling sessions with Cloudflare KV with the "SESSION" KV binding.
+[2m15:50:16[22m [34m[vite][39m Re-optimizing dependencies because vite config has changed
+⎔ Establishing remote connection...
+Using secrets defined in .env
+[2m15:51:19[22m [34m[types][39m Generated [2m30ms[22m
+[33m[1m15:51:19[22m [WARN] [content][39m Content config not loaded
+[2m15:51:19[22m [34m[vite][39m Re-optimizing dependencies because vite config has changed
+[2m15:51:19[22m [34m[vite][39m Re-optimizing dependencies because vite config has changed
+[42m[1m astro [22m[49m [32mv6.1.9[39m [2mready in[22m 96688 [2mms[22m
+[2m┃[22m Local    [36mhttp://127.0.0.1:4333/[39m
+[2m15:51:43[22m [32mwatching for file changes...[39m
+[2m15:52:19[22m [34m[vite][39m [32m✨ new dependencies optimized: [33mdrizzle-orm, drizzle-orm/d1[32m[39m
+[2m15:52:19[22m [34m[vite][39m [32m✨ optimized dependencies changed. reloading[39m
+[2m15:52:19[22m [34m[vite][39m [vite] program reload
+[2m15:52:44[22m [34m[vite][39m [32m✨ new dependencies optimized: [33mdrizzle-orm/sqlite-core[32m[39m
+[2m15:52:44[22m [34m[vite][39m [32m✨ optimized dependencies changed. reloading[39m
+[2m15:52:44[22m [34m[vite][39m [vite] program reload
+[2m15:53:22[22m [34m[vite][39m [32m✨ new dependencies optimized: [33mjose[32m[39m
+[2m15:53:22[22m [34m[vite][39m [32m✨ optimized dependencies changed. reloading[39m
+[2m15:53:22[22m [34m[vite][39m [vite] program reload
+[2m15:53:33[22m [34m[vite][39m 15:53:33 [200] /api/openapi.json 3010ms
+[2m15:54:16[22m [34m[vite][39m 15:54:16 [302] /stats 2586ms
+[2m15:54:27[22m [34m[vite][39m 15:54:27 [200] /login 234ms
+[2m15:59:07[22m [34m[vite][39m 15:59:07 [200] /api/openapi.json 20ms
+[2m15:59:14[22m [34m[vite][39m 15:59:14 [200] / 101ms

@@ -64,7 +64,7 @@ Alternative considered: replace all shadcn class names with custom Liquid Gold n
 
 ### Keep Migrations Append-Only And Journal-Synced
 
-Do not edit applied migrations blindly. Add repair migration(s) only where needed, remove untracked duplicate files or register them correctly before apply, and document local/remote migration verification.
+Do not edit applied migrations blindly. Add repair migration(s) only where needed, remove untracked duplicate files or register them correctly before apply, and document remote development migration verification.
 
 Rationale: D1 remote databases may already have some migrations applied. Duplicate `ADD COLUMN personality` can fail.
 
@@ -74,7 +74,7 @@ Alternative considered: rebuild migration history from scratch. Rejected because
 
 Before user repository reads or writes, inspect `PRAGMA table_info(users)` and add missing auth/settings columns: `password_salt`, `refresh_token`, `personality`, and `theme`. Cache successful repair per D1 binding and allow retry after repair failure.
 
-Rationale: some local or remote D1 databases were created before current `users` columns existed. `CREATE TABLE IF NOT EXISTS` will not add columns to existing tables, so register/login/Google auth can fail even when source schema looks correct.
+Rationale: some remote development or production D1 databases were created before current `users` columns existed. `CREATE TABLE IF NOT EXISTS` will not add columns to existing tables, so register/login/Google auth can fail even when source schema looks correct.
 
 Alternative considered: rely only on manual D1 reset or migration re-apply. Rejected because it breaks existing user data and does not help stale deployed databases during auth.
 
@@ -88,11 +88,11 @@ Alternative considered: rely on manual review only. Rejected because current fai
 
 ## Risks / Trade-offs
 
-- Existing remote D1 schema may differ from local migrations -> verify with non-destructive schema queries before applying repair migration.
+- Existing remote D1 schema may differ from checked-in migrations -> verify with non-destructive remote schema queries before applying repair migration.
 - Changing auth token flow may require updating every frontend call site -> centralize token handling in API client and pass session data consistently.
 - Supporting HTML and JSON auth responses adds branching -> keep request parsing/response helpers shared.
 - Tailwind alias layer may mask future token misuse -> add responsive computed-style smoke checks for login/app pages.
-- Cloudflare AI/KV/R2 bindings can slow local smoke tests -> separate fast local checks from binding-dependent integration checks.
+- Cloudflare AI/KV/R2 bindings can slow smoke tests -> keep fast unit checks separate from remote Cloudflare integration checks.
 
 ## Migration Plan
 
@@ -109,4 +109,4 @@ Alternative considered: rely on manual review only. Rejected because current fai
 
 - Should access tokens be returned only in JSON responses, or also stored in a readable cookie for SSR page hydration?
 - Should public Swagger docs remain enabled in production or be restricted after launch?
-- Should local dev use remote D1/KV/R2 by default, or add local/non-remote bindings for faster smoke tests?
+- Cloudflare-backed development resources are remote by default. Do not accept bindings without explicit remote behavior as the project default.

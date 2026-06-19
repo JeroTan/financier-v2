@@ -17,7 +17,7 @@ const DEV_LIMITS: RateLimitTier = {
   "data-read": { maxAttempts: 120, windowSeconds: 60 },
   "data-write": { maxAttempts: 60, windowSeconds: 60 },
   settings: { maxAttempts: 30, windowSeconds: 60 },
-  auth: { maxAttempts: 5, windowSeconds: 60 },
+  auth: { maxAttempts: 30, windowSeconds: 60 },
 };
 
 const PROD_LIMITS: RateLimitTier = {

@@ -4,13 +4,17 @@ import { getRuntimeEnv } from "@/server/context/bindings";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getClearRefreshTokenCookie } from "@/server/auth/tokens";
 import { errorResponse, jsonResponse } from "@/server/auth/utils";
+import { withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 import "./routes";
 
-export const POST = async (context: APIContext) => {
+const handlePOST = async (context: APIContext) => {
   const request = context.request;
   const env = getRuntimeEnv();
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return errorResponse(code, auth.error, auth.status);
+  }
 
   const refreshToken = request.headers.get("Cookie")?.match(/refreshToken=([^;]+)/)?.[1];
   const tokenRevocation = env.TOKEN_REVOCATION;
@@ -20,8 +24,12 @@ export const POST = async (context: APIContext) => {
   const db = env.DB;
   if (db) {
     const userRepo = new UserRepository(db);
-    await userRepo.updateRefreshToken(auth.context.userId, "");
+    const user = await userRepo.updateRefreshToken(auth.context.userId, "");
+    if (!user) return errorResponse("USER_NOT_FOUND", "User not found", 404);
   }
 
   return jsonResponse({ success: true }, 200, { "Set-Cookie": getClearRefreshTokenCookie(env) });
 };
+
+export const POST = (context: APIContext) =>
+  withDatabaseErrorResponse(context, () => handlePOST(context));

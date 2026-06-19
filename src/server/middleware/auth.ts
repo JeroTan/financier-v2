@@ -2,6 +2,8 @@ import { verifyAccessToken } from "@/server/auth/tokens";
 import type { TokenPayload } from "@/server/auth/tokens";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { UserRepository } from "@/server/repositories/userRepository";
+import { isTransientDatabaseError } from "@/server/db/errors";
+import { databaseUnavailableError } from "@/server/http/databaseErrorResponse";
 
 export type AuthContext = {
   userId: string;
@@ -47,11 +49,19 @@ export async function authMiddleware(
 
   const db = env.DB as D1Database | undefined;
   if (!db) {
-    return { authenticated: false, error: "Database not available", status: 500 };
+    throw databaseUnavailableError("D1_ERROR: DB binding not available");
   }
 
   const userRepo = new UserRepository(db);
-  const user = await userRepo.findByRefreshToken(refreshToken);
+  let user;
+  try {
+    user = await userRepo.findByRefreshToken(refreshToken);
+  } catch (error) {
+    if (isTransientDatabaseError(error)) {
+      throw error;
+    }
+    throw error;
+  }
   if (!user) {
     return { authenticated: false, error: "Invalid session", status: 401 };
   }

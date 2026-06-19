@@ -1,4 +1,28 @@
+import businessmanPrompt from "./businessman.md?raw";
+import cavemanPrompt from "./caveman.md?raw";
+import defaultPrompt from "./default.md?raw";
+import detectivePrompt from "./detective.md?raw";
+import gamerPrompt from "./gamer.md?raw";
+import influencerPrompt from "./influencer.md?raw";
+import piratePrompt from "./pirate.md?raw";
+import tsunderePrompt from "./tsundere.md?raw";
+import yanderePrompt from "./yandere.md?raw";
+import zenmasterPrompt from "./zenmaster.md?raw";
+
 const PERSONALITY_CACHE: Record<string, string> = {};
+
+const PERSONALITY_PROMPTS: Record<string, string> = {
+  businessman: businessmanPrompt,
+  caveman: cavemanPrompt,
+  default: defaultPrompt,
+  detective: detectivePrompt,
+  gamer: gamerPrompt,
+  influencer: influencerPrompt,
+  pirate: piratePrompt,
+  tsundere: tsunderePrompt,
+  yandere: yanderePrompt,
+  zenmaster: zenmasterPrompt,
+};
 
 export async function loadPersonalityPrompt(personality: string): Promise<string> {
   if (PERSONALITY_CACHE[personality]) {
@@ -6,17 +30,10 @@ export async function loadPersonalityPrompt(personality: string): Promise<string
   }
 
   const safeName = personality.replace(/[^a-z0-9_-]/gi, "");
-  const url = new URL(`../personalities/${safeName}.md`, import.meta.url).toString();
-
-  try {
-    const response = await fetch(url);
-    if (response.ok) {
-      const text = await response.text();
-      PERSONALITY_CACHE[personality] = text.trim();
-      return PERSONALITY_CACHE[personality];
-    }
-  } catch {
-    console.warn(`[PersonalityLoader] Failed to load personality: ${personality}`);
+  const prompt = PERSONALITY_PROMPTS[safeName];
+  if (prompt) {
+    PERSONALITY_CACHE[personality] = prompt.trim();
+    return PERSONALITY_CACHE[personality];
   }
 
   if (personality !== "default") {
@@ -30,17 +47,8 @@ export async function loadPersonalityPrompt(personality: string): Promise<string
 async function loadDefaultPersonality(): Promise<string> {
   if (PERSONALITY_CACHE.default) return PERSONALITY_CACHE.default;
 
-  try {
-    const response = await fetch(new URL("../personalities/default.md", import.meta.url).toString());
-    if (response.ok) {
-      PERSONALITY_CACHE.default = (await response.text()).trim();
-      return PERSONALITY_CACHE.default;
-    }
-  } catch {
-    // Fall through
-  }
-
-  return getDefaultFallback();
+  PERSONALITY_CACHE.default = defaultPrompt.trim() || getDefaultFallback();
+  return PERSONALITY_CACHE.default;
 }
 
 function getDefaultFallback(): string {

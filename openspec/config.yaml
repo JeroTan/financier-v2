@@ -1,20 +1,19 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Source truth: everything Cloudflare-backed must use remote Cloudflare resources by default.
+  This includes D1, KV, R2, Workers AI, Cloudflare sessions, and image bindings.
+  OpenSpec proposals, designs, task lists, and spec fragments that touch Cloudflare resources must explicitly preserve remote binding behavior.
+  Do not propose local D1, local KV, local R2, or local-only Cloudflare emulation as the default workflow.
+  Local Cloudflare resources may only be mentioned as isolated emergency/debug tooling when a task explicitly targets Miniflare-local behavior.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - State that Cloudflare-backed resources stay remote by default when the change touches D1, KV, R2, Workers AI, sessions, or images.
+  design:
+    - Treat remote Cloudflare bindings as a non-negotiable project constraint.
+    - Do not list local Cloudflare bindings as an unresolved option unless the task explicitly requests local-only debugging.
+  tasks:
+    - Keep Cloudflare validation tasks remote-first, using deployed development resources for D1/KV/R2/AI checks.
+  spec:
+    - Requirements that mention Cloudflare bindings must say remote development resources are the default.

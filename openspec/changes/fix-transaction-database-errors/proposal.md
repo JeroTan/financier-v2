@@ -2,7 +2,7 @@
 
 The transaction failure is a symptom of broader D1/API reliability problems, not only a transaction insert defect.
 
-The development runtime is configured with `remote: true` for D1, so local Astro/Miniflare requests are proxied over the network to the deployed development database. The audit log records 8-48 second API calls followed by `Network connection lost` failures across stats, users, categories, and transactions. Cloudflare documents that local D1 is the default development mode and that `remote: true` explicitly opts into remote data.
+The development runtime is configured with `remote: true` for D1 because this project requires Cloudflare-backed resources to use deployed development resources by default. Astro/Miniflare development requests therefore proxy D1 calls over the network to the deployed development database. The audit log records 8-48 second API calls followed by `Network connection lost` failures across stats, users, categories, and transactions. The fix must harden the app for remote Cloudflare failures instead of changing the default to local D1.
 
 A second confirmed failure occurs when concurrent default-category seeding hits the legacy unique `categories.slug` constraint. The repository intends to recover, but assumes thrown D1 values satisfy the local `Error` prototype.
 
@@ -10,7 +10,7 @@ The audit also found missing user-column migrations, request-time schema mutatio
 
 ## What Changes
 
-- Use local D1 for normal development and provide an explicit remote-development command for intentional testing against deployed development data
+- Preserve remote Cloudflare D1 for normal development and keep built Worker remote-preview verification explicit
 - Make checked-in migrations the source of truth for all columns currently required by Drizzle
 - Keep compatibility checks read-only during normal requests; do not depend on request-time DDL for a valid deployment
 - Introduce consistent D1 error normalization and JSON API error handling with request IDs

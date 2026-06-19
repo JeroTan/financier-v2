@@ -64,7 +64,10 @@ export class AuthService {
     const tokens = await createTokens(user.id, user.email, this.env);
     if (tokens.error) return tokens;
 
-    await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    const updatedUser = await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    if (!updatedUser) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
 
     return {
       data: {
@@ -97,7 +100,10 @@ export class AuthService {
     const tokens = await createTokens(user.id, user.email, this.env);
     if (tokens.error) return tokens;
 
-    await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    const updatedUser = await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    if (!updatedUser) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
 
     return {
       data: {
@@ -136,7 +142,10 @@ export class AuthService {
     const tokens = await createTokens(user.id, user.email, this.env);
     if (tokens.error) return tokens;
 
-    await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    const updatedUser = await this.userRepo.updateRefreshToken(user.id, tokens.data!.refreshToken);
+    if (!updatedUser) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
 
     return {
       data: {
@@ -175,7 +184,10 @@ export class AuthService {
     }
 
     const { passwordHash, passwordSalt } = await hashPassword(newPassword, this.pepper);
-    await this.userRepo.updatePassword(userId, passwordHash, passwordSalt);
+    const updatedUser = await this.userRepo.updatePassword(userId, passwordHash, passwordSalt);
+    if (!updatedUser) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
 
     return { data: { success: true }, error: null };
   }
@@ -184,7 +196,10 @@ export class AuthService {
     userId: string,
     preferences: { personality?: string; theme?: "light" | "dark" },
   ): Promise<JwtResult<{ success: boolean }>> {
-    await this.userRepo.updatePreferences(userId, preferences);
+    const updatedUser = await this.userRepo.updatePreferences(userId, preferences);
+    if (!updatedUser) {
+      return { data: null, error: "USER_NOT_FOUND" };
+    }
     return { data: { success: true }, error: null };
   }
 }

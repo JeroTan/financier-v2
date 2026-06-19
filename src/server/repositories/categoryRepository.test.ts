@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isUniqueConstraintError } from "./categoryRepository";
+import { isUniqueConstraintError } from "@/server/db/errors";
 
 describe("isUniqueConstraintError", () => {
   it("recognizes normal unique-constraint errors", () => {

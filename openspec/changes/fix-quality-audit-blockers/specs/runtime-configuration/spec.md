@@ -18,6 +18,11 @@ Wrangler configuration SHALL define all bindings required by Astro and applicati
 - **WHEN** the Worker starts
 - **THEN** D1, KV token revocation, KV rate limiter, R2 storage, AI, assets, and any Astro-required session/image bindings are available or explicitly disabled
 
+#### Scenario: Development bindings are remote
+- **WHEN** development Wrangler configuration is validated
+- **THEN** Cloudflare-backed bindings for D1, KV, R2, AI, sessions, and images use remote Cloudflare resources by default
+- **AND** bindings without explicit remote behavior are not accepted as the default development workflow
+
 #### Scenario: Placeholder IDs rejected
 - **WHEN** deployment configuration is validated
 - **THEN** placeholder KV IDs such as `replace-with-*` are treated as invalid

@@ -33,6 +33,7 @@
       ],
       "ai": {
         "binding": "AI",
+        "remote": true,
       },
       "r2_buckets": [
         {
@@ -45,14 +46,17 @@
         {
           "binding": "TOKEN_REVOCATION",
           "id": "2e4f63f32a184f25b07331cb5d6f5fa5",
+          "remote": true,
         },
         {
           "binding": "RATE_LIMITER",
           "id": "d51dffe651254d9881a57848cce34a4a",
+          "remote": true,
         },
         {
           "binding": "SESSION",
           "id": "70fd3fae5f4e4764847ccaa3843b5e3b",
+          "remote": true,
         },
       ],
     },
@@ -73,6 +77,7 @@
       ],
       "ai": {
         "binding": "AI",
+        "remote": true,
       },
       "r2_buckets": [
         {
@@ -85,14 +90,17 @@
         {
           "binding": "TOKEN_REVOCATION",
           "id": "2e4f63f32a184f25b07331cb5d6f5fa5",
+          "remote": true,
         },
         {
           "binding": "RATE_LIMITER",
           "id": "d51dffe651254d9881a57848cce34a4a",
+          "remote": true,
         },
         {
           "binding": "SESSION",
           "id": "70fd3fae5f4e4764847ccaa3843b5e3b",
+          "remote": true,
         },
       ],
     },

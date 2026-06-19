@@ -4,7 +4,8 @@ import { drizzle } from "drizzle-orm/d1";
 
 import { categories } from "@/db/schema";
 import type { Category, NewCategory } from "@/db/schema";
-import { ensureTableSchema, type ColumnRepair } from "./tableRepair";
+import { isUniqueConstraintError } from "@/server/db/errors";
+import { assertTableReady } from "./schemaReadiness";
 
 const DEFAULT_CATEGORIES = [
   { name: "Food", icon: "🍔" },
@@ -18,22 +19,11 @@ const DEFAULT_CATEGORIES = [
   { name: "Other", icon: "📦" },
 ];
 
-const CREATE_CATEGORIES_TABLE = `
-CREATE TABLE IF NOT EXISTS categories (
-  id TEXT PRIMARY KEY NOT NULL,
-  user_id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  icon TEXT,
-  is_default INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT ''
-)`;
-
-const CATEGORY_COLUMN_REPAIRS: readonly ColumnRepair[] = [
-  { name: "user_id", sql: "ALTER TABLE categories ADD COLUMN user_id TEXT NOT NULL DEFAULT ''" },
-  { name: "icon", sql: "ALTER TABLE categories ADD COLUMN icon TEXT" },
-  { name: "is_default", sql: "ALTER TABLE categories ADD COLUMN is_default INTEGER NOT NULL DEFAULT 0" },
-  { name: "created_at", sql: "ALTER TABLE categories ADD COLUMN created_at TEXT NOT NULL DEFAULT ''" },
-];
+const CATEGORY_TABLE_REQUIREMENT = {
+  tableName: "categories",
+  columns: ["id", "user_id", "name", "icon", "is_default", "created_at"],
+  indexes: ["idx_categories_user"],
+} as const;
 
 export class CategoryRepository {
   private readonly d1: D1Database;
@@ -45,7 +35,7 @@ export class CategoryRepository {
   }
 
   private ensureCategorySchema(): Promise<void> {
-    return ensureTableSchema(this.d1, "categories", CREATE_CATEGORIES_TABLE, CATEGORY_COLUMN_REPAIRS);
+    return assertTableReady(this.d1, CATEGORY_TABLE_REQUIREMENT);
   }
 
   async getCategoriesByUserId(userId: string): Promise<Category[]> {
@@ -103,7 +93,7 @@ export class CategoryRepository {
 
     const result = await this.db
       .delete(categories)
-      .where(eq(categories.id, id))
+      .where(and(eq(categories.id, id), eq(categories.userId, userId)))
       .returning();
 
     return result.length > 0;
@@ -117,7 +107,7 @@ export class CategoryRepository {
 
     if (columns.has("slug")) {
       names.push("slug");
-      values.push(`${slugify(data.name)}-${data.userId.slice(0, 8)}`);
+      values.push(`${slugify(data.name)}-${data.userId}`);
     }
     if (columns.has("icon")) {
       names.push("icon");
@@ -146,6 +136,9 @@ export class CategoryRepository {
       .select()
       .from(categories)
       .where(eq(categories.id, data.id));
+    if (!result) {
+      throw new Error("Category insert did not return a row");
+    }
     return result;
   }
 
@@ -165,25 +158,4 @@ function slugify(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || crypto.randomUUID();
-}
-
-export function isUniqueConstraintError(error: unknown): boolean {
-  const message = getErrorMessage(error).toLowerCase();
-  return message.includes("unique constraint failed")
-    || message.includes("sqlite_constraint_unique");
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) return error.message;
-
-  if (
-    typeof error === "object"
-    && error !== null
-    && "message" in error
-    && typeof error.message === "string"
-  ) {
-    return error.message;
-  }
-
-  return String(error);
 }

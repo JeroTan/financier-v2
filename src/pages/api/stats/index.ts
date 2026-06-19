@@ -1,40 +1,10 @@
-import { z } from "zod";
-import { routeDetail } from "@/server/openapi/route-metadata";
 import { TransactionRepository } from "@/server/repositories/transactionRepository";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { getPeriodRange } from "@/server/utils/dateRange";
-
-const statsQuerySchema = z.object({
-  period: z.enum(["daily", "monthly", "yearly"]).default("monthly"),
-  date: z.string().date().optional(),
-});
-
-export const getStatsRouteDetail = routeDetail("GET", "/api/stats", {
-  summary: "Get financial statistics",
-  description: "Returns aggregated income, expenses, and net for the specified period.",
-  tags: ["Stats"],
-  auth: true,
-  request: {
-    query: statsQuerySchema,
-  },
-  response: {
-    description: "Financial statistics",
-    schema: z.object({
-      success: z.literal(true),
-      data: z.object({
-        totalIncome: z.number(),
-        totalExpenses: z.number(),
-        net: z.number(),
-      }),
-    }),
-  },
-  errorCodes: [
-    { code: "INVALID_INPUT", status: 400, description: "Invalid query parameters" },
-    { code: "UNAUTHORIZED", status: 401, description: "Authentication required" },
-    { code: "SERVER_ERROR", status: 500, description: "Database error" },
-  ],
-});
+import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
+import { statsQuerySchema } from "@/server/dto/stats";
+import "./routes";
 
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
@@ -47,16 +17,21 @@ function errorResponse(code: string, message: string, status: number): Response 
   return jsonResponse({ error: { code, message } }, status);
 }
 
-export const GET = async (context: any) => {
+const handleGET = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
 
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return errorResponse("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return errorResponse(code, auth.error, auth.status);
+  }
 
   const url = new URL(request.url);
   const params: Record<string, string> = {};
-  url.searchParams.forEach((value, key) => { params[key] = value; });
+  url.searchParams.forEach((value, key) => {
+    params[key] = value;
+  });
 
   const parseResult = statsQuerySchema.safeParse(params);
   if (!parseResult.success) {
@@ -64,11 +39,12 @@ export const GET = async (context: any) => {
   }
 
   const db = env.DB;
-  if (!db) return errorResponse("SERVER_ERROR", "Database not available", 500);
+  if (!db) {
+    throw databaseUnavailableError("D1_ERROR: DB binding not available");
+  }
 
   const { period, date } = parseResult.data;
   const { startDate, endDate } = getPeriodRange(period, date);
-
   const repo = new TransactionRepository(db);
   const result = await repo.aggregateTransactions({
     userId: auth.context.userId,
@@ -76,12 +52,8 @@ export const GET = async (context: any) => {
     endDate,
   });
 
-  return jsonResponse({
-    success: true,
-    data: {
-      totalIncome: result.totalIncome,
-      totalExpenses: result.totalExpenses,
-      net: result.net,
-    },
-  });
+  return jsonResponse({ success: true, data: result });
 };
+
+export const GET = (context: any) =>
+  withDatabaseErrorResponse(context, () => handleGET(context));

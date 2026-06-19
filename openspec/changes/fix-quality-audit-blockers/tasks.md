@@ -38,7 +38,7 @@
 - [x] 5.1 Reconcile Drizzle schema, existing SQL migrations, and migration journal before adding new migrations.
 - [x] 5.2 Remove or repair duplicate `personality` migration behavior without breaking already-applied databases.
 - [x] 5.3 Ensure users table migration includes `password_salt`, `refresh_token`, `personality`, and `theme`.
-- [x] 5.4 Add safe verification notes or script for checking local/remote D1 schema before migration apply.
+- [x] 5.4 Add safe verification notes or script for checking remote D1 schema before migration apply.
 - [x] 5.5 Run migration generation/check workflow and confirm no unexpected schema drift.
 - [x] 5.6 Document and implement repository-level repair for stale D1 `users` tables missing auth/settings columns.
 

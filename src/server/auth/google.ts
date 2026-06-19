@@ -126,7 +126,8 @@ export async function handleGoogleCallback(
   const authTokens = await createTokens(user.id, user.email, env);
   if (authTokens.error) return authTokens;
 
-  await userRepo.updateRefreshToken(user.id, authTokens.data!.refreshToken);
+  const updatedUser = await userRepo.updateRefreshToken(user.id, authTokens.data!.refreshToken);
+  if (!updatedUser) return { data: null, error: "USER_NOT_FOUND" };
 
   const redirectUrl = `/dashboard?auth=success`;
 

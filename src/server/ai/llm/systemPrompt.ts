@@ -1,3 +1,4 @@
+import basePromptSource from "@/assets/chat_instruction.md?raw";
 import { loadPersonalityPrompt } from "@/server/ai/personalities/loader";
 
 const SYSTEM_PROMPT_CACHE: Record<string, string> = {};
@@ -21,17 +22,7 @@ async function loadBasePrompt(): Promise<string> {
     return SYSTEM_PROMPT_CACHE.base;
   }
 
-  try {
-    const response = await fetch(new URL("/src/assets/chat_instruction.md", import.meta.url).toString());
-    if (response.ok) {
-      SYSTEM_PROMPT_CACHE.base = await response.text();
-      return SYSTEM_PROMPT_CACHE.base;
-    }
-  } catch {
-    // Fallback to inline prompt if file fetch fails
-  }
-
-  SYSTEM_PROMPT_CACHE.base = getDefaultBasePrompt();
+  SYSTEM_PROMPT_CACHE.base = basePromptSource.trim() || getDefaultBasePrompt();
   return SYSTEM_PROMPT_CACHE.base;
 }
 

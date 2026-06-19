@@ -3,9 +3,10 @@ import { handleGoogleCallback } from "@/server/auth/google";
 import { UserRepository } from "@/server/repositories/userRepository";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { getGoogleRedirectUri, redirectResponse } from "@/server/auth/utils";
+import { withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 import "../routes";
 
-export const GET = async (context: APIContext) => {
+const handleGET = async (context: APIContext) => {
   const request = context.request;
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
@@ -38,3 +39,6 @@ export const GET = async (context: APIContext) => {
     result.data!.setCookie ? { "Set-Cookie": result.data!.setCookie } : {},
   );
 };
+
+export const GET = (context: APIContext) =>
+  withDatabaseErrorResponse(context, () => handleGET(context));

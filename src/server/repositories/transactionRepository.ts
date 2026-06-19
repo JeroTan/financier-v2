@@ -5,31 +5,29 @@ import { drizzle } from "drizzle-orm/d1";
 import { transactions, categories } from "@/db/schema";
 import type { Transaction, NewTransaction } from "@/db/schema";
 import { normalizeRangeEnd, normalizeRangeStart, normalizeTransactionDate } from "@/server/utils/dateRange";
-import { ensureTableSchema, type ColumnRepair } from "./tableRepair";
+import { assertTableReady } from "./schemaReadiness";
 
-const CREATE_TRANSACTIONS_TABLE = `
-CREATE TABLE IF NOT EXISTS transactions (
-  id TEXT PRIMARY KEY NOT NULL,
-  user_id TEXT NOT NULL,
-  type TEXT NOT NULL,
-  amount REAL NOT NULL,
-  currency TEXT NOT NULL DEFAULT 'PHP',
-  category_id TEXT,
-  description TEXT,
-  date TEXT NOT NULL,
-  receipt_url TEXT,
-  created_at TEXT NOT NULL DEFAULT '',
-  updated_at TEXT NOT NULL DEFAULT ''
-)`;
-
-const TRANSACTION_COLUMN_REPAIRS: readonly ColumnRepair[] = [
-  { name: "currency", sql: "ALTER TABLE transactions ADD COLUMN currency TEXT NOT NULL DEFAULT 'PHP'" },
-  { name: "category_id", sql: "ALTER TABLE transactions ADD COLUMN category_id TEXT" },
-  { name: "description", sql: "ALTER TABLE transactions ADD COLUMN description TEXT" },
-  { name: "receipt_url", sql: "ALTER TABLE transactions ADD COLUMN receipt_url TEXT" },
-  { name: "created_at", sql: "ALTER TABLE transactions ADD COLUMN created_at TEXT NOT NULL DEFAULT ''" },
-  { name: "updated_at", sql: "ALTER TABLE transactions ADD COLUMN updated_at TEXT NOT NULL DEFAULT ''" },
-];
+const TRANSACTION_TABLE_REQUIREMENT = {
+  tableName: "transactions",
+  columns: [
+    "id",
+    "user_id",
+    "type",
+    "amount",
+    "currency",
+    "category_id",
+    "description",
+    "date",
+    "receipt_url",
+    "created_at",
+    "updated_at",
+  ],
+  indexes: [
+    "idx_transactions_user_date",
+    "idx_transactions_user_type",
+    "idx_transactions_user_category",
+  ],
+} as const;
 
 export class TransactionRepository {
   private readonly d1: D1Database;
@@ -41,7 +39,7 @@ export class TransactionRepository {
   }
 
   private ensureTransactionSchema(): Promise<void> {
-    return ensureTableSchema(this.d1, "transactions", CREATE_TRANSACTIONS_TABLE, TRANSACTION_COLUMN_REPAIRS);
+    return assertTableReady(this.d1, TRANSACTION_TABLE_REQUIREMENT);
   }
 
   async createTransaction(data: NewTransaction): Promise<Transaction> {
@@ -54,16 +52,19 @@ export class TransactionRepository {
         date: normalizeTransactionDate(data.date),
       })
       .returning();
+    if (!result) {
+      throw new Error("Transaction insert did not return a row");
+    }
     return result;
   }
 
-  async getTransactionById(id: string): Promise<Transaction | null> {
+  async getTransactionById(id: string, userId: string): Promise<Transaction | null> {
     await this.ensureTransactionSchema();
 
     const [result] = await this.db
       .select()
       .from(transactions)
-      .where(eq(transactions.id, id));
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
     return result ?? null;
   }
 

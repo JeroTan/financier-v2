@@ -6,6 +6,7 @@ import { formatTransactionConfirmation, parseTransactionIntent } from "@/server/
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
 import type { CategoryRepository } from "@/server/repositories/categoryRepository";
 import type { UserRepository } from "@/server/repositories/userRepository";
+import { isTransientDatabaseError } from "@/server/db/errors";
 
 export type AiChatControllerDeps = {
   ai: Ai;
@@ -140,8 +141,14 @@ export async function aiChatController(
 
         controller.close();
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Internal server error";
-        controller.enqueue(encoder.encode(formatErrorEvent("AI_ERROR", errorMessage)));
+        const databaseUnavailable = isTransientDatabaseError(err);
+        const errorCode = databaseUnavailable ? "DATABASE_UNAVAILABLE" : "AI_ERROR";
+        const errorMessage = databaseUnavailable
+          ? "Database temporarily unavailable. Please retry."
+          : err instanceof Error
+            ? err.message
+            : "Internal server error";
+        controller.enqueue(encoder.encode(formatErrorEvent(errorCode, errorMessage)));
         controller.close();
       }
     },

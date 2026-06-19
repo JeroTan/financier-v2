@@ -4,29 +4,24 @@ import { drizzle } from "drizzle-orm/d1";
 
 import { users } from "@/db/schema";
 import type { User, NewUser } from "@/db/schema";
+import { assertTableReady } from "./schemaReadiness";
 
-type UserTableInfoRow = {
-  name: unknown;
-};
-
-const USER_COLUMN_REPAIRS = [
-  {
-    name: "password_salt",
-    sql: "ALTER TABLE users ADD COLUMN password_salt TEXT",
-  },
-  {
-    name: "refresh_token",
-    sql: "ALTER TABLE users ADD COLUMN refresh_token TEXT",
-  },
-  {
-    name: "personality",
-    sql: "ALTER TABLE users ADD COLUMN personality TEXT NOT NULL DEFAULT 'default'",
-  },
-  {
-    name: "theme",
-    sql: "ALTER TABLE users ADD COLUMN theme TEXT NOT NULL DEFAULT 'light'",
-  },
-] as const;
+const USER_TABLE_REQUIREMENT = {
+  tableName: "users",
+  columns: [
+    "id",
+    "email",
+    "password_hash",
+    "password_salt",
+    "google_id",
+    "refresh_token",
+    "personality",
+    "theme",
+    "created_at",
+    "updated_at",
+  ],
+  indexes: ["users_email_unique", "users_google_id_unique"],
+} as const;
 
 export class UserRepository {
   private static schemaReady = new WeakMap<D1Database, Promise<void>>();
@@ -39,11 +34,11 @@ export class UserRepository {
     this.db = drizzle(db, { schema: { users } });
   }
 
-  private ensureUserSchema(): Promise<void> {
+  private assertUserSchema(): Promise<void> {
     const existing = UserRepository.schemaReady.get(this.d1);
     if (existing) return existing;
 
-    const ready = this.repairUserColumns().catch((error: unknown) => {
+    const ready = assertTableReady(this.d1, USER_TABLE_REQUIREMENT).catch((error: unknown) => {
       UserRepository.schemaReady.delete(this.d1);
       throw error;
     });
@@ -51,27 +46,8 @@ export class UserRepository {
     return ready;
   }
 
-  private async repairUserColumns(): Promise<void> {
-    const { results } = await this.d1.prepare("PRAGMA table_info(users)").all<UserTableInfoRow>();
-    const columns = new Set(
-      (results ?? [])
-        .map((row) => row.name)
-        .filter((name): name is string => typeof name === "string"),
-    );
-
-    for (const repair of USER_COLUMN_REPAIRS) {
-      if (!columns.has(repair.name)) {
-        try {
-          await this.d1.prepare(repair.sql).run();
-        } catch (error) {
-          if (!isDuplicateColumnError(error)) throw error;
-        }
-      }
-    }
-  }
-
   async create(data: NewUser): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .insert(users)
@@ -81,7 +57,7 @@ export class UserRepository {
   }
 
   async findById(id: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .select()
@@ -91,7 +67,7 @@ export class UserRepository {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .select()
@@ -101,7 +77,7 @@ export class UserRepository {
   }
 
   async findByGoogleId(googleId: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .select()
@@ -111,7 +87,7 @@ export class UserRepository {
   }
 
   async findByRefreshToken(refreshToken: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .select()
@@ -121,7 +97,7 @@ export class UserRepository {
   }
 
   async updateRefreshToken(userId: string, refreshToken: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .update(users)
@@ -135,7 +111,7 @@ export class UserRepository {
   }
 
   async updatePassword(userId: string, passwordHash: string, passwordSalt: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .update(users)
@@ -153,7 +129,7 @@ export class UserRepository {
     userId: string,
     preferences: { personality?: string; theme?: string },
   ): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .update(users)
@@ -167,7 +143,7 @@ export class UserRepository {
   }
 
   async unlinkGoogle(userId: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .update(users)
@@ -181,7 +157,7 @@ export class UserRepository {
   }
 
   async linkGoogle(userId: string, googleId: string): Promise<User | null> {
-    await this.ensureUserSchema();
+    await this.assertUserSchema();
 
     const [result] = await this.db
       .update(users)
@@ -193,8 +169,4 @@ export class UserRepository {
       .returning();
     return result ?? null;
   }
-}
-
-function isDuplicateColumnError(error: unknown): boolean {
-  return error instanceof Error && error.message.toLowerCase().includes("duplicate column");
 }

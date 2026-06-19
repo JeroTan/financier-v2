@@ -1,5 +1,6 @@
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
+import { withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 
 function jsonError(code: string, message: string, status: number): Response {
   return new Response(JSON.stringify({ error: { code, message } }), {
@@ -8,12 +9,15 @@ function jsonError(code: string, message: string, status: number): Response {
   });
 }
 
-export const GET = async (context: any) => {
+const handleGET = async (context: any) => {
   const request = context.request;
   const env = getRuntimeEnv();
 
   const auth = await authMiddleware(request, env);
-  if (!auth.authenticated) return jsonError("UNAUTHORIZED", auth.error, auth.status);
+  if (!auth.authenticated) {
+    const code = auth.status === 503 ? "DATABASE_UNAVAILABLE" : "UNAUTHORIZED";
+    return jsonError(code, auth.error, auth.status);
+  }
 
   const storage = env.STORAGE;
   if (!storage) return jsonError("STORAGE_ERROR", "Storage not configured", 500);
@@ -36,3 +40,6 @@ export const GET = async (context: any) => {
 
   return new Response(object.body, { headers });
 };
+
+export const GET = (context: any) =>
+  withDatabaseErrorResponse(context, () => handleGET(context));

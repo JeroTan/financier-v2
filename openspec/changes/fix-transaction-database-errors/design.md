@@ -16,7 +16,7 @@
 
 ### Confirmed root causes
 
-1. The development D1 binding has `remote: true`. Local Worker code therefore proxies D1 calls to the deployed database. Logs show high latency and `Network connection lost` across unrelated queries, confirming an environment-wide transport problem rather than malformed SQL.
+1. The development D1 binding has `remote: true` by project policy. Local Worker code therefore proxies D1 calls to the deployed development database. Logs show high latency and `Network connection lost` across unrelated queries, confirming an environment-wide transport problem rather than malformed SQL.
 2. Default-category seeding can race and hit `categories.slug` uniqueness. Cross-realm D1 errors bypass `instanceof Error` checks.
 3. The checked-in initial migration lacks `password_salt` and `refresh_token`, while application queries always select them. Runtime `ALTER TABLE` logic hides migration drift and repeats the same cross-realm error assumption.
 4. D1-backed handlers generally do not catch repository failures, so documented JSON error responses are replaced by Astro framework errors.
@@ -25,8 +25,8 @@
 ## Goals / Non-Goals
 
 **Goals:**
-- Reliable local development without accidental dependence on remote D1 connectivity
-- Explicit opt-in remote-development workflow
+- Reliable development against remote Cloudflare D1 with clear handling for transport failures
+- Explicit built Worker remote-preview workflow
 - Forward-only migrations that match Drizzle schemas
 - Stable error classification independent of runtime realm
 - Consistent JSON or SSE errors with request IDs
@@ -44,13 +44,13 @@
 
 ## Decisions
 
-1. **Local D1 is the default for `npm run dev`.** Remove the development binding's forced remote mode. Add an explicit remote-development script/config path for intentional integration testing. Local migrations must run before local route tests.
+1. **Remote D1 is the default for `npm run dev`.** Keep development bindings on deployed Cloudflare resources. Local D1 scripts are emergency/debug tooling only and must not become default project workflow. Use the remote development migration command before route tests that depend on schema state.
 
 2. **Migrations own schema evolution.** Add a forward migration for missing user columns and verify all Drizzle-required columns/indexes. Runtime readiness may validate schema and provide a clear deployment error, but normal requests must not be the primary migration mechanism.
 
 3. **Use one database error normalizer.** Safely extract `message`, cause/code metadata, and classify unique, duplicate-column, transient transport, and unknown failures without relying on `instanceof Error`.
 
-4. **Retry policy is operation-aware.** Do not retry writes automatically. For transient read failures, return a stable service-unavailable error and let existing UI retry controls initiate a new request. The explicit local D1 default removes the observed development transport failure.
+4. **Retry policy is operation-aware.** Do not retry writes automatically. For transient read failures, return a stable service-unavailable error and let existing UI retry controls initiate a new request. Remote Cloudflare development keeps transport failures visible, so API/UI error handling must be deterministic.
 
 5. **API boundaries own public error responses.** Repository errors remain technical; handlers map them to stable JSON envelopes with `X-Request-ID`. Authentication database failures return service unavailable, not unauthorized. Once an SSE stream starts, chat emits an SSE error event.
 
@@ -60,7 +60,7 @@
 
 ## Risks / Trade-offs
 
-- Local D1 uses separate data from deployed development D1; seed fixtures and migration scripts are required for reproducible testing.
+- Remote development D1 is shared deployed state; smoke tests must use isolated test users/data and avoid destructive cleanup.
 - Replacing request-time repair with migrations requires deployment discipline.
 - Error classification still depends on D1/SQLite identifiers, so representative messages are locked into tests.
 - Contract consolidation may reveal frontend assumptions; route smoke tests must cover all consumers before removal of duplicate schemas.
