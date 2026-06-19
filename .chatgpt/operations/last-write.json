@@ -1,29 +1,60 @@
 {
   "schema_version": 1,
-  "operation_id": "write-2026-06-17T07-32-05-210Z-327a10d4",
+  "operation_id": "write-2026-06-19T01-21-37-850Z-94c173a2",
   "tool": "repo_write_changes",
   "repo_id": "orbital-osiris",
-  "timestamp": "2026-06-17T07:32:05.210Z",
-  "head_sha_before": "b2c04c5d2512af66d480299265a4e805ce449881",
-  "head_sha_after": "b2c04c5d2512af66d480299265a4e805ce449881",
+  "timestamp": "2026-06-19T01:21:37.850Z",
+  "head_sha_before": "e5a38b466268dec7cebed492c0c8f16b543b157b",
+  "head_sha_after": "e5a38b466268dec7cebed492c0c8f16b543b157b",
   "touched_paths": [
-    "src/components/chat/ChatMessageList.tsx",
-    "src/components/chat/ChatPanel.tsx"
+    "openspec/changes/fix-transaction-database-errors/proposal.md",
+    "openspec/changes/fix-transaction-database-errors/design.md",
+    "openspec/changes/fix-transaction-database-errors/tasks.md",
+    "openspec/changes/fix-transaction-database-errors/specs/d1-api-reliability/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/d1-schema/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/category-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/user-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/auth-middleware/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/transaction-api/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/stats-api-integration/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/ai-chat-service/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/api-client/spec.md"
   ],
   "changed_paths": [
-    "src/components/chat/ChatMessageList.tsx",
-    "src/components/chat/ChatPanel.tsx"
+    "openspec/changes/fix-transaction-database-errors/proposal.md",
+    "openspec/changes/fix-transaction-database-errors/design.md",
+    "openspec/changes/fix-transaction-database-errors/tasks.md",
+    "openspec/changes/fix-transaction-database-errors/specs/d1-api-reliability/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/d1-schema/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/category-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/user-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/auth-middleware/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/transaction-api/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/stats-api-integration/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/ai-chat-service/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/api-client/spec.md"
   ],
-  "created_paths": [],
+  "created_paths": [
+    "openspec/changes/fix-transaction-database-errors/specs/d1-api-reliability/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/d1-schema/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/user-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/auth-middleware/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/stats-api-integration/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/ai-chat-service/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/api-client/spec.md"
+  ],
   "modified_paths": [
-    "src/components/chat/ChatMessageList.tsx",
-    "src/components/chat/ChatPanel.tsx"
+    "openspec/changes/fix-transaction-database-errors/proposal.md",
+    "openspec/changes/fix-transaction-database-errors/design.md",
+    "openspec/changes/fix-transaction-database-errors/tasks.md",
+    "openspec/changes/fix-transaction-database-errors/specs/category-repository/spec.md",
+    "openspec/changes/fix-transaction-database-errors/specs/transaction-api/spec.md"
   ],
   "counts": {
-    "requested": 2,
-    "changed": 2,
-    "created": 0,
+    "requested": 12,
+    "changed": 12,
+    "created": 7,
     "unchanged": 0
   },
-  "summary": "Applied 2 changes across 2 files."
+  "summary": "Applied 12 changes across 12 files."
 }

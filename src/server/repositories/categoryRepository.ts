@@ -167,6 +167,23 @@ function slugify(value: string): string {
     .replace(/^-+|-+$/g, "") || crypto.randomUUID();
 }
 
-function isUniqueConstraintError(error: unknown): boolean {
-  return error instanceof Error && error.message.toLowerCase().includes("unique constraint failed");
+export function isUniqueConstraintError(error: unknown): boolean {
+  const message = getErrorMessage(error).toLowerCase();
+  return message.includes("unique constraint failed")
+    || message.includes("sqlite_constraint_unique");
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+
+  if (
+    typeof error === "object"
+    && error !== null
+    && "message" in error
+    && typeof error.message === "string"
+  ) {
+    return error.message;
+  }
+
+  return String(error);
 }
