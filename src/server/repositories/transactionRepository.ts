@@ -1,4 +1,4 @@
-import { eq, and, gte, lte, desc, count, sum, like } from "drizzle-orm";
+import { eq, and, gte, lte, desc, count, sum, like, sql } from "drizzle-orm";
 import type { D1Database } from "@cloudflare/workers-types";
 import { drizzle } from "drizzle-orm/d1";
 
@@ -114,7 +114,12 @@ export class TransactionRepository {
     userId: string;
     startDate: string;
     endDate: string;
-  }): Promise<{ totalIncome: number; totalExpenses: number; net: number }> {
+  }): Promise<{
+    totalIncome: number;
+    totalExpenses: number;
+    net: number;
+    topCategories: Array<{ categoryId: string | null; name: string; total: number; count: number; percentage: number }>;
+  }> {
     const { userId, startDate, endDate } = options;
     await this.ensureTransactionSchema();
 
@@ -145,10 +150,80 @@ export class TransactionRepository {
       }
     }
 
+    const topCategories = await this.getExpenseCategoryTotals({
+      userId,
+      startDate,
+      endDate,
+      totalExpenses,
+      limit: 5,
+    });
+
     return {
       totalIncome,
       totalExpenses,
       net: totalIncome - totalExpenses,
+      topCategories,
     };
+  }
+
+  private async getExpenseCategoryTotals(options: {
+    userId: string;
+    startDate: string;
+    endDate: string;
+    totalExpenses: number;
+    limit: number;
+  }): Promise<Array<{ categoryId: string | null; name: string; total: number; count: number; percentage: number }>> {
+    const { userId, startDate, endDate, totalExpenses, limit } = options;
+    if (totalExpenses <= 0) return [];
+
+    const categoryTotal = sql<string>`sum(${transactions.amount})`;
+
+    const rows = await this.db
+      .select({
+        categoryId: transactions.categoryId,
+        name: categories.name,
+        total: categoryTotal,
+        count: count(),
+      })
+      .from(transactions)
+      .leftJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.type, "expense"),
+          gte(transactions.date, normalizeRangeStart(startDate)),
+          lte(transactions.date, normalizeRangeEnd(endDate)),
+        ),
+      )
+      .groupBy(transactions.categoryId, categories.name)
+      .orderBy(desc(categoryTotal))
+      .limit(limit);
+
+    const totalsByName = new Map<string, { categoryId: string | null; name: string; total: number; count: number }>();
+
+    for (const row of rows) {
+      const total = Number.parseFloat(row.total ?? "0");
+      if (total <= 0) continue;
+      const name = row.name ?? "Other";
+      const existing = totalsByName.get(name);
+      if (existing) {
+        existing.total += total;
+        existing.count += row.count;
+      } else {
+        totalsByName.set(name, {
+          categoryId: row.categoryId,
+          name,
+          total,
+          count: row.count,
+        });
+      }
+    }
+
+    return Array.from(totalsByName.values())
+      .sort((a, b) => b.total - a.total)
+      .map((row) => ({
+        ...row,
+        percentage: totalExpenses > 0 ? Math.round((row.total / totalExpenses) * 100) : 0,
+      }));
   }
 }

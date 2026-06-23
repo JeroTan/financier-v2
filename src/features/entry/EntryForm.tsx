@@ -13,10 +13,9 @@ import { ImageUpload } from "./ImageUpload";
 type EntryFormProps = {
   token?: string;
   categories: string[];
-  onAddCategory: (name: string) => Promise<void>;
 };
 
-export function EntryForm({ token, categories, onAddCategory }: EntryFormProps) {
+export function EntryForm({ token, categories }: EntryFormProps) {
   const {
     register,
     handleSubmit,
@@ -154,7 +153,6 @@ export function EntryForm({ token, categories, onAddCategory }: EntryFormProps) 
             categories={categories}
             value={watch("category")}
             onChange={(v) => setValue("category", v, { shouldValidate: true, shouldDirty: true })}
-            onAddCategory={onAddCategory}
           />
         </div>
         {errors.category && <p className="text-xs text-destructive mt-1">{errors.category.message}</p>}

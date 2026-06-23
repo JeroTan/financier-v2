@@ -1,5 +1,6 @@
 ---
 import { getAppUrl } from "@/server/context/bindings";
+import "../styles/global.css";
 
 // Landing page — public route, no auth required
 const APP_URL = getAppUrl();
@@ -30,10 +31,6 @@ const APP_URL = getAppUrl();
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap" />
-
-    <style is:global>
-      @import "../styles/global.css";
-    </style>
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json" set:html={JSON.stringify({

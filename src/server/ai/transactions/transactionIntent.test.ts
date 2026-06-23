@@ -31,11 +31,11 @@ describe("transaction intent parser", () => {
     expect(parseTransactionIntent("If I spend 100 today, how much must I gain?", NOW)).toBeNull();
   });
 
-  it("formats confirmation copy", () => {
+  it("formats confirmation copy with category", () => {
     const parsed = parseTransactionIntent("I spent 50 pesos on lunch today", NOW);
 
     expect(parsed && formatTransactionConfirmation(parsed)).toBe(
-      "Got it. Expense: ₱50.00 for lunch. Date: 2026-06-17. Save this?",
+      "Got it. Expense: \u20b150.00 for lunch. Date: 2026-06-17. Category: Food. Save this?",
     );
   });
 });

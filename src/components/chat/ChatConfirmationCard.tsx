@@ -4,27 +4,34 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CategorySelector } from "@/components/categories/CategorySelector";
 
 type ChatConfirmationCardProps = {
   data: Record<string, unknown>;
   onConfirm: (data: Record<string, unknown>) => void;
   onCancel: () => void;
+  categories: string[];
 };
 
-export function ChatConfirmationCard({ data, onConfirm, onCancel }: ChatConfirmationCardProps) {
+export function ChatConfirmationCard({ data, onConfirm, onCancel, categories }: ChatConfirmationCardProps) {
   const [amount, setAmount] = useState(String(data.amount ?? ""));
   const [type, setType] = useState(String(data.type ?? "expense"));
   const [category, setCategory] = useState(String(data.category ?? ""));
   const [date, setDate] = useState(String(data.date ?? new Date().toISOString().split("T")[0]));
   const [description, setDescription] = useState(String(data.description ?? ""));
+  const [categoryError, setCategoryError] = useState("");
 
   const accentClass = type === "income" ? "income" : "expense";
 
   const handleConfirm = () => {
+    if (!category.trim()) {
+      setCategoryError("Category is required");
+      return;
+    }
     onConfirm({
       amount: parseFloat(amount) || 0,
       type,
-      category,
+      category: category.trim(),
       date,
       description,
     });
@@ -60,7 +67,17 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel }: ChatConfirma
           </div>
           <div>
             <Label htmlFor="conf-category">Category</Label>
-            <Input id="conf-category" value={category} onChange={(e) => setCategory(e.target.value)} />
+            <CategorySelector
+              inputId="conf-category"
+              categories={categories}
+              value={category}
+              onChange={(value) => {
+                setCategory(value);
+                setCategoryError("");
+              }}
+              placeholder="Select or type category"
+            />
+            {categoryError && <p className="mt-1 text-xs text-destructive">{categoryError}</p>}
           </div>
           <div>
             <Label htmlFor="conf-date">Date</Label>

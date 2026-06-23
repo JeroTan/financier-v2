@@ -143,24 +143,24 @@
 
 /* ── Dark Mode Tokens ── */
 [data-theme="dark"] {
-  --surface: #1a1a1a;
-  --surface-dim: #111111;
-  --surface-bright: #1a1a1a;
-  --surface-container-lowest: #0d0d0d;
-  --surface-container-low: #141414;
-  --surface-container: #1f1f1f;
-  --surface-container-high: #2a2a2a;
-  --surface-container-highest: #363636;
-  --on-surface: #e1e3e4;
-  --on-surface-variant: #c4b89e;
+  --surface: #242832;
+  --surface-dim: #0e1014;
+  --surface-bright: #303541;
+  --surface-container-lowest: #1b1f27;
+  --surface-container-low: #20242c;
+  --surface-container: #232731;
+  --surface-container-high: #303541;
+  --surface-container-highest: #414753;
+  --on-surface: #eceef0;
+  --on-surface-variant: #cfc5af;
   --inverse-surface: #e1e3e4;
   --inverse-on-surface: #191c1d;
-  --outline: #a09480;
-  --outline-variant: #4a4030;
+  --outline: #b0a58f;
+  --outline-variant: #5b503f;
   --surface-tint: #fbbc00;
-  --background: #0d0d0d;
-  --on-background: #e1e3e4;
-  --surface-variant: #2a2a2a;
+  --background: #0e1014;
+  --on-background: #eceef0;
+  --surface-variant: #303541;
 
   --primary: #fbbc00;
   --on-primary: #261a00;
@@ -223,12 +223,12 @@
 
   --chat-user-bg: #5c4300;
   --chat-user-text: #ffdfa0;
-  --chat-bot-bg: #2a2a2a;
-  --chat-bot-text: #e1e3e4;
-  --chat-border: #363636;
+  --chat-bot-bg: #303541;
+  --chat-bot-text: #eceef0;
+  --chat-border: #464b57;
 
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.3);
-  --shadow-float: 0 6px 24px rgba(251, 188, 0, 0.2);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.16);
+  --shadow-float: 0 6px 24px rgba(251, 188, 0, 0.18);
 }
 
 /* ── Tailwind Theme ── */

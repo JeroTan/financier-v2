@@ -117,8 +117,8 @@ export function createToolDefinitions(
               transactions: result.transactions.map((transaction) => ({
                 ...transaction,
                 category: transaction.categoryId
-                  ? categoryNames.get(transaction.categoryId) ?? null
-                  : null,
+                  ? categoryNames.get(transaction.categoryId) ?? "Other"
+                  : "Other",
               })),
             },
           };
@@ -190,9 +190,8 @@ async function resolveCategoryId(
   userId: string,
   categoryName?: string,
 ): Promise<string | undefined> {
-  if (!categoryName) return undefined;
-  const categories = await categoryRepo.seedDefaultCategories(userId);
-  return categories.find((item) => item.name.toLowerCase() === categoryName.toLowerCase())?.id;
+  const category = await categoryRepo.findOrCreateCategory(userId, categoryName);
+  return category.id;
 }
 
 function stringArg(value: unknown): string | undefined {

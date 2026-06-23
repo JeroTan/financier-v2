@@ -12,6 +12,7 @@ type ChatPanelProps = {
   className?: string;
   headerAction?: ReactNode;
   onMessageSent?: () => void;
+  onNewChat?: () => void;
 };
 
 type Message = {
@@ -21,13 +22,55 @@ type Message = {
   timestamp: string;
 };
 
-export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelProps) {
+const DEFAULT_CATEGORY_NAMES = [
+  "Bills",
+  "Entertainment",
+  "Food",
+  "Freelance",
+  "Investment",
+  "Other",
+  "Salary",
+  "Shopping",
+  "Transport",
+];
+
+function mergeCategoryNames(current: string[], next: string[]): string[] {
+  return Array.from(new Set([...current, ...next].map((category) => category.trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+export function ChatPanel({ token, className, headerAction, onMessageSent, onNewChat }: ChatPanelProps) {
   const { state, transition, setState } = useChatStateMachine();
   const { trail, ready: trailReady, addMessage, getTrailForAPI, clearTrail } = useMessageTrail();
   const { streamingText, doneData, error, startStream } = useChatSSE();
   const [messages, setMessages] = useState<Message[]>([]);
   const [confirmationData, setConfirmationData] = useState<Record<string, unknown> | null>(null);
   const [restoredTrail, setRestoredTrail] = useState(false);
+  const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORY_NAMES);
+
+  const loadCategories = useCallback(() => {
+    fetch("/api/categories", {
+      credentials: "same-origin",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    })
+      .then((res) => res.json() as Promise<{ success: boolean; data: { name: string }[] }>)
+      .then((data) => {
+        if (data.success) {
+          setCategories((current) => mergeCategoryNames(current, data.data.map((category) => category.name)));
+        }
+      })
+      .catch(() => {});
+  }, [token]);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
+
+  useEffect(() => {
+    const handler = () => loadCategories();
+    window.addEventListener("transaction_saved", handler);
+    return () => window.removeEventListener("transaction_saved", handler);
+  }, [loadCategories]);
 
   useEffect(() => {
     if (!trailReady || restoredTrail) return;
@@ -150,7 +193,8 @@ export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelP
     setConfirmationData(null);
     setRestoredTrail(true);
     transition("reset");
-  }, [clearTrail, transition]);
+    onNewChat?.();
+  }, [clearTrail, onNewChat, transition]);
 
   return (
     <div className={cn("flex h-full min-h-0 flex-col bg-surface-container-lowest", className)}>
@@ -173,6 +217,7 @@ export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelP
         confirmation={confirmationData}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+        categories={categories}
       />
       <ChatInput
         onSend={handleSend}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { PersonalitySelector } from "./PersonalitySelector";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type SettingsPanelProps = {
@@ -46,50 +45,56 @@ export default function SettingsPanel({ token }: SettingsPanelProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <h1 className="headline-lg">Settings</h1>
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-4 w-64 mt-2" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 rounded-xl" />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+        <Skeleton className="h-10 w-40 rounded-lg" />
+        <section className="rounded-lg border border-chat-border bg-surface-container-lowest p-6 shadow-card">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="mt-3 h-5 w-64" />
+        </section>
+        <section className="rounded-lg border border-chat-border bg-surface-container-lowest p-6 shadow-card">
+          <Skeleton className="h-5 w-36" />
+          <Skeleton className="mt-3 h-4 w-96 max-w-full" />
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-24 rounded-lg" />
+            ))}
+          </div>
+        </section>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="headline-lg">Settings</h1>
+    <div className="mx-auto flex w-full max-w-[1120px] flex-col gap-6">
+      <header className="space-y-2">
+        <p className="label-md text-primary">Preferences</p>
+        <h1 className="headline-lg text-on-surface">Settings</h1>
+      </header>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>{email}</CardDescription>
-        </CardHeader>
-      </Card>
+      <section className="rounded-lg border border-chat-border bg-surface-container-lowest p-6 shadow-card">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="label-md text-on-surface-variant">Account</p>
+            <p className="mt-2 text-base font-semibold text-on-surface">{email || "User"}</p>
+          </div>
+          <span className="w-fit rounded-full border border-outline-variant px-3 py-1 text-sm text-on-surface-variant">
+            Signed in
+          </span>
+        </div>
+      </section>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Personality</CardTitle>
-          <CardDescription>
+      <section className="rounded-lg border border-chat-border bg-surface-container-lowest p-6 shadow-card">
+        <div className="mb-6 flex flex-col gap-2">
+          <h2 className="headline-md text-on-surface">AI Personality</h2>
+          <p className="max-w-2xl text-sm text-on-surface-variant">
             Choose how your AI assistant communicates with you. Changes apply to new conversations.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <PersonalitySelector
-            currentPersonality={personality}
-            onSelect={handlePersonalityChange}
-          />
-        </CardContent>
-      </Card>
+          </p>
+        </div>
+        <PersonalitySelector
+          currentPersonality={personality}
+          onSelect={handlePersonalityChange}
+        />
+      </section>
     </div>
   );
 }

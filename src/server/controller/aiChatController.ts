@@ -4,6 +4,7 @@ import { executeToolLoop } from "@/server/ai/tooling/toolExecutor";
 import { createAiToolSchemas, normalizeAiCompletion, type AiCompletion } from "@/server/ai/llm/completion";
 import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type ConfirmationData, type SSERequest } from "@/server/ai/llm/types";
 import { formatTransactionConfirmation, parseTransactionIntent } from "@/server/ai/transactions/transactionIntent";
+import type { ParsedTransactionIntent } from "@/server/ai/transactions/transactionIntent";
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
 import type { CategoryRepository } from "@/server/repositories/categoryRepository";
 import type { UserRepository } from "@/server/repositories/userRepository";
@@ -71,9 +72,10 @@ export async function aiChatController(
 
         const parsedTransaction = image ? null : parseTransactionIntent(newMessage);
         if (parsedTransaction) {
-          await streamText(formatTransactionConfirmation(parsedTransaction));
+          const categorizedTransaction = await applyKnownCategory(deps, parsedTransaction, newMessage);
+          await streamText(formatTransactionConfirmation(categorizedTransaction));
           controller.enqueue(encoder.encode(formatDoneEvent("confirmation", {
-            parsedData: parsedTransaction,
+            parsedData: categorizedTransaction,
           })));
           controller.close();
           return;
@@ -133,15 +135,30 @@ export async function aiChatController(
   });
 }
 
+async function applyKnownCategory(
+  deps: AiChatControllerDeps,
+  transaction: ParsedTransactionIntent,
+  message: string,
+): Promise<ParsedTransactionIntent> {
+  if (transaction.category && transaction.category !== "Other") return transaction;
+
+  const categories = await deps.categoryRepo.seedDefaultCategories(deps.userId);
+  const lowerMessage = message.toLowerCase();
+  const matchedCategory = categories
+    .filter((category) => category.name.toLowerCase() !== "other")
+    .sort((a, b) => b.name.length - a.name.length)
+    .find((category) => lowerMessage.includes(category.name.toLowerCase()));
+
+  return matchedCategory
+    ? { ...transaction, category: matchedCategory.name }
+    : transaction;
+}
+
 async function saveConfirmedTransaction(
   deps: AiChatControllerDeps,
   data: ConfirmationData,
 ): Promise<{ id: string }> {
-  const categories = await deps.categoryRepo.seedDefaultCategories(deps.userId);
-  const categoryName = data.category?.trim().toLowerCase();
-  const matchedCategory = categoryName
-    ? categories.find((category) => category.name.toLowerCase() === categoryName)
-    : undefined;
+  const matchedCategory = await deps.categoryRepo.findOrCreateCategory(deps.userId, data.category);
 
   const transaction = await deps.transactionRepo.createTransaction({
     id: crypto.randomUUID(),
@@ -149,7 +166,7 @@ async function saveConfirmedTransaction(
     type: data.type,
     amount: data.amount,
     currency: data.currency ?? "PHP",
-    categoryId: matchedCategory?.id ?? null,
+    categoryId: matchedCategory.id,
     description: data.description ?? null,
     date: data.date,
   });

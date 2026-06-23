@@ -21,40 +21,55 @@ export function FinanceWidgetPane({ token }: FinanceWidgetPaneProps) {
   const income = stats?.totalIncome ?? 0;
   const expenses = stats?.totalExpenses ?? 0;
   const net = stats?.net ?? 0;
+  const topCategories = stats?.topCategories ?? [];
+  const hasActivity = income > 0 || expenses > 0 || topCategories.length > 0;
   const expenseRatio = income > 0 ? Math.min(100, Math.round((expenses / income) * 100)) : 0;
 
   return (
     <aside className="hidden min-h-0 w-72 shrink-0 flex-col gap-4 overflow-y-auto border-l border-chat-border bg-surface-container-lowest p-5 xl:flex">
-      <WidgetCard label="Total Wealth" value={formatMoney(net)} accent={net >= 0 ? "income" : "expense"}>
-        <div className="mt-5 flex h-20 items-end gap-2">
-          {[36, 48, 30, 58, 72].map((height, index) => (
-            <div
-              key={index}
-              className="w-full rounded-t-sm bg-primary-container"
-              style={{ height: `${height}%` }}
-            />
-          ))}
-        </div>
-        <p className="mt-3 text-right text-xs font-semibold text-income">
-          {net >= 0 ? "+" : ""}
-          {formatMoney(net)}
-        </p>
+      <WidgetCard label="Total Wealth" value={loading ? "..." : formatMoney(net)} accent={net >= 0 ? "income" : "expense"}>
+        {loading ? (
+          <WidgetNote>Loading monthly activity...</WidgetNote>
+        ) : hasActivity ? (
+          <div className="mt-5 space-y-2 text-xs text-muted-foreground">
+            <MetricRow label="Income" value={formatMoney(income)} tone="income" />
+            <MetricRow label="Expenses" value={formatMoney(expenses)} tone="expense" />
+            <MetricRow label="Net" value={formatMoney(net)} tone={net >= 0 ? "income" : "expense"} />
+          </div>
+        ) : (
+          <WidgetNote>No transactions this month.</WidgetNote>
+        )}
       </WidgetCard>
 
       <WidgetCard label="Income" value={loading ? "..." : formatMoney(income)} accent="income">
-        <ProgressLine value={income > 0 ? 82 : 0} tone="income" />
+        {loading ? <WidgetNote>Loading income...</WidgetNote> : <ProgressLine value={income > 0 ? 100 : 0} tone="income" />}
       </WidgetCard>
 
       <WidgetCard label="Expenses" value={loading ? "..." : formatMoney(expenses)} accent="expense">
-        <ProgressLine value={expenseRatio} tone="expense" />
+        {loading ? (
+          <WidgetNote>Loading expenses...</WidgetNote>
+        ) : (
+          <ProgressLine value={expenses > 0 && income === 0 ? 100 : expenseRatio} tone="expense" />
+        )}
       </WidgetCard>
 
-      <WidgetCard label="Top Categories" value="This Month">
-        <div className="mt-4 space-y-3">
-          <CategoryLine label="Food" value={expenses > 0 ? Math.round(expenses * 0.45) : 0} pct={60} />
-          <CategoryLine label="Transport" value={expenses > 0 ? Math.round(expenses * 0.25) : 0} pct={36} />
-          <CategoryLine label="Other" value={expenses > 0 ? Math.round(expenses * 0.3) : 0} pct={44} />
-        </div>
+      <WidgetCard label="Top Categories" value={loading ? "..." : topCategories.length > 0 ? "This Month" : "No expenses"}>
+        {loading ? (
+          <WidgetNote>Loading categories...</WidgetNote>
+        ) : topCategories.length > 0 ? (
+          <div className="mt-4 space-y-3">
+            {topCategories.map((category) => (
+              <CategoryLine
+                key={category.categoryId ?? category.name}
+                label={category.name}
+                value={category.total}
+                pct={category.percentage}
+              />
+            ))}
+          </div>
+        ) : (
+          <WidgetNote>No spending categories yet.</WidgetNote>
+        )}
       </WidgetCard>
     </aside>
   );
@@ -104,6 +119,23 @@ function ProgressLine({ value, tone }: { value: number; tone: "income" | "expens
         className={cn("h-full rounded-full", tone === "income" ? "bg-income" : "bg-expense")}
         style={{ width: `${value}%` }}
       />
+    </div>
+  );
+}
+
+function WidgetNote({ children }: { children: ReactNode }) {
+  return (
+    <div className="mt-5 rounded-lg border border-dashed border-outline-variant bg-surface-container-low p-3 text-sm text-muted-foreground">
+      {children}
+    </div>
+  );
+}
+
+function MetricRow({ label, value, tone }: { label: string; value: string; tone: "income" | "expense" }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span>{label}</span>
+      <span className={cn("font-semibold", tone === "income" ? "text-income" : "text-expense")}>{value}</span>
     </div>
   );
 }

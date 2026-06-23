@@ -4,7 +4,6 @@ import { CategoryRepository } from "@/server/repositories/categoryRepository";
 import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
-import { isUniqueConstraintError } from "@/server/db/errors";
 
 const createCategorySchema = z.object({
   name: z.string().min(1).max(100),
@@ -23,7 +22,7 @@ export const categoriesRouteDetail = routeDetail("GET", "/api/categories", {
       data: z.array(z.object({
         id: z.string(),
         name: z.string(),
-        icon: z.string(),
+        icon: z.string().nullable(),
         isDefault: z.number(),
       })),
     }),
@@ -36,20 +35,20 @@ export const categoriesRouteDetail = routeDetail("GET", "/api/categories", {
 
 export const createCategoryRouteDetail = routeDetail("POST", "/api/categories", {
   summary: "Create a new category",
-  description: "Creates a new custom category for the authenticated user.",
+  description: "Creates a new custom category for the authenticated user, or returns the existing matching category.",
   tags: ["Categories"],
   auth: true,
   request: {
     body: createCategorySchema,
   },
   response: {
-    description: "Category created successfully",
+    description: "Category created or returned successfully",
     schema: z.object({
       success: z.literal(true),
       data: z.object({
         id: z.string(),
         name: z.string(),
-        icon: z.string(),
+        icon: z.string().nullable(),
       }),
     }),
   },
@@ -119,23 +118,7 @@ const handlePOST = async (context: any) => {
   if (!db) throw databaseUnavailableError("D1_ERROR: DB binding not available");
 
   const repo = new CategoryRepository(db);
-  const data = parseResult.data;
-
-  let category;
-  try {
-    category = await repo.createCategory({
-      id: crypto.randomUUID(),
-      userId: auth.context.userId,
-      name: data.name,
-      icon: data.icon ?? "📦",
-      isDefault: 0,
-    });
-  } catch (error) {
-    if (isUniqueConstraintError(error)) {
-      return errorResponse("CATEGORY_EXISTS", "Category already exists", 409);
-    }
-    throw error;
-  }
+  const category = await repo.findOrCreateCategory(auth.context.userId, parseResult.data.name);
 
   return jsonResponse({
     success: true,

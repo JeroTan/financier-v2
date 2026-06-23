@@ -51,10 +51,7 @@ const handlePOST = async (context: any) => {
   const categoryRepo = new CategoryRepository(db);
   const data = parseResult.data;
 
-  const categories = await categoryRepo.seedDefaultCategories(auth.context.userId);
-  const matchedCategory = categories.find(
-    (category) => category.name.toLowerCase() === data.category.toLowerCase(),
-  );
+  const matchedCategory = await categoryRepo.findOrCreateCategory(auth.context.userId, data.category);
 
   const transaction = await transactionRepo.createTransaction({
     id: crypto.randomUUID(),
@@ -62,7 +59,7 @@ const handlePOST = async (context: any) => {
     type: data.type,
     amount: data.amount,
     date: data.date,
-    categoryId: matchedCategory?.id ?? null,
+    categoryId: matchedCategory.id,
     description: data.description,
     receiptUrl: data.receiptUrl ?? null,
   });

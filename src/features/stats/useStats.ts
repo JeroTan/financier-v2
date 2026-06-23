@@ -4,6 +4,13 @@ type StatsData = {
   totalIncome: number;
   totalExpenses: number;
   net: number;
+  topCategories?: Array<{
+    categoryId: string | null;
+    name: string;
+    total: number;
+    count: number;
+    percentage: number;
+  }>;
 };
 
 type UseStatsReturn = {

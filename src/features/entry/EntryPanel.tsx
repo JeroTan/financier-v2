@@ -6,21 +6,26 @@ type EntryPanelProps = {
 };
 
 const DEFAULT_CATEGORY_NAMES = [
-  "Food",
-  "Transport",
-  "Shopping",
-  "Entertainment",
   "Bills",
-  "Salary",
+  "Entertainment",
+  "Food",
   "Freelance",
   "Investment",
   "Other",
+  "Salary",
+  "Shopping",
+  "Transport",
 ];
+
+function mergeCategoryNames(current: string[], next: string[]): string[] {
+  return Array.from(new Set([...current, ...next].map((category) => category.trim()).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b));
+}
 
 export function EntryPanel({ token }: EntryPanelProps) {
   const [categories, setCategories] = useState<string[]>(DEFAULT_CATEGORY_NAMES);
 
-  useEffect(() => {
+  const loadCategories = useCallback(() => {
     fetch("/api/categories", {
       credentials: "same-origin",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -28,31 +33,21 @@ export function EntryPanel({ token }: EntryPanelProps) {
       .then((res) => res.json() as Promise<{ success: boolean; data: { name: string }[] }>)
       .then((data) => {
         if (data.success) {
-          setCategories(data.data.map((c) => c.name));
+          setCategories((current) => mergeCategoryNames(current, data.data.map((category) => category.name)));
         }
       })
       .catch(() => {})
   }, [token]);
 
-  const handleAddCategory = useCallback(
-    async (name: string) => {
-      const response = await fetch("/api/categories", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({ name }),
-      });
-      if (!response.ok) throw new Error("Failed to create category");
-      const data = await response.json() as { success: boolean };
-      if (data.success) {
-        setCategories((prev) => [...prev, name]);
-      }
-    },
-    [token],
-  );
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
-  return <EntryForm token={token} categories={categories} onAddCategory={handleAddCategory} />;
+  useEffect(() => {
+    const handler = () => loadCategories();
+    window.addEventListener("transaction_saved", handler);
+    return () => window.removeEventListener("transaction_saved", handler);
+  }, [loadCategories]);
+
+  return <EntryForm token={token} categories={categories} />;
 }

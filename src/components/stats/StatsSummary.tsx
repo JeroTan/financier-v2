@@ -20,7 +20,7 @@ export function StatsSummary({ totalIncome, totalExpenses, net, loading }: Stats
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="min-h-36 rounded-lg border border-outline-variant bg-surface-container-lowest p-5 shadow-card"
+            className="rounded-lg border border-outline-variant bg-surface-container-lowest p-5 shadow-card"
           >
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-20" />

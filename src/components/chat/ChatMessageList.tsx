@@ -17,6 +17,7 @@ type ChatMessageListProps = {
   confirmation?: Record<string, unknown> | null;
   onConfirm?: (data: Record<string, unknown>) => void;
   onCancel?: () => void;
+  categories: string[];
 };
 function ChatThinkingIndicator() {
   return (
@@ -40,15 +41,32 @@ function ChatThinkingIndicator() {
   );
 }
 
-export function ChatMessageList({ messages, streamingText, isThinking, confirmation, onConfirm, onCancel }: ChatMessageListProps) {
+export function ChatMessageList({
+  messages,
+  streamingText,
+  isThinking,
+  confirmation,
+  onConfirm,
+  onCancel,
+  categories,
+}: ChatMessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
+  const isEmpty = messages.length === 0 && !streamingText && !isThinking && !confirmation;
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingText, isThinking, confirmation]);
 
   return (
-    <div className="chat-content min-h-0 flex-1 overflow-y-auto space-y-chat-gap bg-surface-container-lowest">
+    <div className="chat-content relative min-h-0 flex-1 overflow-y-auto space-y-chat-gap bg-surface-container-lowest">
+      {isEmpty && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-6 text-center">
+          <p className="max-w-sm text-sm font-medium text-muted-foreground">
+            Start chatting about your finances.
+          </p>
+        </div>
+      )}
+
       {messages.map((msg) => (
         <ChatMessage
           key={msg.id}
@@ -69,6 +87,7 @@ export function ChatMessageList({ messages, streamingText, isThinking, confirmat
           data={confirmation}
           onConfirm={onConfirm}
           onCancel={onCancel}
+          categories={categories}
         />
       )}
 

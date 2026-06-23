@@ -1,6 +1,7 @@
 ---
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Toaster } from "@/components/ui/toaster";
+import "../styles/global.css";
 
 interface Props {
   title: string;
@@ -8,7 +9,8 @@ interface Props {
   userEmail?: string;
 }
 
-const { title, currentPage, userEmail } = Astro.props;
+const { title, currentPage } = Astro.props;
+const userEmail = Astro.props.userEmail ?? Astro.locals.userEmail;
 ---
 
 <!doctype html>
@@ -25,11 +27,6 @@ const { title, currentPage, userEmail } = Astro.props;
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&display=swap"
     />
-
-    <!-- Global Styles -->
-    <style is:global>
-      @import "../styles/global.css";
-    </style>
 
     <!-- Theme Initialization -->
     <script>

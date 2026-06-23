@@ -11,6 +11,15 @@ export const statsResponseSchema = z.object({
     totalIncome: z.number(),
     totalExpenses: z.number(),
     net: z.number(),
+    topCategories: z.array(
+      z.object({
+        categoryId: z.string().nullable(),
+        name: z.string(),
+        total: z.number(),
+        count: z.number(),
+        percentage: z.number(),
+      }),
+    ),
   }),
 });
 

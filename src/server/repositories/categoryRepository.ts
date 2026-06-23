@@ -54,6 +54,33 @@ export class CategoryRepository {
     return result;
   }
 
+  async findOrCreateCategory(userId: string, name?: string | null): Promise<Category> {
+    const categoryName = normalizeCategoryName(name) || "Other";
+    const existing = await this.seedDefaultCategories(userId);
+    const matched = existing.find(
+      (category) => category.name.toLowerCase() === categoryName.toLowerCase(),
+    );
+    if (matched) return matched;
+
+    try {
+      return await this.createCategory({
+        id: crypto.randomUUID(),
+        userId,
+        name: categoryName,
+        icon: "ðŸ“¦",
+        isDefault: 0,
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error)) throw error;
+      const categories = await this.getCategoriesByUserId(userId);
+      const fallback = categories.find(
+        (category) => category.name.toLowerCase() === categoryName.toLowerCase(),
+      );
+      if (fallback) return fallback;
+      throw error;
+    }
+  }
+
   async seedDefaultCategories(userId: string): Promise<Category[]> {
     await this.ensureCategorySchema();
 
@@ -158,4 +185,11 @@ function slugify(value: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || crypto.randomUUID();
+}
+
+function normalizeCategoryName(value?: string | null): string {
+  return (value ?? "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 100);
 }

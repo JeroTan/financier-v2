@@ -33,7 +33,7 @@ export function ActionCard({ data }: ActionCardProps) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Icon className="h-4 w-4" aria-hidden="true" />
-            <span className="font-semibold">{category || "Uncategorized"}</span>
+            <span className="font-semibold">{category || "Other"}</span>
           </div>
           <Badge variant={isIncome ? "default" : "destructive"} className={isIncome ? "bg-green-600" : ""}>
             {isIncome ? "+" : "-"}{formattedAmount}

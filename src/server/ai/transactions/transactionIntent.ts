@@ -107,8 +107,9 @@ export function formatTransactionConfirmation(data: ParsedTransactionIntent): st
     currency: data.currency,
   }).format(data.amount);
   const detail = data.description ? ` for ${data.description}` : "";
+  const category = data.category ? ` Category: ${data.category}.` : "";
 
-  return `Got it. ${typeLabel}: ${amount}${detail}. Date: ${data.date}. Save this?`;
+  return `Got it. ${typeLabel}: ${amount}${detail}. Date: ${data.date}.${category} Save this?`;
 }
 
 function firstWordIndex(message: string, words: string[]): number {
