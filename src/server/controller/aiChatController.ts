@@ -1,6 +1,7 @@
 import { chatService, type ChatServiceDeps } from "@/server/services/chatService";
 import { createToolDefinitions, type ToolDefinition } from "@/server/ai/tooling/tools";
 import { executeToolLoop } from "@/server/ai/tooling/toolExecutor";
+import { createAiToolSchemas, normalizeAiCompletion, type AiCompletion } from "@/server/ai/llm/completion";
 import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type ConfirmationData, type SSERequest } from "@/server/ai/llm/types";
 import { formatTransactionConfirmation, parseTransactionIntent } from "@/server/ai/transactions/transactionIntent";
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
@@ -21,7 +22,7 @@ export async function aiChatController(
   request: SSERequest,
 ): Promise<ReadableStream> {
   const encoder = new TextEncoder();
-  const { messageTrail, newMessage, image, confirmationData } = request;
+  const { messageTrail, newMessage, image, confirmationData, timeZone } = request;
 
   const tools = createToolDefinitions(deps.transactionRepo, deps.categoryRepo, deps.userId);
 
@@ -32,29 +33,19 @@ export async function aiChatController(
     ai: deps.ai,
     userId: deps.userId,
     personality,
+    timeZone,
   };
 
-  // Helper to run AI with tool support
-  const runAI = async (messages: ChatMessage[], availableTools?: ToolDefinition[]): Promise<string> => {
-    const toolSchemas = availableTools?.map((t) => ({
-      name: t.name,
-      description: t.description,
-      parameters: t.parameters,
-    }));
-
+  const runAI = async (messages: ChatMessage[], availableTools?: ToolDefinition[]): Promise<AiCompletion> => {
     const response = await deps.ai.run("@cf/moonshotai/kimi-k2.6", {
       messages: messages.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
-      tools: toolSchemas,
+      tools: createAiToolSchemas(availableTools ?? []),
       stream: false,
       max_tokens: 1024,
       temperature: 0.7,
     });
 
-    // Extract response content
-    if (typeof response === "string") return response;
-
-    const res = response as { response?: string; tool_calls?: unknown[] };
-    return res.response ?? "";
+    return normalizeAiCompletion(response);
   };
 
   return new ReadableStream({
@@ -89,7 +80,7 @@ export async function aiChatController(
         }
 
         // Initial AI call
-        const initialResult = await chatService(chatDeps, messageTrail, newMessage, image);
+        const initialResult = await chatService(chatDeps, messageTrail, newMessage, image, tools);
 
         if (!initialResult.success) {
           // Stream fallback content
@@ -99,43 +90,30 @@ export async function aiChatController(
           return;
         }
 
-        // Stream the initial response
-        const content = initialResult.content;
-        if (!content.trim()) {
-          await streamText("I can help record income and expenses. Try: \"I spent 50 pesos on lunch.\"");
-          controller.enqueue(encoder.encode(formatDoneEvent("normal")));
-          controller.close();
-          return;
-        }
-        await streamText(content);
-
-        // Execute tool loop
         const toolResult = await executeToolLoop(
-          content,
+          initialResult.completion,
           tools,
           runAI,
-          [
-            ...messageTrail,
-            { role: "user", content: newMessage },
-          ],
+          initialResult.requestMessages,
         );
 
-        // Stream remaining content from tool loop
-        const lastMessage = toolResult.messages[toolResult.messages.length - 1];
-        if (lastMessage && lastMessage.content !== content) {
-          await streamText(lastMessage.content);
-        }
-
-        // Send done event with metadata
         if (toolResult.confirmation) {
+          const confirmationText = toolResult.content.trim()
+            || formatTransactionConfirmation(toolResult.confirmation);
+          await streamText(confirmationText);
           controller.enqueue(encoder.encode(formatDoneEvent("confirmation", {
             parsedData: toolResult.confirmation,
           })));
         } else if (toolResult.saved) {
+          await streamText(toolResult.content);
           controller.enqueue(encoder.encode(formatDoneEvent("saved", {
             transactionId: toolResult.saved.id,
           })));
         } else {
+          const content = toolResult.content.trim()
+            ? toolResult.content
+            : "Ask me about your spending, income, balances, or a financial scenario.";
+          await streamText(content);
           controller.enqueue(encoder.encode(formatDoneEvent("normal")));
         }
 

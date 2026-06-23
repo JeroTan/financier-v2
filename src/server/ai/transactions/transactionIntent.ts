@@ -69,6 +69,7 @@ export function parseTransactionIntent(
 ): ParsedTransactionIntent | null {
   const trimmed = message.trim();
   if (!trimmed) return null;
+  if (isQuestionOrHypothetical(trimmed)) return null;
 
   const lower = trimmed.toLowerCase();
   const expenseIndex = firstWordIndex(lower, EXPENSE_WORDS);
@@ -90,6 +91,13 @@ export function parseTransactionIntent(
     description,
     date: toLocalDate(now),
   };
+}
+
+function isQuestionOrHypothetical(message: string): boolean {
+  if (message.includes("?")) return true;
+
+  return /^(?:how|what|when|where|why|which|can|could|would|should|do|did|does|is|are)\b/i.test(message)
+    || /\b(?:if|suppose|assuming|imagine)\s+(?:i|we|my|our)\b/i.test(message);
 }
 
 export function formatTransactionConfirmation(data: ParsedTransactionIntent): string {

@@ -63,6 +63,7 @@ export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelP
       const body: Record<string, unknown> = {
         messageTrail: getTrailForAPI(),
         newMessage: text,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
       if (image) body.image = image;
 
@@ -130,6 +131,7 @@ export function ChatPanel({ className, headerAction, onMessageSent }: ChatPanelP
         messageTrail: getTrailForAPI(),
         newMessage: "Yes, confirm this transaction",
         confirmationData: data,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
 
       await startStream(body);

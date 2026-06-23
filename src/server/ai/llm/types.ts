@@ -12,6 +12,7 @@ export type SSERequest = {
   newMessage: string;
   image?: string;
   confirmationData?: ConfirmationData;
+  timeZone?: string;
 };
 
 export type ChatMessage = {

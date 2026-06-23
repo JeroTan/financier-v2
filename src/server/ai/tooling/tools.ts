@@ -3,6 +3,7 @@ import type { CategoryRepository } from "@/server/repositories/categoryRepositor
 import type { CreateTransactionInput } from "@/server/dto/transaction";
 
 export type ToolCall = {
+  id?: string;
   name: string;
   arguments: Record<string, unknown>;
 };
@@ -35,7 +36,7 @@ export function createToolDefinitions(
           type: { type: "string", enum: ["income", "expense"], description: "Transaction type" },
           amount: { type: "number", description: "Transaction amount" },
           currency: { type: "string", default: "PHP", description: "Currency code" },
-          categoryId: { type: "string", description: "Category ID" },
+          category: { type: "string", description: "Human-readable category name" },
           description: { type: "string", description: "Transaction description" },
           date: { type: "string", format: "date", description: "Transaction date (ISO format)" },
         },
@@ -43,11 +44,12 @@ export function createToolDefinitions(
       },
       execute: async (args) => {
         try {
+          const categoryId = await resolveCategoryId(categoryRepo, userId, stringArg(args.category));
           const input: CreateTransactionInput = {
             type: args.type as "income" | "expense",
             amount: Number(args.amount),
             currency: (args.currency as string) ?? "PHP",
-            categoryId: args.categoryId as string | undefined,
+            categoryId,
             description: args.description as string | undefined,
             date: args.date as string,
           };
@@ -65,26 +67,102 @@ export function createToolDefinitions(
     },
     {
       name: "getTransactions",
-      description: "Get a list of transactions with optional filters.",
+      description: "Read transactions for the signed-in user. Use for lists, details, category questions, and finding past entries.",
       parameters: {
         type: "object",
         properties: {
           type: { type: "string", enum: ["income", "expense"], description: "Filter by type" },
-          limit: { type: "number", default: 10, description: "Number of results" },
+          startDate: { type: "string", format: "date", description: "Inclusive start date in YYYY-MM-DD format" },
+          endDate: { type: "string", format: "date", description: "Inclusive end date in YYYY-MM-DD format" },
+          category: { type: "string", description: "Filter by human-readable category name" },
+          search: { type: "string", description: "Search transaction descriptions" },
+          limit: { type: "number", default: 20, description: "Number of results, from 1 to 100" },
           offset: { type: "number", default: 0, description: "Offset for pagination" },
         },
       },
       execute: async (args) => {
         try {
+          const categories = await categoryRepo.getCategoriesByUserId(userId);
+          const categoryName = stringArg(args.category);
+          const category = categoryName
+            ? categories.find((item) => item.name.toLowerCase() === categoryName.toLowerCase())
+            : undefined;
+
+          if (categoryName && !category) {
+            return {
+              success: true,
+              data: {
+                transactions: [],
+                total: 0,
+                note: `No category named ${categoryName} exists.`,
+              },
+            };
+          }
+
           const result = await transactionRepo.getTransactions({
             userId,
-            type: args.type as "income" | "expense" | undefined,
-            limit: Number(args.limit) ?? 10,
-            offset: Number(args.offset) ?? 0,
+            type: transactionTypeArg(args.type),
+            startDate: stringArg(args.startDate),
+            endDate: stringArg(args.endDate),
+            categoryId: category?.id,
+            search: stringArg(args.search),
+            limit: boundedInteger(args.limit, 20, 1, 100),
+            offset: boundedInteger(args.offset, 0, 0, 100_000),
           });
-          return { success: true, data: result };
+          const categoryNames = new Map(categories.map((item) => [item.id, item.name]));
+          return {
+            success: true,
+            data: {
+              ...result,
+              transactions: result.transactions.map((transaction) => ({
+                ...transaction,
+                category: transaction.categoryId
+                  ? categoryNames.get(transaction.categoryId) ?? null
+                  : null,
+              })),
+            },
+          };
         } catch (err) {
           return { success: false, error: err instanceof Error ? err.message : "Failed to get transactions" };
+        }
+      },
+    },
+    {
+      name: "getFinancialSummary",
+      description: "Read total income, expenses, net, and transaction count for an inclusive date range. Use before answering totals, comparisons, balances, or hypothetical break-even questions.",
+      parameters: {
+        type: "object",
+        properties: {
+          startDate: { type: "string", format: "date", description: "Inclusive start date in YYYY-MM-DD format" },
+          endDate: { type: "string", format: "date", description: "Inclusive end date in YYYY-MM-DD format" },
+        },
+        required: ["startDate", "endDate"],
+      },
+      execute: async (args) => {
+        try {
+          const startDate = stringArg(args.startDate);
+          const endDate = stringArg(args.endDate);
+          if (!startDate || !endDate) {
+            return { success: false, error: "startDate and endDate are required" };
+          }
+
+          const [summary, page] = await Promise.all([
+            transactionRepo.aggregateTransactions({ userId, startDate, endDate }),
+            transactionRepo.getTransactions({ userId, startDate, endDate, limit: 1 }),
+          ]);
+
+          return {
+            success: true,
+            data: {
+              startDate,
+              endDate,
+              currency: "PHP",
+              ...summary,
+              transactionCount: page.total,
+            },
+          };
+        } catch (err) {
+          return { success: false, error: err instanceof Error ? err.message : "Failed to summarize transactions" };
         }
       },
     },
@@ -105,4 +183,28 @@ export function createToolDefinitions(
       },
     },
   ];
+}
+
+async function resolveCategoryId(
+  categoryRepo: CategoryRepository,
+  userId: string,
+  categoryName?: string,
+): Promise<string | undefined> {
+  if (!categoryName) return undefined;
+  const categories = await categoryRepo.seedDefaultCategories(userId);
+  return categories.find((item) => item.name.toLowerCase() === categoryName.toLowerCase())?.id;
+}
+
+function stringArg(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function transactionTypeArg(value: unknown): "income" | "expense" | undefined {
+  return value === "income" || value === "expense" ? value : undefined;
+}
+
+function boundedInteger(value: unknown, fallback: number, min: number, max: number): number {
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, Math.trunc(parsed)));
 }

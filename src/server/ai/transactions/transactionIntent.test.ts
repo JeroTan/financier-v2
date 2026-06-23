@@ -26,6 +26,11 @@ describe("transaction intent parser", () => {
     });
   });
 
+  it("does not turn finance questions into transactions", () => {
+    expect(parseTransactionIntent("How much did I spend today?", NOW)).toBeNull();
+    expect(parseTransactionIntent("If I spend 100 today, how much must I gain?", NOW)).toBeNull();
+  });
+
   it("formats confirmation copy", () => {
     const parsed = parseTransactionIntent("I spent 50 pesos on lunch today", NOW);
 

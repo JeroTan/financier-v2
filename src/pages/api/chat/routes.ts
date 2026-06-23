@@ -15,6 +15,7 @@ export const chatDetail = routeDetail("POST", "/api/chat", {
       newMessage: z.string().min(1).max(4000),
       message: z.string().min(1).max(4000).optional().describe("Legacy alias for newMessage."),
       image: z.string().base64().optional(),
+      timeZone: z.string().min(1).max(100).optional().describe("Browser IANA timezone used to resolve relative dates."),
       confirmationData: z.object({
         type: z.enum(["income", "expense"]),
         amount: z.number().positive(),

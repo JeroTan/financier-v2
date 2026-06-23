@@ -15,6 +15,7 @@ const chatRequestSchema = z.object({
   })).default([]),
   newMessage: z.string().min(1).max(4000),
   image: z.string().base64().optional(),
+  timeZone: z.string().min(1).max(100).optional(),
   confirmationData: z.object({
     type: z.enum(["income", "expense"]),
     amount: z.number().positive(),
@@ -91,7 +92,7 @@ const handlePOST = async (context: any) => {
     );
   }
 
-  const { messageTrail, newMessage, image, confirmationData } = parseResult.data;
+  const { messageTrail, newMessage, image, confirmationData, timeZone } = parseResult.data;
 
   // Check for AI binding
   const ai = env.AI;
@@ -121,7 +122,7 @@ const handlePOST = async (context: any) => {
       categoryRepo,
       userRepo,
     },
-    { messageTrail, newMessage, image, confirmationData },
+    { messageTrail, newMessage, image, confirmationData, timeZone },
   );
 
   return new Response(stream, {

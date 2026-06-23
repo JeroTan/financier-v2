@@ -13,14 +13,14 @@ export type ActionType =
 export type ActionBlock = {
   type: ActionType | "Unknown";
   content: string;
-  parsed?: Record<string, unknown> | string[];
+  parsed?: Record<string, unknown> | string[] | string;
 };
 
 export type ParsedSegment =
   | { kind: "text"; content: string }
   | { kind: "action"; action: ActionBlock };
 
-const ACTION_REGEX = /@#=_([A-Za-z]+)=>([\s\S]*?)<=\1=#@/g;
+const ACTION_REGEX = /@#=_?([A-Za-z]+)=>([\s\S]*?)<=_?\1=#@/g;
 const VALID_ACTIONS: ActionType[] = [
   "Card",
   "Table",
@@ -47,22 +47,15 @@ export function parseActions(text: string): ParsedSegment[] {
     }
 
     const rawType = match[1];
+    if (rawType.toLowerCase() === "done") {
+      lastIndex = match.index + match[0].length;
+      continue;
+    }
+
     const rawContent = match[2].trim();
     const type = VALID_ACTIONS.includes(rawType as ActionType) ? (rawType as ActionType) : "Unknown";
 
-    let parsed: Record<string, unknown> | string[] | undefined;
-
-    if (["Card", "Table", "Chart", "Progress", "Button"].includes(type)) {
-      try {
-        parsed = JSON.parse(rawContent) as Record<string, unknown>;
-      } catch {
-        parsed = undefined;
-      }
-    } else if (type === "List") {
-      parsed = rawContent.split("\n").filter((line) => line.trim().length > 0);
-    } else if (type === "Divider") {
-      parsed = [];
-    }
+    const parsed = parseActionContent(type, rawContent);
 
     segments.push({
       kind: "action",
@@ -86,8 +79,7 @@ export class StreamingActionParser {
   private buffer = "";
   private actionType = "";
   private actionContent = "";
-  private readonly marker = "@#=_";
-  private readonly closeMarker = "=#@";
+  private readonly markers = ["@#=_", "@#="];
 
   feed(chunk: string): ParsedSegment[] {
     const newSegments: ParsedSegment[] = [];
@@ -96,8 +88,9 @@ export class StreamingActionParser {
       this.buffer += char;
 
       if (this.state === "TEXT") {
-        if (this.buffer.endsWith(this.marker)) {
-          const textBefore = this.buffer.slice(0, -this.marker.length);
+        const marker = this.markers.find((item) => this.buffer.endsWith(item));
+        if (marker) {
+          const textBefore = this.buffer.slice(0, -marker.length);
           if (textBefore.length > 0) {
             newSegments.push({ kind: "text", content: textBefore });
           }
@@ -105,12 +98,12 @@ export class StreamingActionParser {
           this.actionType = "";
           this.actionContent = "";
           this.buffer = "";
-        } else if (this.buffer.length > this.marker.length) {
-          const safeText = this.buffer.slice(0, -this.marker.length);
+        } else if (this.buffer.length > 4) {
+          const safeText = this.buffer.slice(0, -4);
           if (safeText.length > 0) {
             newSegments.push({ kind: "text", content: safeText });
           }
-          this.buffer = this.buffer.slice(-this.marker.length);
+          this.buffer = this.buffer.slice(-4);
         }
       } else if (this.state === "DETECTING_ACTION") {
         this.actionType += char;
@@ -126,24 +119,23 @@ export class StreamingActionParser {
         }
       } else if (this.state === "PARSING_ACTION") {
         this.actionContent += char;
-        if (this.actionContent.endsWith(this.closeMarker)) {
-          const content = this.actionContent.slice(0, -this.closeMarker.length).trim();
+        const closeMarker = [`<=${this.actionType}=#@`, `<=_${this.actionType}=#@`]
+          .find((item) => this.actionContent.endsWith(item));
+        if (closeMarker) {
+          const content = this.actionContent.slice(0, -closeMarker.length).trim();
           const type = VALID_ACTIONS.includes(this.actionType as ActionType)
             ? (this.actionType as ActionType)
             : "Unknown";
 
-          let parsed: Record<string, unknown> | string[] | undefined;
-          if (["Card", "Table", "Chart", "Progress", "Button"].includes(type)) {
-            try {
-              parsed = JSON.parse(content) as Record<string, unknown>;
-            } catch {
-              parsed = undefined;
-            }
-          } else if (type === "List") {
-            parsed = content.split("\n").filter((line) => line.trim().length > 0);
-          } else if (type === "Divider") {
-            parsed = [];
+          if (this.actionType.toLowerCase() === "done") {
+            this.state = "TEXT";
+            this.buffer = "";
+            this.actionType = "";
+            this.actionContent = "";
+            continue;
           }
+
+          const parsed = parseActionContent(type, content);
 
           newSegments.push({
             kind: "action",
@@ -185,4 +177,31 @@ export class StreamingActionParser {
     this.actionType = "";
     this.actionContent = "";
   }
+}
+
+function parseActionContent(
+  type: ActionType | "Unknown",
+  content: string,
+): Record<string, unknown> | string[] | string | undefined {
+  if (["Card", "Table", "Chart", "Progress", "Button", "Alert"].includes(type)) {
+    try {
+      return JSON.parse(content) as Record<string, unknown>;
+    } catch {
+      return type === "Alert" ? content : undefined;
+    }
+  }
+
+  if (type === "List") {
+    return content.split("\n").filter((line) => line.trim().length > 0);
+  }
+
+  if (type === "Image" || type === "Insight") {
+    return content;
+  }
+
+  if (type === "Divider") {
+    return [];
+  }
+
+  return undefined;
 }
