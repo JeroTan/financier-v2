@@ -21,6 +21,8 @@ export type ParsedSegment =
   | { kind: "action"; action: ActionBlock };
 
 const ACTION_REGEX = /@#=_?([A-Za-z]+)=>([\s\S]*?)<=_?\1=#@/g;
+const COMPLETION_METADATA_BLOCK_REGEX = /@#=_?\s*(done|status)\s*=>[\s\S]*?<=_?\s*([A-Za-z]+)\s*=#@/gi;
+const TRAILING_STATUS_JSON_REGEX = /(?:\s|\n)*\{\s*["']status["']\s*:\s*["'](?:normal|confirmation|saved|error)["']\s*\}\s*$/i;
 const VALID_ACTIONS: ActionType[] = [
   "Card",
   "Table",
@@ -38,12 +40,13 @@ export function parseActions(text: string): ParsedSegment[] {
   const segments: ParsedSegment[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+  const sanitizedText = stripCompletionMetadata(text);
 
   ACTION_REGEX.lastIndex = 0;
 
-  while ((match = ACTION_REGEX.exec(text)) !== null) {
+  while ((match = ACTION_REGEX.exec(sanitizedText)) !== null) {
     if (match.index > lastIndex) {
-      segments.push({ kind: "text", content: text.slice(lastIndex, match.index) });
+      segments.push({ kind: "text", content: sanitizedText.slice(lastIndex, match.index) });
     }
 
     const rawType = match[1];
@@ -65,11 +68,31 @@ export function parseActions(text: string): ParsedSegment[] {
     lastIndex = match.index + match[0].length;
   }
 
-  if (lastIndex < text.length) {
-    segments.push({ kind: "text", content: text.slice(lastIndex) });
+  if (lastIndex < sanitizedText.length) {
+    segments.push({ kind: "text", content: sanitizedText.slice(lastIndex) });
   }
 
   return segments;
+}
+
+export function stripCompletionMetadata(text: string): string {
+  return text
+    .replace(COMPLETION_METADATA_BLOCK_REGEX, "")
+    .replace(TRAILING_STATUS_JSON_REGEX, "");
+}
+
+export function isCompletionMetadataPayload(content: string): boolean {
+  try {
+    const parsed = JSON.parse(content.trim()) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return false;
+
+    const keys = Object.keys(parsed);
+    return keys.length === 1
+      && keys[0] === "status"
+      && ["normal", "confirmation", "saved", "error"].includes(String((parsed as Record<string, unknown>).status));
+  } catch {
+    return false;
+  }
 }
 
 type ParserState = "TEXT" | "DETECTING_ACTION" | "PARSING_ACTION";

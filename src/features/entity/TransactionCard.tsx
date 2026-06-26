@@ -23,7 +23,7 @@ export function TransactionCard({ type, amount, date, description, categoryName,
 
   return (
     <Card
-      className={`border-l-4 hover:shadow-md transition-shadow cursor-pointer ${
+      className={`border-l-4 transition-shadow ${
         isIncome ? "border-l-green-500" : "border-l-red-500"
       }`}
     >

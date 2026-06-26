@@ -4,6 +4,7 @@ import {
   createTransactionRequestSchema,
   paginatedTransactionsSchema,
   transactionResponseSchema,
+  updateTransactionRequestSchema,
 } from "./transaction";
 import { statsResponseSchema } from "./stats";
 
@@ -32,6 +33,16 @@ describe("API contracts", () => {
     }).success).toBe(true);
   });
 
+  it("accepts transaction update payloads", () => {
+    expect(updateTransactionRequestSchema.safeParse({
+      amount: 75,
+      category: "Food",
+      description: "Dinner",
+    }).success).toBe(true);
+
+    expect(updateTransactionRequestSchema.safeParse({}).success).toBe(false);
+  });
+
   it("uses the persisted transaction shape for create and list responses", () => {
     expect(transactionResponseSchema.safeParse({
       success: true,
@@ -57,6 +68,7 @@ describe("API contracts", () => {
         totalIncome: 100,
         totalExpenses: 50,
         net: 50,
+        topCategories: [],
       },
     }).success).toBe(true);
   });

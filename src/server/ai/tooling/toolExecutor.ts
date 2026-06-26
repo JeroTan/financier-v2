@@ -65,6 +65,49 @@ export async function executeToolLoop(
         };
       }
 
+      if (call.name === "updateTransaction") {
+        const args = call.arguments;
+        confirmation = {
+          operation: "update",
+          transactionId: String(args.transactionId ?? ""),
+          type: args.type === "income" || args.type === "expense" ? args.type : undefined,
+          amount: args.amount === undefined ? undefined : Number(args.amount),
+          currency: typeof args.currency === "string" ? args.currency : undefined,
+          category: typeof args.category === "string" ? args.category : undefined,
+          description: typeof args.description === "string" ? args.description : undefined,
+          date: typeof args.date === "string" ? args.date : undefined,
+        };
+
+        messages.push({ role: "assistant", content: currentCompletion.content });
+        return {
+          messages,
+          confirmation,
+          content: currentCompletion.content,
+          limitReached: false,
+          toolCalls,
+          toolResults,
+        };
+      }
+
+      if (call.name === "deleteTransaction") {
+        const args = call.arguments;
+        confirmation = {
+          operation: "delete",
+          transactionId: String(args.transactionId ?? ""),
+          description: typeof args.description === "string" ? args.description : undefined,
+        };
+
+        messages.push({ role: "assistant", content: currentCompletion.content });
+        return {
+          messages,
+          confirmation,
+          content: currentCompletion.content,
+          limitReached: false,
+          toolCalls,
+          toolResults,
+        };
+      }
+
       // Execute other tools
       const tool = tools.find((t) => t.name === call.name);
       if (tool) {

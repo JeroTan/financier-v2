@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 type ChatPanelProps = {
   token?: string;
+  userEmail?: string;
   className?: string;
   headerAction?: ReactNode;
   onMessageSent?: () => void;
@@ -39,7 +40,7 @@ function mergeCategoryNames(current: string[], next: string[]): string[] {
     .sort((a, b) => a.localeCompare(b));
 }
 
-export function ChatPanel({ token, className, headerAction, onMessageSent, onNewChat }: ChatPanelProps) {
+export function ChatPanel({ token, userEmail, className, headerAction, onMessageSent, onNewChat }: ChatPanelProps) {
   const { state, transition, setState } = useChatStateMachine();
   const { trail, ready: trailReady, addMessage, getTrailForAPI, clearTrail } = useMessageTrail();
   const { streamingText, doneData, error, startStream } = useChatSSE();
@@ -144,6 +145,14 @@ export function ChatPanel({ token, className, headerAction, onMessageSent, onNew
         toast.success("Transaction saved!");
         window.dispatchEvent(new CustomEvent("transaction_saved", { detail: doneData }));
         transition("done");
+      } else if (doneData.type === "updated") {
+        toast.success("Transaction updated!");
+        window.dispatchEvent(new CustomEvent("transaction_saved", { detail: doneData }));
+        transition("done");
+      } else if (doneData.type === "deleted") {
+        toast.success("Transaction deleted!");
+        window.dispatchEvent(new CustomEvent("transaction_saved", { detail: doneData }));
+        transition("done");
       } else {
         transition("done");
       }
@@ -172,7 +181,7 @@ export function ChatPanel({ token, className, headerAction, onMessageSent, onNew
 
       const body: Record<string, unknown> = {
         messageTrail: getTrailForAPI(),
-        newMessage: "Yes, confirm this transaction",
+        newMessage: "Yes, confirm this change",
         confirmationData: data,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
@@ -217,6 +226,8 @@ export function ChatPanel({ token, className, headerAction, onMessageSent, onNew
         confirmation={confirmationData}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
+        onActionClick={handleSend}
+        userEmail={userEmail}
         categories={categories}
       />
       <ChatInput

@@ -1,6 +1,6 @@
-import type { ConfirmationData } from "@/server/ai/llm/types";
+import type { CreateConfirmationData } from "@/server/ai/llm/types";
 
-export type ParsedTransactionIntent = ConfirmationData;
+export type ParsedTransactionIntent = CreateConfirmationData;
 
 const EXPENSE_WORDS = [
   "spent",

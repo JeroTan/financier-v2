@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 
-type ButtonDef = {
+export type ButtonDef = {
   label: string;
   action?: string;
   variant?: "default" | "secondary" | "outline" | "destructive";
@@ -23,6 +23,8 @@ export function ActionButton({ data, onClick }: ActionButtonProps) {
     buttons = [{ label, action, variant }];
   }
 
+  buttons = buttons.filter((button) => button.label?.trim());
+
   if (buttons.length === 0) return null;
 
   return (
@@ -30,8 +32,10 @@ export function ActionButton({ data, onClick }: ActionButtonProps) {
       {buttons.map((btn, i) => (
         <Button
           key={i}
+          type="button"
           variant={btn.variant ?? "default"}
           size="sm"
+          disabled={!onClick}
           onClick={() => onClick?.(btn.action ?? btn.label)}
         >
           {btn.label}

@@ -1,6 +1,6 @@
 import type { TransactionRepository } from "@/server/repositories/transactionRepository";
 import type { CategoryRepository } from "@/server/repositories/categoryRepository";
-import type { CreateTransactionInput } from "@/server/dto/transaction";
+import type { CreateTransactionInput, UpdateTransactionInput } from "@/server/dto/transaction";
 
 export type ToolCall = {
   id?: string;
@@ -124,6 +124,84 @@ export function createToolDefinitions(
           };
         } catch (err) {
           return { success: false, error: err instanceof Error ? err.message : "Failed to get transactions" };
+        }
+      },
+    },
+    {
+      name: "updateTransaction",
+      description: "Update one existing transaction after the user explicitly confirms the exact change. Use getTransactions first to find the transaction id.",
+      parameters: {
+        type: "object",
+        properties: {
+          transactionId: { type: "string", description: "Existing transaction id from getTransactions" },
+          type: { type: "string", enum: ["income", "expense"], description: "New transaction type" },
+          amount: { type: "number", description: "New amount" },
+          currency: { type: "string", description: "Currency code" },
+          category: { type: "string", description: "New human-readable category name" },
+          description: { type: "string", description: "New transaction description" },
+          date: { type: "string", format: "date", description: "New transaction date in YYYY-MM-DD format" },
+        },
+        required: ["transactionId"],
+      },
+      execute: async (args) => {
+        try {
+          const transactionId = stringArg(args.transactionId);
+          if (!transactionId) return { success: false, error: "transactionId is required" };
+
+          const updates: UpdateTransactionInput = {};
+          if (args.type === "income" || args.type === "expense") updates.type = args.type;
+          if (args.amount !== undefined) {
+            const amount = Number(args.amount);
+            if (!Number.isFinite(amount) || amount <= 0) return { success: false, error: "amount must be positive" };
+            updates.amount = amount;
+          }
+          const currency = stringArg(args.currency);
+          if (currency !== undefined) updates.currency = currency;
+          const description = stringArg(args.description);
+          if (description !== undefined) updates.description = description;
+          const date = stringArg(args.date);
+          if (date !== undefined) updates.date = date;
+
+          const categoryName = stringArg(args.category);
+          if (categoryName !== undefined) {
+            const categoryId = await resolveCategoryId(categoryRepo, userId, categoryName);
+            updates.categoryId = categoryId;
+          }
+
+          if (Object.keys(updates).length === 0) {
+            return { success: false, error: "No transaction changes provided" };
+          }
+
+          const transaction = await transactionRepo.updateTransaction(transactionId, userId, updates);
+          if (!transaction) return { success: false, error: "Transaction not found" };
+
+          return { success: true, data: { id: transaction.id } };
+        } catch (err) {
+          return { success: false, error: err instanceof Error ? err.message : "Failed to update transaction" };
+        }
+      },
+    },
+    {
+      name: "deleteTransaction",
+      description: "Delete one existing transaction after the user explicitly confirms deletion. Use getTransactions first to find the transaction id.",
+      parameters: {
+        type: "object",
+        properties: {
+          transactionId: { type: "string", description: "Existing transaction id from getTransactions" },
+        },
+        required: ["transactionId"],
+      },
+      execute: async (args) => {
+        try {
+          const transactionId = stringArg(args.transactionId);
+          if (!transactionId) return { success: false, error: "transactionId is required" };
+
+          const deleted = await transactionRepo.deleteTransaction(transactionId, userId);
+          if (!deleted) return { success: false, error: "Transaction not found" };
+
+          return { success: true, data: { id: transactionId } };
+        } catch (err) {
+          return { success: false, error: err instanceof Error ? err.message : "Failed to delete transaction" };
         }
       },
     },

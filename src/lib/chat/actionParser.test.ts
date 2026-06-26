@@ -22,6 +22,20 @@ describe("parseActions", () => {
     ]);
   });
 
+  it("drops status metadata variants from model text", () => {
+    expect(parseActions("Text @#=_Status=> {\"status\":\"normal\"} <=Status=#@")).toEqual([
+      { kind: "text", content: "Text " },
+    ]);
+
+    expect(parseActions("Text @#=_Done=> {\"status\":\"normal\"} <=done=#@")).toEqual([
+      { kind: "text", content: "Text " },
+    ]);
+
+    expect(parseActions("Text\n{\"status\":\"normal\"}")).toEqual([
+      { kind: "text", content: "Text" },
+    ]);
+  });
+
   it("parses alert and insight data", () => {
     expect(parseActions('@#=_Alert=> {"text":"Careful","type":"warning"} <=Alert=#@')).toEqual([
       { kind: "action", action: { type: "Alert", content: '{"text":"Careful","type":"warning"}', parsed: { text: "Careful", type: "warning" } } },

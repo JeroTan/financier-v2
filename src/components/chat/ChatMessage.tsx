@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { MarkdownText } from "@/components/ui/MarkdownText";
 import { ActionRenderer } from "@/components/chat/actions/ActionRenderer";
 import { parseActions, type ParsedSegment } from "@/lib/chat/actionParser";
 
@@ -6,17 +7,20 @@ type ChatMessageProps = {
   role: "user" | "assistant";
   content: string;
   timestamp?: string;
+  onActionClick?: (action: string) => void;
+  userEmail?: string;
 };
 
-export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
+export function ChatMessage({ role, content, timestamp, onActionClick, userEmail }: ChatMessageProps) {
   const isUser = role === "user";
   const segments: ParsedSegment[] = isUser ? [] : parseActions(content);
+  const userInitial = userEmail?.trim()?.[0]?.toUpperCase() || "U";
 
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}>
       <Avatar className="h-8 w-8 flex-shrink-0 shadow-sm">
         <AvatarFallback className={isUser ? "bg-gold-500 text-gold-950" : "bg-muted"}>
-          {isUser ? "U" : "AI"}
+          {isUser ? userInitial : "AI"}
         </AvatarFallback>
       </Avatar>
       <div className={`max-w-[70%] ${isUser ? "items-end" : "items-start"} flex flex-col`}>
@@ -28,10 +32,13 @@ export function ChatMessage({ role, content, timestamp }: ChatMessageProps) {
           }`}
         >
           {isUser ? (
-            <p className="text-sm whitespace-pre-wrap">{content}</p>
+            <MarkdownText className="text-sm">{content}</MarkdownText>
           ) : (
             <div className="text-sm">
-              <ActionRenderer segments={segments.length > 0 ? segments : [{ kind: "text", content }]} />
+              <ActionRenderer
+                segments={segments.length > 0 ? segments : [{ kind: "text", content }]}
+                onActionClick={onActionClick}
+              />
             </div>
           )}
         </div>

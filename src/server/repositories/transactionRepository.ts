@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/d1";
 
 import { transactions, categories } from "@/db/schema";
 import type { Transaction, NewTransaction } from "@/db/schema";
+import type { UpdateTransactionInput } from "@/server/dto/transaction";
 import { normalizeRangeEnd, normalizeRangeStart, normalizeTransactionDate } from "@/server/utils/dateRange";
 import { assertTableReady } from "./schemaReadiness";
 
@@ -66,6 +67,45 @@ export class TransactionRepository {
       .from(transactions)
       .where(and(eq(transactions.id, id), eq(transactions.userId, userId)));
     return result ?? null;
+  }
+
+  async updateTransaction(
+    id: string,
+    userId: string,
+    data: UpdateTransactionInput,
+  ): Promise<Transaction | null> {
+    await this.ensureTransactionSchema();
+
+    const updates: Partial<NewTransaction> = {
+      updatedAt: new Date().toISOString(),
+    };
+
+    if (data.type !== undefined) updates.type = data.type;
+    if (data.amount !== undefined) updates.amount = data.amount;
+    if (data.currency !== undefined) updates.currency = data.currency;
+    if (data.categoryId !== undefined) updates.categoryId = data.categoryId;
+    if (data.description !== undefined) updates.description = data.description;
+    if (data.receiptUrl !== undefined) updates.receiptUrl = data.receiptUrl;
+    if (data.date !== undefined) updates.date = normalizeTransactionDate(data.date);
+
+    const [result] = await this.db
+      .update(transactions)
+      .set(updates)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .returning();
+
+    return result ?? null;
+  }
+
+  async deleteTransaction(id: string, userId: string): Promise<boolean> {
+    await this.ensureTransactionSchema();
+
+    const result = await this.db
+      .delete(transactions)
+      .where(and(eq(transactions.id, id), eq(transactions.userId, userId)))
+      .returning();
+
+    return result.length > 0;
   }
 
   async getTransactions(options: {

@@ -2,10 +2,12 @@
 import AppLayout from "@/layouts/AppLayout.astro";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { DashboardLayout } from "@/components/chat/DashboardLayout";
+
+const userEmail = Astro.locals.userEmail;
 ---
 
 <AppLayout title="Dashboard" currentPage="/dashboard">
   <ErrorBoundary>
-    <DashboardLayout client:load />
+    <DashboardLayout client:load userEmail={userEmail} />
   </ErrorBoundary>
 </AppLayout>

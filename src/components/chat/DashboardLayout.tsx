@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils";
 
 type DashboardLayoutProps = {
   token?: string;
+  userEmail?: string;
 };
 
-export function DashboardLayout({ token }: DashboardLayoutProps) {
+export function DashboardLayout({ token, userEmail }: DashboardLayoutProps) {
   const [chatActive, setChatActive] = useState(() => {
     if (typeof window === "undefined") return false;
     return localStorage.getItem("financier:chat:active") === "true";
@@ -35,6 +36,7 @@ export function DashboardLayout({ token }: DashboardLayoutProps) {
       <div className="min-h-0 flex-1">
         <ChatWorkspace
           token={token}
+          userEmail={userEmail}
           onMessageSent={() => setChatActive(true)}
           onNewChat={() => setChatActive(false)}
         />

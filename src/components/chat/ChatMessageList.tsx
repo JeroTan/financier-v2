@@ -12,11 +12,13 @@ type Message = {
 
 type ChatMessageListProps = {
   messages: Message[];
+  userEmail?: string;
   streamingText?: string;
   isThinking?: boolean;
   confirmation?: Record<string, unknown> | null;
   onConfirm?: (data: Record<string, unknown>) => void;
   onCancel?: () => void;
+  onActionClick?: (action: string) => void;
   categories: string[];
 };
 function ChatThinkingIndicator() {
@@ -43,11 +45,13 @@ function ChatThinkingIndicator() {
 
 export function ChatMessageList({
   messages,
+  userEmail,
   streamingText,
   isThinking,
   confirmation,
   onConfirm,
   onCancel,
+  onActionClick,
   categories,
 }: ChatMessageListProps) {
   const endRef = useRef<HTMLDivElement>(null);
@@ -73,11 +77,13 @@ export function ChatMessageList({
           role={msg.role}
           content={msg.content}
           timestamp={msg.timestamp}
+          onActionClick={onActionClick}
+          userEmail={userEmail}
         />
       ))}
 
       {streamingText ? (
-        <ChatMessage role="assistant" content={streamingText} />
+        <ChatMessage role="assistant" content={streamingText} onActionClick={onActionClick} userEmail={userEmail} />
       ) : isThinking ? (
         <ChatThinkingIndicator />
       ) : null}

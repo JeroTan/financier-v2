@@ -76,4 +76,57 @@ describe("executeToolLoop", () => {
       date: "2026-06-23",
     });
   });
+
+  it("gates transaction updates for confirmation", async () => {
+    const result = await executeToolLoop(
+      {
+        content: "Found lunch expense for PHP 100. Change it to PHP 120?",
+        toolCalls: [{
+          name: "updateTransaction",
+          arguments: {
+            transactionId: "txn-1",
+            amount: 120,
+            category: "Food",
+          },
+        }],
+      },
+      [],
+      vi.fn(),
+      [{ role: "user", content: "Change lunch to PHP 120" }],
+    );
+
+    expect(result.confirmation).toEqual({
+      operation: "update",
+      transactionId: "txn-1",
+      type: undefined,
+      amount: 120,
+      currency: undefined,
+      category: "Food",
+      description: undefined,
+      date: undefined,
+    });
+  });
+
+  it("gates transaction deletes for confirmation", async () => {
+    const result = await executeToolLoop(
+      {
+        content: "Found lunch expense for PHP 100. Delete it?",
+        toolCalls: [{
+          name: "deleteTransaction",
+          arguments: {
+            transactionId: "txn-1",
+          },
+        }],
+      },
+      [],
+      vi.fn(),
+      [{ role: "user", content: "Delete lunch" }],
+    );
+
+    expect(result.confirmation).toEqual({
+      operation: "delete",
+      transactionId: "txn-1",
+      description: undefined,
+    });
+  });
 });

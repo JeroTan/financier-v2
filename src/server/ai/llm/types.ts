@@ -5,7 +5,7 @@ export type SSEMessageEvent = {
   content: string;
 };
 
-export type DoneState = "confirmation" | "saved" | "normal" | "error";
+export type DoneState = "confirmation" | "saved" | "updated" | "deleted" | "normal" | "error";
 
 export type SSERequest = {
   messageTrail: ChatMessage[];
@@ -20,7 +20,8 @@ export type ChatMessage = {
   content: string;
 };
 
-export type ConfirmationData = {
+export type CreateConfirmationData = {
+  operation?: "create";
   type: "income" | "expense";
   amount: number;
   currency: string;
@@ -28,6 +29,25 @@ export type ConfirmationData = {
   description?: string;
   date: string;
 };
+
+export type UpdateConfirmationData = {
+  operation: "update";
+  transactionId: string;
+  type?: "income" | "expense";
+  amount?: number;
+  currency?: string;
+  category?: string;
+  description?: string;
+  date?: string;
+};
+
+export type DeleteConfirmationData = {
+  operation: "delete";
+  transactionId: string;
+  description?: string;
+};
+
+export type ConfirmationData = CreateConfirmationData | UpdateConfirmationData | DeleteConfirmationData;
 
 export type SSEResponse = {
   success: true;

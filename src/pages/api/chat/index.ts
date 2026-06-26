@@ -8,6 +8,43 @@ import { authMiddleware } from "@/server/middleware/auth";
 import { getRuntimeEnv } from "@/server/context/bindings";
 import { databaseUnavailableError, withDatabaseErrorResponse } from "@/server/http/databaseErrorResponse";
 
+const createConfirmationDataSchema = z.object({
+  operation: z.literal("create").optional(),
+  type: z.enum(["income", "expense"]),
+  amount: z.number().positive(),
+  currency: z.string().default("PHP"),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  date: z.string(),
+});
+
+const updateConfirmationDataSchema = z.object({
+  operation: z.literal("update"),
+  transactionId: z.string().min(1),
+  type: z.enum(["income", "expense"]).optional(),
+  amount: z.number().positive().optional(),
+  currency: z.string().optional(),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  date: z.string().optional(),
+}).refine(
+  (data) => [data.type, data.amount, data.currency, data.category, data.description, data.date]
+    .some((value) => value !== undefined),
+  "At least one transaction field is required",
+);
+
+const deleteConfirmationDataSchema = z.object({
+  operation: z.literal("delete"),
+  transactionId: z.string().min(1),
+  description: z.string().optional(),
+});
+
+const confirmationDataSchema = z.union([
+  createConfirmationDataSchema,
+  updateConfirmationDataSchema,
+  deleteConfirmationDataSchema,
+]);
+
 const chatRequestSchema = z.object({
   messageTrail: z.array(z.object({
     role: z.enum(["user", "assistant"]),
@@ -16,14 +53,7 @@ const chatRequestSchema = z.object({
   newMessage: z.string().min(1).max(4000),
   image: z.string().base64().optional(),
   timeZone: z.string().min(1).max(100).optional(),
-  confirmationData: z.object({
-    type: z.enum(["income", "expense"]),
-    amount: z.number().positive(),
-    currency: z.string().default("PHP"),
-    category: z.string().optional(),
-    description: z.string().optional(),
-    date: z.string(),
-  }).optional(),
+  confirmationData: confirmationDataSchema.optional(),
 });
 
 function normalizeChatBody(body: unknown): unknown {

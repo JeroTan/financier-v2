@@ -21,6 +21,19 @@ export const createTransactionRequestSchema = z.object({
 
 export const updateTransactionSchema = createTransactionSchema.partial();
 
+export const updateTransactionRequestSchema = z.object({
+  type: z.enum(["income", "expense"]).optional(),
+  amount: z.number().positive().max(999999999).optional(),
+  currency: z.string().optional(),
+  date: z.string().datetime().or(z.string().date()).optional(),
+  category: z.string().min(1).max(100).optional(),
+  description: z.string().min(1).max(500).optional(),
+  receiptUrl: z.string().url().nullable().optional(),
+}).refine(
+  (data) => Object.values(data).some((value) => value !== undefined),
+  "At least one transaction field is required",
+);
+
 export const transactionQuerySchema = z.object({
   type: z.enum(["income", "expense"]).optional(),
   search: z.string().max(200).optional(),
@@ -64,4 +77,5 @@ export const paginatedTransactionsSchema = z.object({
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;
 export type CreateTransactionRequest = z.infer<typeof createTransactionRequestSchema>;
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
+export type UpdateTransactionRequest = z.infer<typeof updateTransactionRequestSchema>;
 export type TransactionQueryInput = z.infer<typeof transactionQuerySchema>;

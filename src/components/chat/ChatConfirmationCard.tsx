@@ -14,6 +14,7 @@ type ChatConfirmationCardProps = {
 };
 
 export function ChatConfirmationCard({ data, onConfirm, onCancel, categories }: ChatConfirmationCardProps) {
+  const operation = data.operation === "update" || data.operation === "delete" ? data.operation : "create";
   const [amount, setAmount] = useState(String(data.amount ?? ""));
   const [type, setType] = useState(String(data.type ?? "expense"));
   const [category, setCategory] = useState(String(data.category ?? ""));
@@ -24,6 +25,16 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel, categories }: 
   const accentClass = type === "income" ? "income" : "expense";
 
   const handleConfirm = () => {
+    if (operation === "delete") {
+      onConfirm(data);
+      return;
+    }
+
+    if (operation === "update") {
+      onConfirm(data);
+      return;
+    }
+
     if (!category.trim()) {
       setCategoryError("Category is required");
       return;
@@ -36,6 +47,49 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel, categories }: 
       description,
     });
   };
+
+  if (operation === "delete" || operation === "update") {
+    const detailRows = getMutationDetails(data);
+    return (
+      <div className="flex gap-3">
+        <div className="w-8 flex-shrink-0" />
+        <Card className="financial-card w-full max-w-md border-0 shadow-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">
+              {operation === "delete" ? "Confirm Delete" : "Confirm Update"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            <p className="text-muted-foreground">
+              {operation === "delete"
+                ? "Remove selected transaction from ledger?"
+                : "Apply these changes to selected transaction?"}
+            </p>
+            {detailRows.length > 0 && (
+              <dl className="space-y-2 rounded-lg border border-outline-variant bg-surface-container-low p-3">
+                {detailRows.map((row) => (
+                  <div key={row.label} className="flex justify-between gap-3">
+                    <dt className="text-muted-foreground">{row.label}</dt>
+                    <dd className="text-right font-semibold text-foreground">{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </CardContent>
+          <CardFooter className="gap-2">
+            <Button variant="outline" onClick={onCancel} className="flex-1 rounded-full">Cancel</Button>
+            <Button
+              onClick={handleConfirm}
+              className={`flex-1 rounded-full ${operation === "delete" ? "bg-expense text-white hover:bg-expense/80" : "bg-primary text-white hover:bg-primary-container hover:text-on-primary-container"}`}
+              style={{ color: operation === "delete" ? "#fff" : "var(--on-primary)" }}
+            >
+              {operation === "delete" ? "Delete" : "Update"}
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex gap-3">
@@ -101,4 +155,14 @@ export function ChatConfirmationCard({ data, onConfirm, onCancel, categories }: 
       </Card>
     </div>
   );
+}
+
+function getMutationDetails(data: Record<string, unknown>): Array<{ label: string; value: string }> {
+  const details: Array<{ label: string; value: string }> = [];
+  if (typeof data.type === "string") details.push({ label: "Type", value: data.type });
+  if (typeof data.amount === "number") details.push({ label: "Amount", value: `PHP ${data.amount.toFixed(2)}` });
+  if (typeof data.category === "string") details.push({ label: "Category", value: data.category });
+  if (typeof data.description === "string") details.push({ label: "Description", value: data.description });
+  if (typeof data.date === "string") details.push({ label: "Date", value: data.date });
+  return details;
 }

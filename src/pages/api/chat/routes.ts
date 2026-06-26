@@ -1,6 +1,37 @@
 import { routeDetail } from "@/server/openapi/route-metadata";
 import { z } from "zod";
 
+const createConfirmationDataSchema = z.object({
+  operation: z.literal("create").optional(),
+  type: z.enum(["income", "expense"]),
+  amount: z.number().positive(),
+  currency: z.string().default("PHP"),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  date: z.string(),
+});
+
+const updateConfirmationDataSchema = z.object({
+  operation: z.literal("update"),
+  transactionId: z.string().min(1),
+  type: z.enum(["income", "expense"]).optional(),
+  amount: z.number().positive().optional(),
+  currency: z.string().optional(),
+  category: z.string().optional(),
+  description: z.string().optional(),
+  date: z.string().optional(),
+}).refine(
+  (data) => [data.type, data.amount, data.currency, data.category, data.description, data.date]
+    .some((value) => value !== undefined),
+  "At least one transaction field is required",
+);
+
+const deleteConfirmationDataSchema = z.object({
+  operation: z.literal("delete"),
+  transactionId: z.string().min(1),
+  description: z.string().optional(),
+});
+
 export const chatDetail = routeDetail("POST", "/api/chat", {
   summary: "Send a message to the AI assistant",
   description: "Sends a user message to the AI finance assistant. Returns a streaming SSE response with the AI's reply. Supports text messages and optional image attachments for receipt analysis.",
@@ -16,14 +47,11 @@ export const chatDetail = routeDetail("POST", "/api/chat", {
       message: z.string().min(1).max(4000).optional().describe("Legacy alias for newMessage."),
       image: z.string().base64().optional(),
       timeZone: z.string().min(1).max(100).optional().describe("Browser IANA timezone used to resolve relative dates."),
-      confirmationData: z.object({
-        type: z.enum(["income", "expense"]),
-        amount: z.number().positive(),
-        currency: z.string().default("PHP"),
-        category: z.string().optional(),
-        description: z.string().optional(),
-        date: z.string(),
-      }).optional(),
+      confirmationData: z.union([
+        createConfirmationDataSchema,
+        updateConfirmationDataSchema,
+        deleteConfirmationDataSchema,
+      ]).optional(),
     }),
   },
   response: {

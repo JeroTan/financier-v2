@@ -1,4 +1,5 @@
-import type { ParsedSegment } from "@/lib/chat/actionParser";
+import { isCompletionMetadataPayload, type ParsedSegment } from "@/lib/chat/actionParser";
+import { MarkdownText } from "@/components/ui/MarkdownText";
 import { ActionCard } from "./ActionCard";
 import { ActionTable } from "./ActionTable";
 import { ActionChart } from "./ActionChart";
@@ -8,7 +9,7 @@ import { ActionList } from "./ActionList";
 import { ActionImage } from "./ActionImage";
 import { ActionDivider } from "./ActionDivider";
 import { ActionInsight } from "./ActionInsight";
-import { ActionButton } from "./ActionButton";
+import { ActionButton, type ButtonDef } from "./ActionButton";
 
 type ActionRendererProps = {
   segments: ParsedSegment[];
@@ -21,15 +22,17 @@ export function ActionRenderer({ segments, onActionClick }: ActionRendererProps)
       {segments.map((segment, i) => {
         if (segment.kind === "text") {
           return (
-            <span key={i} className="whitespace-pre-wrap">
+            <MarkdownText key={i} className="text-sm">
               {segment.content}
-            </span>
+            </MarkdownText>
           );
         }
 
         const { action } = segment;
 
         if (action.type === "Unknown" || !action.parsed) {
+          if (isCompletionMetadataPayload(action.content)) return null;
+
           return (
             <pre key={i} className="text-xs bg-muted p-2 rounded my-1 overflow-x-auto">
               {action.content}
@@ -57,7 +60,7 @@ export function ActionRenderer({ segments, onActionClick }: ActionRendererProps)
           case "Insight":
             return <ActionInsight key={i} data={action.parsed as Record<string, unknown>} />;
           case "Button":
-            return <ActionButton key={i} data={action.parsed as Record<string, unknown>} onClick={onActionClick} />;
+            return <ActionButton key={i} data={action.parsed as Record<string, unknown> | ButtonDef[]} onClick={onActionClick} />;
           default:
             return (
               <span key={i} className="text-muted-foreground text-sm italic">
