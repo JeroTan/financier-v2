@@ -2,9 +2,10 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Send, X } from "lucide-react";
+import type { ChatImageAttachment } from "@/server/ai/llm/types";
 
 type ChatInputProps = {
-  onSend: (message: string, image?: string) => void;
+  onSend: (message: string, image?: ChatImageAttachment) => void;
   disabled?: boolean;
   placeholder?: string;
 };
@@ -15,7 +16,7 @@ const MAX_SIZE = 10 * 1024 * 1024; // 10MB
 export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [imageAttachment, setImageAttachment] = useState<ChatImageAttachment | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,21 +37,21 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
     reader.onload = () => {
       const result = reader.result as string;
       setImagePreview(result);
-      setImageBase64(result.split(",")[1] ?? "");
+      setImageAttachment({ dataUrl: result, mediaType: file.type });
     };
     reader.readAsDataURL(file);
   };
 
   const clearImage = () => {
     setImagePreview(null);
-    setImageBase64(null);
+    setImageAttachment(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed && !imageBase64) return;
-    onSend(trimmed, imageBase64 ?? undefined);
+    if (!trimmed && !imageAttachment) return;
+    onSend(trimmed, imageAttachment ?? undefined);
     setText("");
     clearImage();
   };
@@ -103,7 +104,7 @@ export function ChatInput({ onSend, disabled, placeholder }: ChatInputProps) {
         />
         <Button
           onClick={handleSend}
-          disabled={disabled || (!text.trim() && !imageBase64)}
+          disabled={disabled || (!text.trim() && !imageAttachment)}
           size="icon"
           className="h-9 w-9 rounded-full bg-primary text-on-primary shadow-float hover:bg-primary-container hover:text-on-primary-container"
         >

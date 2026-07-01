@@ -10,7 +10,7 @@ export type DoneState = "confirmation" | "saved" | "updated" | "deleted" | "norm
 export type SSERequest = {
   messageTrail: ChatMessage[];
   newMessage: string;
-  image?: string;
+  image?: string | ChatImageAttachment;
   confirmationData?: ConfirmationData;
   timeZone?: string;
 };
@@ -18,6 +18,29 @@ export type SSERequest = {
 export type ChatMessage = {
   role: "user" | "assistant" | "system";
   content: string;
+};
+
+export type ChatTextContentPart = {
+  type: "text";
+  text: string;
+};
+
+export type ChatImageContentPart = {
+  type: "image_url";
+  image_url: {
+    url: string;
+    detail?: "low" | "high" | "auto";
+  };
+};
+
+export type AiMessage = {
+  role: "user" | "assistant" | "system";
+  content: string | Array<ChatTextContentPart | ChatImageContentPart>;
+};
+
+export type ChatImageAttachment = {
+  dataUrl: string;
+  mediaType?: string;
 };
 
 export type CreateConfirmationData = {

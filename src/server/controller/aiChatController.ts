@@ -2,7 +2,7 @@ import { chatService, type ChatServiceDeps } from "@/server/services/chatService
 import { createToolDefinitions, type ToolDefinition } from "@/server/ai/tooling/tools";
 import { executeToolLoop } from "@/server/ai/tooling/toolExecutor";
 import { createAiToolSchemas, normalizeAiCompletion, type AiCompletion } from "@/server/ai/llm/completion";
-import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type ChatMessage, type ConfirmationData, type CreateConfirmationData, type SSERequest } from "@/server/ai/llm/types";
+import { formatMessageEvent, formatDoneEvent, formatErrorEvent, type AiMessage, type ConfirmationData, type CreateConfirmationData, type SSERequest } from "@/server/ai/llm/types";
 import { formatTransactionConfirmation, parseTransactionIntent } from "@/server/ai/transactions/transactionIntent";
 import type { ParsedTransactionIntent } from "@/server/ai/transactions/transactionIntent";
 import { stripCompletionMetadata } from "@/lib/chat/actionParser";
@@ -38,9 +38,9 @@ export async function aiChatController(
     timeZone,
   };
 
-  const runAI = async (messages: ChatMessage[], availableTools?: ToolDefinition[]): Promise<AiCompletion> => {
+  const runAI = async (messages: AiMessage[], availableTools?: ToolDefinition[]): Promise<AiCompletion> => {
     const response = await deps.ai.run("@cf/moonshotai/kimi-k2.6", {
-      messages: messages.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
       tools: createAiToolSchemas(availableTools ?? []),
       stream: false,
       max_tokens: 1024,

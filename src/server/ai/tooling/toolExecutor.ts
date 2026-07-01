@@ -1,11 +1,11 @@
 import type { ToolDefinition, ToolCall, ToolResult } from "./tools";
-import type { ChatMessage, ConfirmationData } from "../llm/types";
+import type { AiMessage, ConfirmationData } from "../llm/types";
 import type { AiCompletion } from "../llm/completion";
 
 const MAX_TOOL_ROUNDS = 5;
 
 export type ToolExecutorResult = {
-  messages: ChatMessage[];
+  messages: AiMessage[];
   confirmation?: ConfirmationData;
   saved?: { id: string };
   content: string;
@@ -17,8 +17,8 @@ export type ToolExecutorResult = {
 export async function executeToolLoop(
   initialCompletion: AiCompletion,
   tools: ToolDefinition[],
-  runAI: (messages: ChatMessage[], tools?: ToolDefinition[]) => Promise<AiCompletion>,
-  initialMessages: ChatMessage[],
+  runAI: (messages: AiMessage[], tools?: ToolDefinition[]) => Promise<AiCompletion>,
+  initialMessages: AiMessage[],
 ): Promise<ToolExecutorResult> {
   const messages = [...initialMessages];
   const toolCalls: ToolCall[] = [];

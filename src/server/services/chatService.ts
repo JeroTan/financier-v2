@@ -1,4 +1,4 @@
-import type { ChatMessage } from "@/server/ai/llm/types";
+import type { AiMessage, ChatImageAttachment, ChatMessage } from "@/server/ai/llm/types";
 import { loadSystemPrompt } from "@/server/ai/llm/systemPrompt";
 import { buildMessageArray } from "@/server/ai/llm/messageTrail";
 import { createAiToolSchemas, normalizeAiCompletion, type AiCompletion } from "@/server/ai/llm/completion";
@@ -16,7 +16,7 @@ export type ChatServiceResult = {
   success: true;
   content: string;
   completion: AiCompletion;
-  requestMessages: ChatMessage[];
+  requestMessages: AiMessage[];
   messageTrail: ChatMessage[];
 } | {
   success: false;
@@ -28,24 +28,35 @@ export async function chatService(
   deps: ChatServiceDeps,
   messageTrail: ChatMessage[],
   newMessage: string,
-  image?: string,
+  image?: string | ChatImageAttachment,
   tools: ToolDefinition[] = [],
 ): Promise<ChatServiceResult> {
   try {
     const basePrompt = await loadSystemPrompt(deps.personality);
     const systemPrompt = `${basePrompt}\n\n${buildRuntimeContext(deps.now ?? new Date(), deps.timeZone)}`;
-    const messages = buildMessageArray(systemPrompt, messageTrail, newMessage);
+    const messages: AiMessage[] = buildMessageArray(systemPrompt, messageTrail, newMessage)
+      .map((message) => ({ ...message }));
 
-    // Add image if provided
     if (image) {
-      messages.push({
-        role: "user",
-        content: `[Image attached: ${image.substring(0, 50)}...]`,
-      });
+      const imageUrl = normalizeImageDataUrl(image);
+      const userMessage = messages[messages.length - 1];
+      userMessage.content = [
+        {
+          type: "text",
+          text: newMessage || "Please describe this image and identify any finance or receipt details.",
+        },
+        {
+          type: "image_url",
+          image_url: {
+            url: imageUrl,
+            detail: "auto",
+          },
+        },
+      ];
     }
 
     const response = await deps.ai.run("@cf/moonshotai/kimi-k2.6", {
-      messages: messages.map((m: ChatMessage) => ({ role: m.role, content: m.content })),
+      messages: messages.map((m) => ({ role: m.role, content: m.content })),
       tools: createAiToolSchemas(tools),
       stream: false,
       max_tokens: 1024,
@@ -57,7 +68,7 @@ export async function chatService(
 
     const newTrail: ChatMessage[] = [
       ...messageTrail,
-      { role: "user", content: newMessage },
+      { role: "user", content: image ? (newMessage ? `${newMessage}\n[Image attached]` : "[Image attached]") : newMessage },
       { role: "assistant", content },
     ];
 
@@ -70,6 +81,15 @@ export async function chatService(
       fallbackContent: "I'm having trouble connecting right now. Please try again in a moment, or enter your transaction manually.",
     };
   }
+}
+
+function normalizeImageDataUrl(image: string | ChatImageAttachment): string {
+  if (typeof image === "string") {
+    if (image.startsWith("data:image/")) return image;
+    return `data:image/jpeg;base64,${image}`;
+  }
+
+  return image.dataUrl;
 }
 
 export function buildRuntimeContext(now: Date, requestedTimeZone?: string): string {

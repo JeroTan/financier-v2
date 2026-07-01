@@ -43,8 +43,11 @@ export function ImageUpload({ value, onChange, onClear }: ImageUploadProps) {
           throw new Error("Upload failed");
         }
 
-        const data = await response.json() as { url: string };
-        onChange(data.url);
+        const data = await response.json() as { url?: string; data?: { url?: string } };
+        const url = data.data?.url ?? data.url;
+        if (!url) throw new Error("Upload response missing URL");
+
+        onChange(url);
       } catch {
         setError("Failed to upload image. You can still submit without it.");
       } finally {

@@ -7,6 +7,7 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
   timestamp: string;
 };
 
@@ -76,6 +77,7 @@ export function ChatMessageList({
           key={msg.id}
           role={msg.role}
           content={msg.content}
+          imageUrl={msg.imageUrl}
           timestamp={msg.timestamp}
           onActionClick={onActionClick}
           userEmail={userEmail}

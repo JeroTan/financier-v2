@@ -58,6 +58,7 @@ const handlePOST = async (context: any) => {
     userId: auth.context.userId,
     type: data.type,
     amount: data.amount,
+    currency: data.currency,
     date: data.date,
     categoryId: matchedCategory.id,
     description: data.description,

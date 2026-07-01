@@ -89,7 +89,9 @@ export function CategorySelector({
           autoComplete="off"
           onFocus={() => setOpen(true)}
           onChange={(event) => {
-            setQuery(event.target.value);
+            const nextValue = event.target.value;
+            setQuery(nextValue);
+            onChange(nextValue);
             setOpen(true);
             setVisibleCount(PAGE_SIZE);
           }}

@@ -68,6 +68,7 @@ export function EntryForm({ token, categories }: EntryFormProps) {
           body: JSON.stringify({
             type: data.type,
             amount: parseFloat(data.amount),
+            currency: "PHP",
             date: data.date,
             category: data.category,
             description: data.description,

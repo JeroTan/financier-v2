@@ -13,6 +13,7 @@ export const createTransactionSchema = z.object({
 export const createTransactionRequestSchema = z.object({
   type: z.enum(["income", "expense"]),
   amount: z.number().positive().max(999999999),
+  currency: z.string().default("PHP"),
   date: z.string().datetime().or(z.string().date()),
   category: z.string().min(1).max(100),
   description: z.string().min(1).max(500),

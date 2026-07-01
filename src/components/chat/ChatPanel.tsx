@@ -6,6 +6,7 @@ import { useMessageTrail } from "@/features/chat/useMessageTrail";
 import { useChatSSE } from "@/features/chat/useChatSSE";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import type { ChatImageAttachment } from "@/server/ai/llm/types";
 
 type ChatPanelProps = {
   token?: string;
@@ -20,6 +21,7 @@ type Message = {
   id: string;
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
   timestamp: string;
 };
 
@@ -89,17 +91,21 @@ export function ChatPanel({ token, userEmail, className, headerAction, onMessage
   }, [trail, trailReady, restoredTrail]);
 
   const handleSend = useCallback(
-    async (text: string, image?: string) => {
+    async (text: string, image?: ChatImageAttachment) => {
       if (!text && !image) return;
 
       const userMsg: Message = {
         id: crypto.randomUUID() as string,
         role: "user",
-        content: text || "[Image attached]",
+        content: text,
+        imageUrl: image?.dataUrl,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       };
       setMessages((prev) => [...prev, userMsg]);
-      addMessage({ role: "user", content: text || "[Image attached]" });
+      addMessage({
+        role: "user",
+        content: image ? (text ? `${text}\n[Image attached]` : "[Image attached]") : text,
+      });
       onMessageSent?.();
 
       transition("send");

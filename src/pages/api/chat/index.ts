@@ -45,13 +45,24 @@ const confirmationDataSchema = z.union([
   deleteConfirmationDataSchema,
 ]);
 
+const imageAttachmentSchema = z.union([
+  z.string().base64(),
+  z.object({
+    dataUrl: z.string().min(1).refine(
+      (value) => /^data:image\/(?:jpeg|png|webp|gif);base64,/i.test(value),
+      "Image must be a JPEG, PNG, WebP, or GIF data URL",
+    ),
+    mediaType: z.enum(["image/jpeg", "image/png", "image/webp", "image/gif"]).optional(),
+  }),
+]);
+
 const chatRequestSchema = z.object({
   messageTrail: z.array(z.object({
     role: z.enum(["user", "assistant"]),
     content: z.string(),
   })).default([]),
   newMessage: z.string().min(1).max(4000),
-  image: z.string().base64().optional(),
+  image: imageAttachmentSchema.optional(),
   timeZone: z.string().min(1).max(100).optional(),
   confirmationData: confirmationDataSchema.optional(),
 });

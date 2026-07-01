@@ -6,12 +6,13 @@ import { parseActions, type ParsedSegment } from "@/lib/chat/actionParser";
 type ChatMessageProps = {
   role: "user" | "assistant";
   content: string;
+  imageUrl?: string;
   timestamp?: string;
   onActionClick?: (action: string) => void;
   userEmail?: string;
 };
 
-export function ChatMessage({ role, content, timestamp, onActionClick, userEmail }: ChatMessageProps) {
+export function ChatMessage({ role, content, imageUrl, timestamp, onActionClick, userEmail }: ChatMessageProps) {
   const isUser = role === "user";
   const segments: ParsedSegment[] = isUser ? [] : parseActions(content);
   const userInitial = userEmail?.trim()?.[0]?.toUpperCase() || "U";
@@ -32,7 +33,16 @@ export function ChatMessage({ role, content, timestamp, onActionClick, userEmail
           }`}
         >
           {isUser ? (
-            <MarkdownText className="text-sm">{content}</MarkdownText>
+            <div className="space-y-2">
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt="Uploaded image"
+                  className="max-h-64 w-full rounded-lg border border-primary-fixed object-cover"
+                />
+              )}
+              {content && <MarkdownText className="text-sm">{content}</MarkdownText>}
+            </div>
           ) : (
             <div className="text-sm">
               <ActionRenderer
